@@ -1,7 +1,7 @@
 ﻿// GPWS mod for KSP
 // License: CC-BY-NC-SA
 // Author: bss, 2015
-// Last modified: 2015-01-17, 02:20:08
+// Last modified: 2015-01-17, 02:45:18
 
 using System;
 using System.Collections.Generic;
@@ -22,16 +22,25 @@ namespace KSP_GPWS
 
         public void Start()
         {
-            if (FlightGlobals.ActiveVessel == null)
+            GameEvents.onVesselChange.Add(findGears);
+            if (FlightGlobals.ActiveVessel != null)
+            {
+                findGears(FlightGlobals.ActiveVessel);
+            }
+        }
+
+        private void findGears(Vessel v)
+        {
+            gearList.Clear();
+
+            if (null == v)
             {
                 return;
             }
 
-            Vessel vessel = FlightGlobals.ActiveVessel;
-            gearList.Clear();
-            for (int i = 0; i < vessel.parts.Count; i++)    // it is said that foreach costs more memory due to Unity Mono issues
+            for (int i = 0; i < v.parts.Count; i++)    // it is said that foreach costs more memory due to Unity Mono issues
             {
-                Part p = vessel.parts[i];
+                Part p = v.parts[i];
                 if (p.Modules.Contains("GPWSGear"))
                 {
                     gearList.Add(p.Modules["GPWSGear"] as GPWSGear);
@@ -42,6 +51,11 @@ namespace KSP_GPWS
 
         public void Update()
         {
+        }
+
+        public void OnDestroy()
+        {
+            GameEvents.onVesselChange.Remove(findGears);
         }
 
         void Log(String msg)
