@@ -41,6 +41,7 @@ namespace KSP_GPWS
 
         public void Start()
         {
+            Log("Start");
             LoadSettings();
             AudioInitialize();
 
