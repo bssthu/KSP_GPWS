@@ -1,7 +1,7 @@
 ﻿// GPWS mod for KSP
 // License: CC-BY-NC-SA
 // Author: bss, 2015
-// Last modified: 2015-01-17, 15:05:30
+// Last modified: 2015-01-18, 01:42:43
 
 using System;
 using System.Collections.Generic;
@@ -21,8 +21,8 @@ namespace KSP_GPWS
         private int[] groundProximityAltitudeArray = { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
         public enum UnitOfAltitude
         {
-            FOOT,
-            METER,
+            FOOT = 0,
+            METER = 1,
         };
         private UnitOfAltitude unitOfAltitude = UnitOfAltitude.FOOT;    // use meters or feet
 
@@ -34,6 +34,8 @@ namespace KSP_GPWS
         private AudioSource asGPWS = new AudioSource();
 
         private float lastGearHeight = float.PositiveInfinity;
+
+        ScreenMessage screenMsg = new ScreenMessage("", 1, ScreenMessageStyle.UPPER_CENTER);
 
         public void Awake()
         {
@@ -82,7 +84,12 @@ namespace KSP_GPWS
                 UpdateVolume();
             }
 
-            float gearHeight = getGearHeightFromTerrain();
+            if (FlightGlobals.getStaticPressure() < 0.1)    // air too thin
+            {
+                return;
+            }
+
+            float gearHeight = getGearHeightFromGround();
             if (gearHeight > 0 && gearHeight < float.PositiveInfinity)
             {
                 if (UnitOfAltitude.FOOT == unitOfAltitude)  // meters or feet
@@ -109,31 +116,45 @@ namespace KSP_GPWS
                     }
                 }
                 lastGearHeight = gearHeight;    // save last gear height
-                //Log(String.Format("{0}", gearHeight));
             }
+
+            showScreenMessage(unitOfAltitude.ToString() + " Height: " + gearHeight.ToString());
         }
 
         /// <summary>
-        /// return height from terrain to the lowest landing gear, in meters
+        /// return height from surface to the lowest landing gear, in meters
         /// </summary>
         /// <returns></returns>
-        public float getGearHeightFromTerrain()
+        public float getGearHeightFromGround()
         {
-            if (gearList.Count <= 0)
+            if (gearList.Count <= 0)    // no vessel
             {
                 return float.PositiveInfinity;
             }
 
-            float vesselHeight = gearList[0].part.vessel.heightFromTerrain;
-            if (vesselHeight < 0)
+            Vessel vessel = gearList[0].part.vessel;
+            if (FlightGlobals.ActiveVessel != vessel)   // not right vessel?
             {
                 return float.PositiveInfinity;
+            }
+
+            float vesselHeight = vessel.heightFromTerrain;      // from vessel to surface, in meters
+            if (vesselHeight < 0)
+            {
+                if (vessel.altitude > 0)
+                {
+                    vesselHeight = (float)vessel.altitude;
+                }
+                else
+                {
+                    return float.PositiveInfinity;
+                }
             }
 
             Part lowestGearPart = gearList[0].part;
             // height from terrain to gear
             float lowestGearHeight = float.PositiveInfinity;
-            for (int i = 0; i < gearList.Count; i++)
+            for (int i = 0; i < gearList.Count; i++)    // find lowest gear
             {
                 Part p = gearList[i].part;
                 // pos of part, rotate to fit ground coord.
@@ -192,7 +213,8 @@ namespace KSP_GPWS
                     {
                         try
                         {
-                            unitOfAltitude = (UnitOfAltitude)Enum.Parse(typeof(UnitOfAltitude), "METER", true);
+                            unitOfAltitude = (UnitOfAltitude)Enum.Parse(typeof(UnitOfAltitude),
+                                node.GetValue("unitOfAltitude"), true);
                         }
                         catch (Exception ex)
                         {
@@ -216,6 +238,13 @@ namespace KSP_GPWS
         {
             volume = GameSettings.VOICE_VOLUME;
             asGPWS.volume = volume;
+        }
+
+        private void showScreenMessage(String msg)
+        {
+            screenMsg.message = msg;
+            ScreenMessages.RemoveMessage(screenMsg);
+            ScreenMessages.PostScreenMessage(screenMsg);
         }
 
         public static void Log(String msg)
