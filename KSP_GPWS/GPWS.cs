@@ -1,7 +1,7 @@
 ﻿// GPWS mod for KSP
 // License: CC-BY-NC-SA
 // Author: bss, 2015
-// Last modified: 2015-01-17, 13:55:14
+// Last modified: 2015-01-17, 14:20:47
 
 using System;
 using System.Collections.Generic;
@@ -16,6 +16,7 @@ namespace KSP_GPWS
     {
         private List<GPWSGear> gearList = new List<GPWSGear>();     // parts with module "GPWSGear"
 
+        // settings
         private bool enableGroundProximityWarning = true;
         private int[] groundProximityAltitudeArray = { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
         public enum UnitOfAltitude
@@ -25,6 +26,14 @@ namespace KSP_GPWS
         };
         private UnitOfAltitude unitOfAltitude = UnitOfAltitude.FOOT;    // use meters or feet
 
+        // Audio
+        private GameObject audioPlayer = new GameObject();
+        private string audioPrefix = "GPWS/Sounds";
+
+        private AudioSource asGPWS = new AudioSource();
+
+        private float lastGearHeight = float.PositiveInfinity;
+
         public void Awake()
         {
         }
@@ -32,11 +41,15 @@ namespace KSP_GPWS
         public void Start()
         {
             LoadSettings();
+            AudioInitialize();
+
             GameEvents.onVesselChange.Add(findGears);
             if (FlightGlobals.ActiveVessel != null)
             {
                 findGears(FlightGlobals.ActiveVessel);
             }
+
+            lastGearHeight = float.PositiveInfinity;
         }
 
         private void findGears(Vessel v)
@@ -61,17 +74,56 @@ namespace KSP_GPWS
 
         public void Update()
         {
+            float gearHeight = getGearHeightFromTerrain();
+            if (gearHeight > 0 && gearHeight < float.PositiveInfinity)
+            {
+                if (UnitOfAltitude.FOOT == unitOfAltitude)  // meters or feet
+                {
+                    gearHeight *= 3.2808399f;
+                }
+
+                // is descending
+                if ((lastGearHeight != float.PositiveInfinity) && (gearHeight - lastGearHeight < 0))
+                {
+                    // lower than an altitude
+                    foreach (float threshold in groundProximityAltitudeArray)
+                    {
+                        if (lastGearHeight > threshold && gearHeight < threshold)
+                        {
+                            // play sound
+                            if (asGPWS.isPlaying)
+                            {
+                                asGPWS.Stop();
+                            }
+                            asGPWS.PlayOneShot(GameDatabase.Instance.GetAudioClip(audioPrefix + "/gpws" + threshold));
+                            //Log(String.Format("play " + audioPrefix + "/gpws" + threshold));
+                        }
+                    }
+                }
+                lastGearHeight = gearHeight;    // save last gear height
+                //Log(String.Format("{0}", gearHeight));
+            }
+        }
+
+        /// <summary>
+        /// return height from terrain to the lowest landing gear, in meters
+        /// </summary>
+        /// <returns></returns>
+        public float getGearHeightFromTerrain()
+        {
             if (gearList.Count <= 0)
             {
-                return;
+                return float.PositiveInfinity;
             }
+
             float vesselHeight = gearList[0].part.vessel.heightFromTerrain;
             if (vesselHeight < 0)
             {
-                return;
+                return float.PositiveInfinity;
             }
 
             Part lowestGearPart = gearList[0].part;
+            // height from terrain to gear
             float lowestGearHeight = float.PositiveInfinity;
             for (int i = 0; i < gearList.Count; i++)
             {
@@ -86,7 +138,7 @@ namespace KSP_GPWS
                     lowestGearHeight = partHeightFromTerrain;
                 }
             }
-            Log(String.Format("{0}, a={1}", lowestGearPart.name, lowestGearHeight));
+            return lowestGearHeight;
         }
 
         public void OnDestroy()
@@ -105,6 +157,7 @@ namespace KSP_GPWS
                     {
                         bool.TryParse(node.GetValue("enableGroundProximityWarning"), out enableGroundProximityWarning);
                     }
+
                     if (node.HasValue("groundProximityAltitudeArray"))
                     {
                         String[] intstrings = node.GetValue("groundProximityAltitudeArray").Split(',');
@@ -126,6 +179,7 @@ namespace KSP_GPWS
                             }
                         }
                     }
+
                     if (node.HasValue("unitOfAltitude"))
                     {
                         try
@@ -139,6 +193,13 @@ namespace KSP_GPWS
                     }
                 }   // End of has value "name"
             }
+        }
+
+        private void AudioInitialize()
+        {
+            asGPWS = audioPlayer.AddComponent<AudioSource>();
+            asGPWS.volume = GameSettings.VOICE_VOLUME;
+            asGPWS.panLevel = 0;
         }
 
         public static void Log(String msg)
