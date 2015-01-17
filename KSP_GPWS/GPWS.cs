@@ -1,7 +1,7 @@
 ﻿// GPWS mod for KSP
 // License: CC-BY-NC-SA
 // Author: bss, 2015
-// Last modified: 2015-01-17, 03:35:18
+// Last modified: 2015-01-17, 13:55:14
 
 using System;
 using System.Collections.Generic;
@@ -18,6 +18,12 @@ namespace KSP_GPWS
 
         private bool enableGroundProximityWarning = true;
         private int[] groundProximityAltitudeArray = { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
+        public enum UnitOfAltitude
+        {
+            FOOT,
+            METER,
+        };
+        private UnitOfAltitude unitOfAltitude = UnitOfAltitude.FOOT;    // use meters or feet
 
         public void Awake()
         {
@@ -55,6 +61,32 @@ namespace KSP_GPWS
 
         public void Update()
         {
+            if (gearList.Count <= 0)
+            {
+                return;
+            }
+            float vesselHeight = gearList[0].part.vessel.heightFromTerrain;
+            if (vesselHeight < 0)
+            {
+                return;
+            }
+
+            Part lowestGearPart = gearList[0].part;
+            float lowestGearHeight = float.PositiveInfinity;
+            for (int i = 0; i < gearList.Count; i++)
+            {
+                Part p = gearList[i].part;
+                // pos of part, rotate to fit ground coord.
+                Vector3 rotatedPos = p.vessel.srfRelRotation * p.orgPos;
+                float partHeightFromTerrain = vesselHeight - rotatedPos.z;
+
+                if (partHeightFromTerrain < lowestGearHeight)
+                {
+                    lowestGearPart = p;
+                    lowestGearHeight = partHeightFromTerrain;
+                }
+            }
+            Log(String.Format("{0}, a={1}", lowestGearPart.name, lowestGearHeight));
         }
 
         public void OnDestroy()
@@ -94,7 +126,18 @@ namespace KSP_GPWS
                             }
                         }
                     }
-                }
+                    if (node.HasValue("unitOfAltitude"))
+                    {
+                        try
+                        {
+                            unitOfAltitude = (UnitOfAltitude)Enum.Parse(typeof(UnitOfAltitude), "METER", true);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log("Error: " + ex.Message);
+                        }
+                    }
+                }   // End of has value "name"
             }
         }
 
