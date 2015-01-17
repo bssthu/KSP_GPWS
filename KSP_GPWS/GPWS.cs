@@ -1,7 +1,7 @@
 ﻿// GPWS mod for KSP
 // License: CC-BY-NC-SA
 // Author: bss, 2015
-// Last modified: 2015-01-17, 14:20:47
+// Last modified: 2015-01-17, 15:05:30
 
 using System;
 using System.Collections.Generic;
@@ -29,6 +29,7 @@ namespace KSP_GPWS
         // Audio
         private GameObject audioPlayer = new GameObject();
         private string audioPrefix = "GPWS/Sounds";
+        private float volume = 0;
 
         private AudioSource asGPWS = new AudioSource();
 
@@ -74,6 +75,12 @@ namespace KSP_GPWS
 
         public void Update()
         {
+            // check volume
+            if (volume != GameSettings.VOICE_VOLUME)
+            {
+                UpdateVolume();
+            }
+
             float gearHeight = getGearHeightFromTerrain();
             if (gearHeight > 0 && gearHeight < float.PositiveInfinity)
             {
@@ -96,7 +103,7 @@ namespace KSP_GPWS
                                 asGPWS.Stop();
                             }
                             asGPWS.PlayOneShot(GameDatabase.Instance.GetAudioClip(audioPrefix + "/gpws" + threshold));
-                            //Log(String.Format("play " + audioPrefix + "/gpws" + threshold));
+                            Log(String.Format("play " + audioPrefix + "/gpws" + threshold));
                         }
                     }
                 }
@@ -197,9 +204,17 @@ namespace KSP_GPWS
 
         private void AudioInitialize()
         {
+            volume = GameSettings.VOICE_VOLUME;
+
             asGPWS = audioPlayer.AddComponent<AudioSource>();
-            asGPWS.volume = GameSettings.VOICE_VOLUME;
+            asGPWS.volume = volume;
             asGPWS.panLevel = 0;
+        }
+
+        private void UpdateVolume()
+        {
+            volume = GameSettings.VOICE_VOLUME;
+            asGPWS.volume = volume;
         }
 
         public static void Log(String msg)
