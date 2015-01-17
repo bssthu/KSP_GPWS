@@ -1,7 +1,7 @@
 ﻿// GPWS mod for KSP
 // License: CC-BY-NC-SA
 // Author: bss, 2015
-// Last modified: 2015-01-18, 01:42:43
+// Last modified: 2015-01-18, 02:01:18
 
 using System;
 using System.Collections.Generic;
@@ -84,7 +84,9 @@ namespace KSP_GPWS
                 UpdateVolume();
             }
 
-            if (FlightGlobals.getStaticPressure() < 0.1)    // air too thin
+            // check atmosphere
+            if (!FlightGlobals.getMainBody().atmosphere ||
+                    FlightGlobals.ship_altitude > FlightGlobals.getMainBody().maxAtmosphereAltitude)
             {
                 return;
             }
@@ -118,7 +120,7 @@ namespace KSP_GPWS
                 lastGearHeight = gearHeight;    // save last gear height
             }
 
-            showScreenMessage(unitOfAltitude.ToString() + " Height: " + gearHeight.ToString());
+            //showScreenMessage(unitOfAltitude.ToString() + " Height: " + gearHeight.ToString());
         }
 
         /// <summary>
@@ -138,36 +140,30 @@ namespace KSP_GPWS
                 return float.PositiveInfinity;
             }
 
-            float vesselHeight = vessel.heightFromTerrain;      // from vessel to surface, in meters
-            if (vesselHeight < 0)
+            float terrainHeight = (float)vessel.terrainAltitude;
+            if (terrainHeight < 0)
             {
-                if (vessel.altitude > 0)
-                {
-                    vesselHeight = (float)vessel.altitude;
-                }
-                else
-                {
-                    return float.PositiveInfinity;
-                }
+                terrainHeight = 0;
             }
+            float radarAltitude = (float)vessel.altitude - terrainHeight;      // from vessel to surface, in meters
 
             Part lowestGearPart = gearList[0].part;
             // height from terrain to gear
-            float lowestGearHeight = float.PositiveInfinity;
+            float lowestGearRA = float.PositiveInfinity;
             for (int i = 0; i < gearList.Count; i++)    // find lowest gear
             {
                 Part p = gearList[i].part;
                 // pos of part, rotate to fit ground coord.
                 Vector3 rotatedPos = p.vessel.srfRelRotation * p.orgPos;
-                float partHeightFromTerrain = vesselHeight - rotatedPos.z;
+                float gearRadarAltitude = radarAltitude - rotatedPos.z;
 
-                if (partHeightFromTerrain < lowestGearHeight)
+                if (gearRadarAltitude < lowestGearRA)
                 {
                     lowestGearPart = p;
-                    lowestGearHeight = partHeightFromTerrain;
+                    lowestGearRA = gearRadarAltitude;
                 }
             }
-            return lowestGearHeight;
+            return lowestGearRA;
         }
 
         public void OnDestroy()
