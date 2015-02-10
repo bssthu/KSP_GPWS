@@ -1,7 +1,7 @@
 ﻿// GPWS mod for KSP
 // License: CC-BY-NC-SA
 // Author: bss, 2015
-// Last modified: 2015-02-11, 01:05:39
+// Last modified: 2015-02-11, 01:23:05
 
 using System;
 using System.Collections.Generic;
@@ -22,12 +22,17 @@ namespace KSP_GPWS
             FOOT = 0,
             METER = 1,
         };
-        private UnitOfAltitude unitOfAltitude = UnitOfAltitude.FOOT;    // use meters or feet
+        private UnitOfAltitude unitOfAltitude = UnitOfAltitude.FOOT;    // use meters or feet, feet is recommanded.
 
         private float gearHeight = 0.0f;
         private float lastGearHeight = float.PositiveInfinity;
 
         private Tools tools = new Tools();
+
+        private float time0 = 0.0f;
+        // time since scene loaded
+        private float time = 0.0f;
+        private float lastTime = 0.0f;
 
         public void Awake()
         {
@@ -46,6 +51,7 @@ namespace KSP_GPWS
             }
 
             lastGearHeight = float.PositiveInfinity;
+            time0 = Time.time;
         }
 
         public void Update()
@@ -54,6 +60,13 @@ namespace KSP_GPWS
             if (tools.Volume != GameSettings.VOICE_VOLUME)
             {
                 tools.UpdateVolume();
+            }
+
+            time = Time.time - time0;
+            // check time
+            if (time < 3.0f)
+            {
+                return;
             }
 
             // check atmosphere
@@ -79,6 +92,7 @@ namespace KSP_GPWS
                 }
             }
             lastGearHeight = gearHeight;    // save last gear height
+            lastTime = time;        // save time of last frame
 
             //showScreenMessage(unitOfAltitude.ToString() + " Height: " + gearHeight.ToString());
         }
@@ -90,6 +104,10 @@ namespace KSP_GPWS
         /// <returns></returns>
         public bool checkMode_1()
         {
+            // is descending
+            if ((lastGearHeight != float.PositiveInfinity) && (gearHeight - lastGearHeight < 0))
+            {
+            }
             return false;
         }
         
