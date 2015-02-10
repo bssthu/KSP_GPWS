@@ -8,6 +8,10 @@ by Cryphonus.
 
 Add warning sounds for Kerbal Space Program.
 
+ref:
+- http://www51.honeywell.com/aero/common/documents/Mk_V_VII_EGPWS.pdf
+- http://www.boeing-727.com/Data/systems/infogpws.html
+
 ------
 
 ![CC-BY-NC-SA 4.0](https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png)

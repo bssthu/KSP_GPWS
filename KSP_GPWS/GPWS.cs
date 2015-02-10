@@ -1,7 +1,7 @@
 ﻿// GPWS mod for KSP
 // License: CC-BY-NC-SA
 // Author: bss, 2015
-// Last modified: 2015-01-18, 02:01:18
+// Last modified: 2015-02-11, 01:05:39
 
 using System;
 using System.Collections.Generic;
@@ -14,8 +14,6 @@ namespace KSP_GPWS
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class GPWS : UnityEngine.MonoBehaviour
     {
-        private List<GPWSGear> gearList = new List<GPWSGear>();     // parts with module "GPWSGear"
-
         // settings
         private bool enableGroundProximityWarning = true;
         private int[] groundProximityAltitudeArray = { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
@@ -26,16 +24,10 @@ namespace KSP_GPWS
         };
         private UnitOfAltitude unitOfAltitude = UnitOfAltitude.FOOT;    // use meters or feet
 
-        // Audio
-        private GameObject audioPlayer = new GameObject();
-        private string audioPrefix = "GPWS/Sounds";
-        private float volume = 0;
-
-        private AudioSource asGPWS = new AudioSource();
-
+        private float gearHeight = 0.0f;
         private float lastGearHeight = float.PositiveInfinity;
 
-        ScreenMessage screenMsg = new ScreenMessage("", 1, ScreenMessageStyle.UPPER_CENTER);
+        private Tools tools = new Tools();
 
         public void Awake()
         {
@@ -43,45 +35,25 @@ namespace KSP_GPWS
 
         public void Start()
         {
-            Log("Start");
+            Tools.Log("Start");
             LoadSettings();
-            AudioInitialize();
+            tools.AudioInitialize();
 
-            GameEvents.onVesselChange.Add(findGears);
+            GameEvents.onVesselChange.Add(tools.FindGears);
             if (FlightGlobals.ActiveVessel != null)
             {
-                findGears(FlightGlobals.ActiveVessel);
+                tools.FindGears(FlightGlobals.ActiveVessel);
             }
 
             lastGearHeight = float.PositiveInfinity;
         }
 
-        private void findGears(Vessel v)
-        {
-            gearList.Clear();
-
-            if (null == v)
-            {
-                return;
-            }
-
-            for (int i = 0; i < v.parts.Count; i++)    // it is said that foreach costs more memory due to Unity Mono issues
-            {
-                Part p = v.parts[i];
-                if (p.Modules.Contains("GPWSGear"))
-                {
-                    gearList.Add(p.Modules["GPWSGear"] as GPWSGear);
-                    Log(String.Format("find {0}", p.name));
-                }
-            }
-        }
-
         public void Update()
         {
             // check volume
-            if (volume != GameSettings.VOICE_VOLUME)
+            if (tools.Volume != GameSettings.VOICE_VOLUME)
             {
-                UpdateVolume();
+                tools.UpdateVolume();
             }
 
             // check atmosphere
@@ -91,85 +63,66 @@ namespace KSP_GPWS
                 return;
             }
 
-            float gearHeight = getGearHeightFromGround();
+            float gearHeightMeters = tools.GetGearHeightFromGround();
+            float gearHeightFeet = gearHeightMeters * 3.2808399f;
+            // height in meters/feet
+            gearHeight = (UnitOfAltitude.FOOT == unitOfAltitude) ? gearHeightFeet : gearHeightMeters;
             if (gearHeight > 0 && gearHeight < float.PositiveInfinity)
             {
-                if (UnitOfAltitude.FOOT == unitOfAltitude)  // meters or feet
+                if (checkMode_1())  // Excessive Decent Rate
                 {
-                    gearHeight *= 3.2808399f;
+                    return;
                 }
-
-                // is descending
-                if ((lastGearHeight != float.PositiveInfinity) && (gearHeight - lastGearHeight < 0))
+                if (checkMode_6())  // Excessive Decent Rate
                 {
-                    // lower than an altitude
-                    foreach (float threshold in groundProximityAltitudeArray)
-                    {
-                        if (lastGearHeight > threshold && gearHeight < threshold)
-                        {
-                            // play sound
-                            if (asGPWS.isPlaying)
-                            {
-                                asGPWS.Stop();
-                            }
-                            asGPWS.PlayOneShot(GameDatabase.Instance.GetAudioClip(audioPrefix + "/gpws" + threshold));
-                            Log(String.Format("play " + audioPrefix + "/gpws" + threshold));
-                        }
-                    }
+                    return;
                 }
-                lastGearHeight = gearHeight;    // save last gear height
             }
+            lastGearHeight = gearHeight;    // save last gear height
 
             //showScreenMessage(unitOfAltitude.ToString() + " Height: " + gearHeight.ToString());
         }
 
         /// <summary>
-        /// return height from surface to the lowest landing gear, in meters
+        /// Excessive Decent Rate
+        /// SINK RATE / WOOP WOOP PULL UP
         /// </summary>
         /// <returns></returns>
-        public float getGearHeightFromGround()
+        public bool checkMode_1()
         {
-            if (gearList.Count <= 0)    // no vessel
+            return false;
+        }
+        
+        /// <summary>
+        /// Advisory Callout
+        /// Altitude Callouts / Bank Angle Callout
+        /// </summary>
+        /// <returns></returns>
+        public bool checkMode_6()
+        {
+            // Altitude Callouts
+            // is descending
+            if ((lastGearHeight != float.PositiveInfinity) && (gearHeight - lastGearHeight < 0))
             {
-                return float.PositiveInfinity;
-            }
-
-            Vessel vessel = gearList[0].part.vessel;
-            if (FlightGlobals.ActiveVessel != vessel)   // not right vessel?
-            {
-                return float.PositiveInfinity;
-            }
-
-            float terrainHeight = (float)vessel.terrainAltitude;
-            if (terrainHeight < 0)
-            {
-                terrainHeight = 0;
-            }
-            float radarAltitude = (float)vessel.altitude - terrainHeight;      // from vessel to surface, in meters
-
-            Part lowestGearPart = gearList[0].part;
-            // height from terrain to gear
-            float lowestGearRA = float.PositiveInfinity;
-            for (int i = 0; i < gearList.Count; i++)    // find lowest gear
-            {
-                Part p = gearList[i].part;
-                // pos of part, rotate to fit ground coord.
-                Vector3 rotatedPos = p.vessel.srfRelRotation * p.orgPos;
-                float gearRadarAltitude = radarAltitude - rotatedPos.z;
-
-                if (gearRadarAltitude < lowestGearRA)
+                // lower than an altitude
+                foreach (float threshold in groundProximityAltitudeArray)
                 {
-                    lowestGearPart = p;
-                    lowestGearRA = gearRadarAltitude;
+                    if (lastGearHeight > threshold && gearHeight < threshold)
+                    {
+                        // play sound
+                        tools.PlayOneShot("/gpws" + threshold);
+                        Tools.Log(String.Format("play " + "/gpws" + threshold));
+                        return true;
+                    }
                 }
             }
-            return lowestGearRA;
+            return false;
         }
 
         public void OnDestroy()
         {
-            GameEvents.onVesselChange.Remove(findGears);
-            gearList.Clear();
+            GameEvents.onVesselChange.Remove(tools.FindGears);
+            tools.gearList.Clear();
         }
 
         public void LoadSettings()
@@ -214,38 +167,11 @@ namespace KSP_GPWS
                         }
                         catch (Exception ex)
                         {
-                            Log("Error: " + ex.Message);
+                            Tools.Log("Error: " + ex.Message);
                         }
                     }
                 }   // End of has value "name"
             }
-        }
-
-        private void AudioInitialize()
-        {
-            volume = GameSettings.VOICE_VOLUME;
-
-            asGPWS = audioPlayer.AddComponent<AudioSource>();
-            asGPWS.volume = volume;
-            asGPWS.panLevel = 0;
-        }
-
-        private void UpdateVolume()
-        {
-            volume = GameSettings.VOICE_VOLUME;
-            asGPWS.volume = volume;
-        }
-
-        private void showScreenMessage(String msg)
-        {
-            screenMsg.message = msg;
-            ScreenMessages.RemoveMessage(screenMsg);
-            ScreenMessages.PostScreenMessage(screenMsg);
-        }
-
-        public static void Log(String msg)
-        {
-            UnityEngine.Debug.Log("[GPWS] " + msg);
         }
     }
 }
