@@ -1,7 +1,7 @@
 ﻿// GPWS mod for KSP
 // License: CC-BY-NC-SA
 // Author: bss, 2015
-// Last modified: 2015-02-11, 01:04:31
+// Last modified: 2015-02-11, 02:11:56
 
 using System;
 using System.Collections.Generic;
@@ -21,8 +21,26 @@ namespace KSP_GPWS
         public float Volume { get; set; }
 
         private AudioSource asGPWS = new AudioSource();
+        private float lastPlayTime = 0.0f;
 
         ScreenMessage screenMsg = new ScreenMessage("", 1, ScreenMessageStyle.UPPER_CENTER);
+
+        public enum KindOfSound
+        {
+            NONE,
+            SINK_RATE,
+            WOOP_WOOP_PULL_UP,
+            TERRAIN,
+            DONT_SINK,
+            TOO_LOW_GEAR,
+            TOO_LOW_TERRAIN,
+            TOO_LOW_FLAPS,
+            GLIDESLOPE,
+            ALTITUDE_CALLOUTS,
+            BANK_ANGLE,
+            WINDSHEAR,
+        };
+        public KindOfSound kindOfSound = KindOfSound.NONE;    // use meters or feet, feet is recommanded.
 
         public void AudioInitialize()
         {
@@ -31,6 +49,9 @@ namespace KSP_GPWS
             asGPWS = audioPlayer.AddComponent<AudioSource>();
             asGPWS.volume = Volume;
             asGPWS.panLevel = 0;
+
+            kindOfSound = KindOfSound.NONE;
+            lastPlayTime = Time.time;
         }
 
         public void UpdateVolume()
@@ -41,11 +62,30 @@ namespace KSP_GPWS
 
         public void PlayOneShot(String filename)
         {
+            if (Time.time - lastPlayTime < 0.1f)    // check time
+            {
+                return;
+            }
+
             if (asGPWS.isPlaying)
             {
                 asGPWS.Stop();
             }
-            asGPWS.PlayOneShot(GameDatabase.Instance.GetAudioClip(audioPrefix + filename));
+            asGPWS.PlayOneShot(GameDatabase.Instance.GetAudioClip(audioPrefix + "/" + filename));
+            Log(String.Format("play " + filename));
+        }
+
+        public bool IsPlaying(KindOfSound kind)
+        {
+            if (!asGPWS.isPlaying)
+            {
+                return false;
+            }
+            if (kind != kindOfSound)
+            {
+                return false;
+            }
+            return true;
         }
 
         public void showScreenMessage(String msg)

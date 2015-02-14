@@ -1,7 +1,7 @@
 ﻿// GPWS mod for KSP
 // License: CC-BY-NC-SA
 // Author: bss, 2015
-// Last modified: 2015-02-11, 01:23:05
+// Last modified: 2015-02-11, 02:12:28
 
 using System;
 using System.Collections.Generic;
@@ -34,14 +34,24 @@ namespace KSP_GPWS
         private float time = 0.0f;
         private float lastTime = 0.0f;
 
+        // curves
+        private FloatCurve sinkRateCurve = new FloatCurve();
+        private FloatCurve pullUpCurve = new FloatCurve();
+
         public void Awake()
         {
+            LoadSettings();
+            // init curves, points are not accurate
+            sinkRateCurve.Add(50, -1000);
+            sinkRateCurve.Add(2500, -5000);
+            pullUpCurve.Add(50, -1500);
+            pullUpCurve.Add(100, -1600);
+            pullUpCurve.Add(2200, -7000);
         }
 
         public void Start()
         {
             Tools.Log("Start");
-            LoadSettings();
             tools.AudioInitialize();
 
             GameEvents.onVesselChange.Add(tools.FindGears);
@@ -52,6 +62,7 @@ namespace KSP_GPWS
 
             lastGearHeight = float.PositiveInfinity;
             time0 = Time.time;
+            lastTime = time0;
         }
 
         public void Update()
@@ -83,18 +94,14 @@ namespace KSP_GPWS
             if (gearHeight > 0 && gearHeight < float.PositiveInfinity)
             {
                 if (checkMode_1())  // Excessive Decent Rate
-                {
-                    return;
-                }
-                if (checkMode_6())  // Excessive Decent Rate
-                {
-                    return;
-                }
+                { }
+                else if (checkMode_6())  // Excessive Decent Rate
+                { }
             }
             lastGearHeight = gearHeight;    // save last gear height
             lastTime = time;        // save time of last frame
 
-            //showScreenMessage(unitOfAltitude.ToString() + " Height: " + gearHeight.ToString());
+            //tools.showScreenMessage(unitOfAltitude.ToString() + " Time: " + Time.time);
         }
 
         /// <summary>
@@ -107,6 +114,36 @@ namespace KSP_GPWS
             // is descending
             if ((lastGearHeight != float.PositiveInfinity) && (gearHeight - lastGearHeight < 0))
             {
+                float vSpeed = Math.Abs((gearHeight - lastGearHeight) / (time - lastTime) * 60.0f);   // ft/min, radar altitude
+                // pull up
+                /*float maxVSpeedPullUp = pullUpCurve.Evaluate(gearHeight);
+                if (vSpeed > maxVSpeedPullUp)
+                {
+                    // play sound
+                    if (!tools.IsPlaying(Tools.KindOfSound.WOOP_WOOP_PULL_UP))
+                    {
+                        tools.PlayOneShot("pull_up");
+                        tools.kindOfSound = Tools.KindOfSound.WOOP_WOOP_PULL_UP;
+                    }
+                    return true;
+                }*/
+                // sink rate
+                float maxVSpeedSinkRate = Math.Abs(sinkRateCurve.Evaluate(gearHeight));
+                if (vSpeed > maxVSpeedSinkRate)
+                {
+                    // play sound
+                    if (!tools.IsPlaying(Tools.KindOfSound.SINK_RATE))
+                    {
+                        tools.showScreenMessage("not playing");
+                        tools.PlayOneShot("sink_rate");
+                        tools.kindOfSound = Tools.KindOfSound.SINK_RATE;
+                    }
+                    else
+                    {
+                        tools.showScreenMessage("playing");
+                    }
+                    return true;
+                }
             }
             return false;
         }
@@ -128,8 +165,7 @@ namespace KSP_GPWS
                     if (lastGearHeight > threshold && gearHeight < threshold)
                     {
                         // play sound
-                        tools.PlayOneShot("/gpws" + threshold);
-                        Tools.Log(String.Format("play " + "/gpws" + threshold));
+                        tools.PlayOneShot("gpws" + threshold);
                         return true;
                     }
                 }
