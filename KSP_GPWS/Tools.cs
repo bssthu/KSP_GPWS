@@ -1,7 +1,6 @@
 ﻿// GPWS mod for KSP
 // License: CC-BY-NC-SA
 // Author: bss, 2015
-// Last modified: 2015-02-11, 02:11:56
 
 using System;
 using System.Collections.Generic;
@@ -71,7 +70,9 @@ namespace KSP_GPWS
             {
                 asGPWS.Stop();
             }
-            asGPWS.PlayOneShot(GameDatabase.Instance.GetAudioClip(audioPrefix + "/" + filename));
+            asGPWS.clip = GameDatabase.Instance.GetAudioClip(audioPrefix + "/" + filename);
+            asGPWS.Play();
+            lastPlayTime = Time.time;
             Log(String.Format("play " + filename));
         }
 

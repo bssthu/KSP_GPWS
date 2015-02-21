@@ -1,7 +1,6 @@
 ﻿// GPWS mod for KSP
 // License: CC-BY-NC-SA
 // Author: bss, 2015
-// Last modified: 2015-02-11, 02:12:28
 
 using System;
 using System.Collections.Generic;
@@ -23,6 +22,7 @@ namespace KSP_GPWS
             METER = 1,
         };
         private UnitOfAltitude unitOfAltitude = UnitOfAltitude.FOOT;    // use meters or feet, feet is recommanded.
+        private float descentRateFactor = 1.0f;
 
         private float gearHeight = 0.0f;
         private float lastGearHeight = float.PositiveInfinity;
@@ -95,7 +95,7 @@ namespace KSP_GPWS
             {
                 if (checkMode_1())  // Excessive Decent Rate
                 { }
-                else if (checkMode_6())  // Excessive Decent Rate
+                else if (checkMode_6())  // Advisory Callout
                 { }
             }
             lastGearHeight = gearHeight;    // save last gear height
@@ -116,7 +116,7 @@ namespace KSP_GPWS
             {
                 float vSpeed = Math.Abs((gearHeight - lastGearHeight) / (time - lastTime) * 60.0f);   // ft/min, radar altitude
                 // pull up
-                /*float maxVSpeedPullUp = pullUpCurve.Evaluate(gearHeight);
+                float maxVSpeedPullUp = Math.Abs(pullUpCurve.Evaluate(gearHeight)) * descentRateFactor;
                 if (vSpeed > maxVSpeedPullUp)
                 {
                     // play sound
@@ -126,21 +126,17 @@ namespace KSP_GPWS
                         tools.kindOfSound = Tools.KindOfSound.WOOP_WOOP_PULL_UP;
                     }
                     return true;
-                }*/
+                }
                 // sink rate
-                float maxVSpeedSinkRate = Math.Abs(sinkRateCurve.Evaluate(gearHeight));
+                float maxVSpeedSinkRate = Math.Abs(sinkRateCurve.Evaluate(gearHeight)) * descentRateFactor;
                 if (vSpeed > maxVSpeedSinkRate)
                 {
                     // play sound
-                    if (!tools.IsPlaying(Tools.KindOfSound.SINK_RATE))
+                    if (!tools.IsPlaying(Tools.KindOfSound.SINK_RATE)
+                            && !tools.IsPlaying(Tools.KindOfSound.WOOP_WOOP_PULL_UP))
                     {
-                        tools.showScreenMessage("not playing");
                         tools.PlayOneShot("sink_rate");
                         tools.kindOfSound = Tools.KindOfSound.SINK_RATE;
-                    }
-                    else
-                    {
-                        tools.showScreenMessage("playing");
                     }
                     return true;
                 }
@@ -223,6 +219,11 @@ namespace KSP_GPWS
                         {
                             Tools.Log("Error: " + ex.Message);
                         }
+                    }
+
+                    if (node.HasValue("descentRateFactor"))
+                    {
+                        float.TryParse(node.GetValue("descentRateFactor"), out descentRateFactor);
                     }
                 }   // End of has value "name"
             }
