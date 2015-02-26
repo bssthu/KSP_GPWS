@@ -13,9 +13,11 @@ namespace KSP_GPWS
     [KSPAddon(KSPAddon.Startup.MainMenu, false)]
     class Settings : MonoBehaviour
     {
-        public static bool enableGroundProximityWarning = true;
+        #region from_file
 
-        public static int[] groundProximityAltitudeArray = { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
+        public static bool enableSystem = true;
+
+        public static int[] altitudeArray = { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
         public enum UnitOfAltitude
         {
             FOOT = 0,
@@ -25,6 +27,16 @@ namespace KSP_GPWS
         public static float descentRateFactor = 1.0f;
 
         public static bool useBlizzy78Toolbar = false;
+
+        #endregion
+
+        #region in_memory
+
+        public static Rect guiwindowPosition = new Rect(100, 100, 300, 350);
+
+        #endregion
+
+
 
         public void Awake()
         {
@@ -39,7 +51,7 @@ namespace KSP_GPWS
                 {
                     if (node.HasValue("enableGroundProximityWarning"))
                     {
-                        bool.TryParse(node.GetValue("enableGroundProximityWarning"), out enableGroundProximityWarning);
+                        bool.TryParse(node.GetValue("enableGroundProximityWarning"), out enableSystem);
                     }
 
                     if (node.HasValue("groundProximityAltitudeArray"))
@@ -56,10 +68,10 @@ namespace KSP_GPWS
                                     id++;
                                 }
                             }
-                            groundProximityAltitudeArray = new int[id];
+                            altitudeArray = new int[id];
                             for (int j = 0; j < id; j++)
                             {
-                                groundProximityAltitudeArray[j] = tempAlt[j];
+                                altitudeArray[j] = tempAlt[j];
                             }
                         }
                     }

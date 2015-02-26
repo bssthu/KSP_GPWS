@@ -12,5 +12,21 @@ namespace KSP_GPWS
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     class GUIAppLaunch
     {
+        ApplicationLauncherButton appBtn = null;
+
+        public void Awake()
+        {
+            if (!Settings.useBlizzy78Toolbar)
+            {
+            }
+        }
+
+        public void OnDestroy()
+        {
+            if (appBtn != null)
+            {
+                ApplicationLauncher.Instance.RemoveApplication(appBtn);
+            }
+        }
     }
 }

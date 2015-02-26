@@ -145,7 +145,7 @@ namespace KSP_GPWS
             if ((lastGearHeight != float.PositiveInfinity) && (gearHeight - lastGearHeight < 0))
             {
                 // lower than an altitude
-                foreach (float threshold in Settings.groundProximityAltitudeArray)
+                foreach (float threshold in Settings.altitudeArray)
                 {
                     if (lastGearHeight > threshold && gearHeight < threshold)
                     {

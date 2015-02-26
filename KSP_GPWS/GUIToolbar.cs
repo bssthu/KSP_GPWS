@@ -13,19 +13,26 @@ namespace KSP_GPWS
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     class GUIToolbar : MonoBehaviour
     {
-        private IButton btn;
+        private IButton btn = null;
 
         public void Awake()
         {
-            btn = ToolbarManager.Instance.add("GPWS", "GPWSBtn");
-            btn.TexturePath = "GPWS/gpws";
-            btn.ToolTip = "GPWS settings";
-            btn.Visibility = new GameScenesVisibility(GameScenes.FLIGHT);
-            btn.OnClick += (e) => toggleToolbarButton(e, btn);
+            if (Settings.useBlizzy78Toolbar)
+            {
+                btn = ToolbarManager.Instance.add("GPWS", "GPWSBtn");
+                btn.TexturePath = "GPWS/gpws";
+                btn.ToolTip = "GPWS settings";
+                btn.Visibility = new GameScenesVisibility(GameScenes.FLIGHT);
+                btn.OnClick += (e) => SettingGUI.toggleSettingGUI();
+            }
         }
 
-        private void toggleToolbarButton(ClickEvent e, IButton btn)
+        public void OnDestroy()
         {
+            if (btn != null)
+            {
+                btn.Destroy();
+            }
         }
     }
 }
