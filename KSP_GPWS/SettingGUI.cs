@@ -17,7 +17,7 @@ namespace KSP_GPWS
         public static bool isActive = false;
         private bool isHideUI = false;
 
-        private static String descentRateFactorString = "1";    // non-static don't work, strange
+        private String descentRateFactorString;
 
         public void Awake()
         {
