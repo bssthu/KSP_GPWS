@@ -65,6 +65,14 @@ namespace KSP_GPWS
             // check time
             if (time < 3.0f)
             {
+                Tools.kindOfSound = Tools.KindOfSound.UNAVAILABLE;
+                return;
+            }
+
+            // check gear
+            if (tools.gearList.Count <= 0)
+            {
+                Tools.kindOfSound = Tools.KindOfSound.UNAVAILABLE;
                 return;
             }
 
@@ -72,6 +80,7 @@ namespace KSP_GPWS
             if (!FlightGlobals.getMainBody().atmosphere ||
                     FlightGlobals.ship_altitude > FlightGlobals.getMainBody().maxAtmosphereAltitude)
             {
+                Tools.kindOfSound = Tools.KindOfSound.UNAVAILABLE;
                 return;
             }
 
@@ -83,12 +92,18 @@ namespace KSP_GPWS
             {
                 if (checkMode_1())  // Excessive Decent Rate
                 { }
+                else if (checkMode_4())  // Unsafe Terrain Clearance
+                { }
                 else if (checkMode_6())  // Advisory Callout
                 { }
             }
             lastGearHeight = gearHeight;    // save last gear height
             lastTime = time;        // save time of last frame
 
+            if (!tools.IsPlaying())
+            {
+                Tools.kindOfSound = Tools.KindOfSound.NONE;
+            }
             //tools.showScreenMessage(unitOfAltitude.ToString() + " Time: " + Time.time);
         }
 
@@ -113,7 +128,7 @@ namespace KSP_GPWS
                         if (!tools.IsPlaying(Tools.KindOfSound.WOOP_WOOP_PULL_UP))
                         {
                             tools.PlayOneShot("pull_up");
-                            tools.kindOfSound = Tools.KindOfSound.WOOP_WOOP_PULL_UP;
+                            Tools.kindOfSound = Tools.KindOfSound.WOOP_WOOP_PULL_UP;
                         }
                         return true;
                     }
@@ -126,7 +141,62 @@ namespace KSP_GPWS
                                 && !tools.IsPlaying(Tools.KindOfSound.WOOP_WOOP_PULL_UP))
                         {
                             tools.PlayOneShot("sink_rate");
-                            tools.kindOfSound = Tools.KindOfSound.SINK_RATE;
+                            Tools.kindOfSound = Tools.KindOfSound.SINK_RATE;
+                        }
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Unsafe Terrain Clearance
+        /// TOO LOW TERRAIN / TOO LOW GEAR / TOO LOW FLAPS
+        /// </summary>
+        /// <returns></returns>
+        public bool checkMode_4()
+        {
+            if (Settings.enableTerrainClearance)
+            {
+                Part lowestGear = tools.GetLowestGear();
+                if (lowestGear != null && gearHeight < Settings.tooLowGearAltitude)
+                {
+                    bool playTooLowGear = false;
+                    // ModuleLandingGear
+                    try
+                    {
+                        if (lowestGear.Modules.Contains("ModuleLandingGear") &&
+                                lowestGear.Modules["ModuleLandingGear"].Events["LowerLandingGear"].active)
+                        {
+                            playTooLowGear = true;  // not down
+                        }
+                    }
+                    catch (Exception) { }
+
+                    // FSwheel
+                    try
+                    {
+                        if (lowestGear.Modules.Contains("FSwheel"))
+                        {
+                            PartModule m = lowestGear.Modules["FSwheel"];
+                            if (m.GetType().GetField("deploymentState").GetValue(m).ToString() != "Deployed")
+                            {
+                                playTooLowGear = true;  // not down
+                            }
+                        }
+                    }
+                    catch (Exception ex) { tools.showScreenMessage(ex.Message); }
+
+                    if (playTooLowGear)
+                    {
+                        // play sound
+                        if (!tools.IsPlaying(Tools.KindOfSound.TOO_LOW_GEAR)
+                                && !tools.IsPlaying(Tools.KindOfSound.TOO_LOW_TERRAIN)
+                                && !tools.IsPlaying(Tools.KindOfSound.TOO_LOW_FLAPS))
+                        {
+                            tools.PlayOneShot("too_low_gear");
+                            Tools.kindOfSound = Tools.KindOfSound.TOO_LOW_GEAR;
                         }
                         return true;
                     }
