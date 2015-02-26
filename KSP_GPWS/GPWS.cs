@@ -29,7 +29,6 @@ namespace KSP_GPWS
 
         public void Awake()
         {
-            Settings.LoadSettings();
             // init curves, points are not accurate
             sinkRateCurve.Add(50, -1000);
             sinkRateCurve.Add(2500, -5000);
@@ -94,40 +93,43 @@ namespace KSP_GPWS
         }
 
         /// <summary>
-        /// Excessive Decent Rate
+        /// Excessive Descent Rate
         /// SINK RATE / WOOP WOOP PULL UP
         /// </summary>
         /// <returns></returns>
         public bool checkMode_1()
         {
-            // is descending
-            if ((lastGearHeight != float.PositiveInfinity) && (gearHeight - lastGearHeight < 0))
+            if (Settings.enableDescentRate)
             {
-                float vSpeed = Math.Abs((gearHeight - lastGearHeight) / (time - lastTime) * 60.0f);   // ft/min, radar altitude
-                // pull up
-                float maxVSpeedPullUp = Math.Abs(pullUpCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
-                if (vSpeed > maxVSpeedPullUp)
+                // is descending
+                if ((lastGearHeight != float.PositiveInfinity) && (gearHeight - lastGearHeight < 0))
                 {
-                    // play sound
-                    if (!tools.IsPlaying(Tools.KindOfSound.WOOP_WOOP_PULL_UP))
+                    float vSpeed = Math.Abs((gearHeight - lastGearHeight) / (time - lastTime) * 60.0f);   // ft/min, radar altitude
+                    // pull up
+                    float maxVSpeedPullUp = Math.Abs(pullUpCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
+                    if (vSpeed > maxVSpeedPullUp)
                     {
-                        tools.PlayOneShot("pull_up");
-                        tools.kindOfSound = Tools.KindOfSound.WOOP_WOOP_PULL_UP;
+                        // play sound
+                        if (!tools.IsPlaying(Tools.KindOfSound.WOOP_WOOP_PULL_UP))
+                        {
+                            tools.PlayOneShot("pull_up");
+                            tools.kindOfSound = Tools.KindOfSound.WOOP_WOOP_PULL_UP;
+                        }
+                        return true;
                     }
-                    return true;
-                }
-                // sink rate
-                float maxVSpeedSinkRate = Math.Abs(sinkRateCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
-                if (vSpeed > maxVSpeedSinkRate)
-                {
-                    // play sound
-                    if (!tools.IsPlaying(Tools.KindOfSound.SINK_RATE)
-                            && !tools.IsPlaying(Tools.KindOfSound.WOOP_WOOP_PULL_UP))
+                    // sink rate
+                    float maxVSpeedSinkRate = Math.Abs(sinkRateCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
+                    if (vSpeed > maxVSpeedSinkRate)
                     {
-                        tools.PlayOneShot("sink_rate");
-                        tools.kindOfSound = Tools.KindOfSound.SINK_RATE;
+                        // play sound
+                        if (!tools.IsPlaying(Tools.KindOfSound.SINK_RATE)
+                                && !tools.IsPlaying(Tools.KindOfSound.WOOP_WOOP_PULL_UP))
+                        {
+                            tools.PlayOneShot("sink_rate");
+                            tools.kindOfSound = Tools.KindOfSound.SINK_RATE;
+                        }
+                        return true;
                     }
-                    return true;
                 }
             }
             return false;
@@ -141,17 +143,20 @@ namespace KSP_GPWS
         public bool checkMode_6()
         {
             // Altitude Callouts
-            // is descending
-            if ((lastGearHeight != float.PositiveInfinity) && (gearHeight - lastGearHeight < 0))
+            if (Settings.enableAltitudeCallouts)
             {
-                // lower than an altitude
-                foreach (float threshold in Settings.altitudeArray)
+                // is descending
+                if ((lastGearHeight != float.PositiveInfinity) && (gearHeight - lastGearHeight < 0))
                 {
-                    if (lastGearHeight > threshold && gearHeight < threshold)
+                    // lower than an altitude
+                    foreach (float threshold in Settings.altitudeArray)
                     {
-                        // play sound
-                        tools.PlayOneShot("gpws" + threshold);
-                        return true;
+                        if (lastGearHeight > threshold && gearHeight < threshold)
+                        {
+                            // play sound
+                            tools.PlayOneShot("gpws" + threshold);
+                            return true;
+                        }
                     }
                 }
             }

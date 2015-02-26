@@ -10,12 +10,23 @@ using UnityEngine;
 
 namespace KSP_GPWS
 {
-    [KSPAddon(KSPAddon.Startup.MainMenu, false)]
-    class Settings : MonoBehaviour
+    [KSPAddon(KSPAddon.Startup.MainMenu, true)]
+    class SettingsLoader : MonoBehaviour
+    {
+        public void Awake()
+        {
+            // load settings when game start
+            Settings.LoadSettings();
+        }
+    }
+
+    static class Settings
     {
         #region from_file
 
         public static bool enableSystem = true;
+        public static bool enableAltitudeCallouts = true;
+        public static bool enableDescentRate = true;
 
         public static int[] altitudeArray = { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
         public enum UnitOfAltitude
@@ -25,6 +36,7 @@ namespace KSP_GPWS
         };
         public static UnitOfAltitude unitOfAltitude = UnitOfAltitude.FOOT;    // use meters or feet, feet is recommanded.
         public static float descentRateFactor = 1.0f;
+        public static String drfString = "1.0";
 
         public static bool useBlizzy78Toolbar = false;
 
@@ -32,16 +44,10 @@ namespace KSP_GPWS
 
         #region in_memory
 
-        public static Rect guiwindowPosition = new Rect(100, 100, 300, 350);
+        public static Rect guiwindowPosition = new Rect(100, 100, 800, 350);
 
         #endregion
 
-
-
-        public void Awake()
-        {
-            LoadSettings();
-        }
 
         public static void LoadSettings()
         {
@@ -49,14 +55,24 @@ namespace KSP_GPWS
             {
                 if (node.HasValue("name") && node.GetValue("name") == "gpwsSettings")
                 {
-                    if (node.HasValue("enableGroundProximityWarning"))
+                    if (node.HasValue("enableSystem"))
                     {
-                        bool.TryParse(node.GetValue("enableGroundProximityWarning"), out enableSystem);
+                        bool.TryParse(node.GetValue("enableSystem"), out enableSystem);
                     }
 
-                    if (node.HasValue("groundProximityAltitudeArray"))
+                    if (node.HasValue("enableAltitudeCallouts"))
                     {
-                        String[] intstrings = node.GetValue("groundProximityAltitudeArray").Split(',');
+                        bool.TryParse(node.GetValue("enableAltitudeCallouts"), out enableAltitudeCallouts);
+                    }
+
+                    if (node.HasValue("enableDescentRate"))
+                    {
+                        bool.TryParse(node.GetValue("enableDescentRate"), out enableDescentRate);
+                    }
+
+                    if (node.HasValue("altitudeArray"))
+                    {
+                        String[] intstrings = node.GetValue("altitudeArray").Split(',');
                         if (intstrings.Length > 0)
                         {
                             int id = 0;
@@ -100,6 +116,26 @@ namespace KSP_GPWS
                     }
                 }   // End of has value "name"
             }
+        }
+
+        public static void SaveSettings()
+        {
+            ConfigNode config = new ConfigNode();
+            ConfigNode gpwsNode = new ConfigNode();
+
+            gpwsNode.name = "GPWS_SETTINGS";
+
+            gpwsNode.AddValue("name", "gpwsSettings");
+            gpwsNode.AddValue("enableSystem", enableSystem);
+            gpwsNode.AddValue("enableAltitudeCallouts", enableAltitudeCallouts);
+            gpwsNode.AddValue("enableDescentRate", enableDescentRate);
+            gpwsNode.AddValue("altitudeArray", String.Join(",", Array.ConvertAll(altitudeArray, x => x.ToString())));
+            gpwsNode.AddValue("unitOfAltitude", unitOfAltitude);
+            gpwsNode.AddValue("descentRateFactor", descentRateFactor);
+            gpwsNode.AddValue("useBlizzy78Toolbar", useBlizzy78Toolbar);
+
+            config.AddNode(gpwsNode);
+            config.Save(KSPUtil.ApplicationRootPath + "GameData/GPWS/settings.cfg", "GPWS");
         }
     }
 }
