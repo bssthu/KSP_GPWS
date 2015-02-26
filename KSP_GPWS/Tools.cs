@@ -26,6 +26,7 @@ namespace KSP_GPWS
 
         public enum KindOfSound
         {
+            UNAVAILABLE,
             NONE,
             SINK_RATE,
             WOOP_WOOP_PULL_UP,
@@ -39,7 +40,7 @@ namespace KSP_GPWS
             BANK_ANGLE,
             WINDSHEAR,
         };
-        public KindOfSound kindOfSound = KindOfSound.NONE;    // use meters or feet, feet is recommanded.
+        public static KindOfSound kindOfSound = KindOfSound.NONE;    // use meters or feet, feet is recommanded.
 
         public void AudioInitialize()
         {
@@ -61,7 +62,7 @@ namespace KSP_GPWS
 
         public void PlayOneShot(String filename)
         {
-            if (Time.time - lastPlayTime < 0.1f)    // check time
+            if (Time.time - lastPlayTime < 0.3f)    // check time
             {
                 return;
             }
@@ -74,6 +75,11 @@ namespace KSP_GPWS
             asGPWS.Play();
             lastPlayTime = Time.time;
             Log(String.Format("play " + filename));
+        }
+
+        public bool IsPlaying()
+        {
+            return asGPWS.isPlaying;
         }
 
         public bool IsPlaying(KindOfSound kind)
@@ -114,6 +120,30 @@ namespace KSP_GPWS
                     Log(String.Format("find {0}", p.name));
                 }
             }
+        }
+
+        public Part GetLowestGear()
+        {
+            if (gearList.Count <= 0)    // no vessel
+            {
+                return null;
+            }
+            Part lowestGearPart = gearList[0].part;
+            float lowestGearAlt = float.PositiveInfinity;
+            for (int i = 0; i < gearList.Count; i++)    // find lowest gear
+            {
+                Part p = gearList[i].part;
+                // pos of part, rotate to fit ground coord.
+                Vector3 rotatedPos = p.vessel.srfRelRotation * p.orgPos;
+                float gearAltitude = (float)(FlightGlobals.ActiveVessel.altitude - rotatedPos.z);
+
+                if (gearAltitude < lowestGearAlt)
+                {
+                    lowestGearPart = p;
+                    lowestGearAlt = gearAltitude;
+                }
+            }
+            return lowestGearPart;
         }
 
         /// <summary>

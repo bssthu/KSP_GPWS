@@ -25,9 +25,12 @@ namespace KSP_GPWS
         #region from_file
 
         public static bool enableSystem = true;
-        public static bool enableAltitudeCallouts = true;
         public static bool enableDescentRate = true;
+        public static bool enableTerrainClearance = true;
+        public static bool enableAltitudeCallouts = true;
 
+        public static float descentRateFactor = 1.0f;
+        public static float tooLowGearAltitude = 500.0f;
         public static int[] altitudeArray = { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
         public enum UnitOfAltitude
         {
@@ -35,7 +38,6 @@ namespace KSP_GPWS
             METER = 1,
         };
         public static UnitOfAltitude unitOfAltitude = UnitOfAltitude.FOOT;    // use meters or feet, feet is recommanded.
-        public static float descentRateFactor = 1.0f;
 
         public static bool useBlizzy78Toolbar = false;
 
@@ -59,14 +61,29 @@ namespace KSP_GPWS
                         bool.TryParse(node.GetValue("enableSystem"), out enableSystem);
                     }
 
+                    if (node.HasValue("enableDescentRate"))
+                    {
+                        bool.TryParse(node.GetValue("enableDescentRate"), out enableDescentRate);
+                    }
+
+                    if (node.HasValue("enableTerrainClearance"))
+                    {
+                        bool.TryParse(node.GetValue("enableTerrainClearance"), out enableTerrainClearance);
+                    }
+
                     if (node.HasValue("enableAltitudeCallouts"))
                     {
                         bool.TryParse(node.GetValue("enableAltitudeCallouts"), out enableAltitudeCallouts);
                     }
 
-                    if (node.HasValue("enableDescentRate"))
+                    if (node.HasValue("descentRateFactor"))
                     {
-                        bool.TryParse(node.GetValue("enableDescentRate"), out enableDescentRate);
+                        float.TryParse(node.GetValue("descentRateFactor"), out descentRateFactor);
+                    }
+
+                    if (node.HasValue("tooLowGearAltitude"))
+                    {
+                        float.TryParse(node.GetValue("tooLowGearAltitude"), out tooLowGearAltitude);
                     }
 
                     if (node.HasValue("altitudeArray"))
@@ -104,11 +121,6 @@ namespace KSP_GPWS
                         }
                     }
 
-                    if (node.HasValue("descentRateFactor"))
-                    {
-                        float.TryParse(node.GetValue("descentRateFactor"), out descentRateFactor);
-                    }
-
                     if (node.HasValue("useBlizzy78Toolbar"))
                     {
                         bool.TryParse(node.GetValue("useBlizzy78Toolbar"), out useBlizzy78Toolbar);
@@ -125,12 +137,17 @@ namespace KSP_GPWS
             gpwsNode.name = "GPWS_SETTINGS";
 
             gpwsNode.AddValue("name", "gpwsSettings");
+
             gpwsNode.AddValue("enableSystem", enableSystem);
-            gpwsNode.AddValue("enableAltitudeCallouts", enableAltitudeCallouts);
             gpwsNode.AddValue("enableDescentRate", enableDescentRate);
+            gpwsNode.AddValue("enableTerrainClearance", enableTerrainClearance);
+            gpwsNode.AddValue("enableAltitudeCallouts", enableAltitudeCallouts);
+
+            gpwsNode.AddValue("descentRateFactor", descentRateFactor);
+            gpwsNode.AddValue("tooLowGearAltitude", tooLowGearAltitude);
             gpwsNode.AddValue("altitudeArray", String.Join(",", Array.ConvertAll(altitudeArray, x => x.ToString())));
             gpwsNode.AddValue("unitOfAltitude", unitOfAltitude);
-            gpwsNode.AddValue("descentRateFactor", descentRateFactor);
+
             gpwsNode.AddValue("useBlizzy78Toolbar", useBlizzy78Toolbar);
 
             config.AddNode(gpwsNode);
