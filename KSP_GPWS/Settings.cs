@@ -36,7 +36,6 @@ namespace KSP_GPWS
         };
         public static UnitOfAltitude unitOfAltitude = UnitOfAltitude.FOOT;    // use meters or feet, feet is recommanded.
         public static float descentRateFactor = 1.0f;
-        public static String drfString = "1.0";
 
         public static bool useBlizzy78Toolbar = false;
 

@@ -49,8 +49,8 @@
   <ItemGroup>
     <Compile Include="GPWS.cs" />
     <Compile Include="GPWSGear.cs" />
-    <Compile Include="GUIAppLaunch.cs" />
-    <Compile Include="GUIToolbar.cs" />
+    <Compile Include="GUIAppLaunchBtn.cs" />
+    <Compile Include="GUIToolbarBtn.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SettingGUI.cs" />
     <Compile Include="Settings.cs" />

@@ -11,7 +11,7 @@ using UnityEngine;
 namespace KSP_GPWS
 {
     [KSPAddon(KSPAddon.Startup.Flight, false)]
-    class GUIToolbar : MonoBehaviour
+    class GUIToolbarBtn : MonoBehaviour
     {
         private IButton btn = null;
 
@@ -32,6 +32,7 @@ namespace KSP_GPWS
             if (btn != null)
             {
                 btn.Destroy();
+                btn = null;
             }
         }
     }

@@ -17,7 +17,7 @@ namespace KSP_GPWS
         public static bool isActive = false;
         private bool isHideUI = false;
 
-        private static String descentRateFactorString = "1";
+        private static String descentRateFactorString = "1";    // non-static don't work, strange
 
         public void Awake()
         {
@@ -29,6 +29,13 @@ namespace KSP_GPWS
         public static void toggleSettingGUI()
         {
             isActive = !isActive;
+            if (!isActive)
+            {
+                if (!Settings.useBlizzy78Toolbar && GUIAppLaunchBtn.appBtn != null)
+                {
+                    GUIAppLaunchBtn.appBtn.SetFalse();
+                }
+            }
         }
 
         public void HideUI()
@@ -122,6 +129,7 @@ namespace KSP_GPWS
         {
             GameEvents.onShowUI.Remove(ShowUI);
             GameEvents.onHideUI.Remove(HideUI);
+            isActive = false;
         }
     }
 }
