@@ -28,6 +28,7 @@ namespace KSP_GPWS
         public static bool enableDescentRate = true;
         public static bool enableTerrainClearance = true;
         public static bool enableAltitudeCallouts = true;
+        public static bool enableBankAngle = false;
 
         public static float descentRateFactor = 1.0f;
         public static float tooLowGearAltitude = 500.0f;
@@ -60,32 +61,31 @@ namespace KSP_GPWS
                     {
                         bool.TryParse(node.GetValue("enableSystem"), out enableSystem);
                     }
-
                     if (node.HasValue("enableDescentRate"))
                     {
                         bool.TryParse(node.GetValue("enableDescentRate"), out enableDescentRate);
                     }
-
                     if (node.HasValue("enableTerrainClearance"))
                     {
                         bool.TryParse(node.GetValue("enableTerrainClearance"), out enableTerrainClearance);
                     }
-
                     if (node.HasValue("enableAltitudeCallouts"))
                     {
                         bool.TryParse(node.GetValue("enableAltitudeCallouts"), out enableAltitudeCallouts);
+                    }
+                    if (node.HasValue("enableBankAngle"))
+                    {
+                        bool.TryParse(node.GetValue("enableBankAngle"), out enableBankAngle);
                     }
 
                     if (node.HasValue("descentRateFactor"))
                     {
                         float.TryParse(node.GetValue("descentRateFactor"), out descentRateFactor);
                     }
-
                     if (node.HasValue("tooLowGearAltitude"))
                     {
                         float.TryParse(node.GetValue("tooLowGearAltitude"), out tooLowGearAltitude);
                     }
-
                     if (node.HasValue("altitudeArray"))
                     {
                         String[] intstrings = node.GetValue("altitudeArray").Split(',');
@@ -107,7 +107,6 @@ namespace KSP_GPWS
                             }
                         }
                     }
-
                     if (node.HasValue("unitOfAltitude"))
                     {
                         try
@@ -142,6 +141,7 @@ namespace KSP_GPWS
             gpwsNode.AddValue("enableDescentRate", enableDescentRate);
             gpwsNode.AddValue("enableTerrainClearance", enableTerrainClearance);
             gpwsNode.AddValue("enableAltitudeCallouts", enableAltitudeCallouts);
+            gpwsNode.AddValue("enableBankAngle", enableBankAngle);
 
             gpwsNode.AddValue("descentRateFactor", descentRateFactor);
             gpwsNode.AddValue("tooLowGearAltitude", tooLowGearAltitude);

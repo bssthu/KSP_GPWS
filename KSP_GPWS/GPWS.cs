@@ -24,8 +24,9 @@ namespace KSP_GPWS
         private float lastTime = 0.0f;
 
         // curves
-        private FloatCurve sinkRateCurve = new FloatCurve();
-        private FloatCurve pullUpCurve = new FloatCurve();
+        private FloatCurve sinkRateCurve = new FloatCurve();    // (alt, vSpeed)
+        private FloatCurve pullUpCurve = new FloatCurve();      // (alt, vSpeed)
+        private FloatCurve bankAngleCurve = new FloatCurve();   // (alt, bankAngle)
 
         public void Awake()
         {
@@ -35,6 +36,11 @@ namespace KSP_GPWS
             pullUpCurve.Add(50, -1500);
             pullUpCurve.Add(100, -1600);
             pullUpCurve.Add(2200, -7000);
+            pullUpCurve.Add(2200, -7000);
+            bankAngleCurve.Add(5, 10);
+            bankAngleCurve.Add(30, 10);
+            bankAngleCurve.Add(150, 40);
+            bankAngleCurve.Add(2450, 55);
         }
 
         public void Start()
@@ -227,6 +233,38 @@ namespace KSP_GPWS
                             tools.PlayOneShot("gpws" + threshold);
                             return true;
                         }
+                    }
+                }
+            }
+            // Bank Angle Callout
+            if (Settings.enableBankAngle)
+            {
+                Vessel vessel = FlightGlobals.ActiveVessel;
+
+                // https://github.com/Crzyrndm/Pilot-Assistant/blob/ebd426fe1a9a0fc75a674e5a45d69b1c6c66a438/PilotAssistant/Utility/FlightData.cs
+                // surface vectors
+                Vector3d planetUp = (vessel.findWorldCenterOfMass() - vessel.mainBody.position).normalized;
+                // Vessel forward and right vetors, parallel to the surface
+                Vector3d surfVesRight = Vector3d.Cross(planetUp, vessel.ReferenceTransform.up).normalized;
+                // roll
+                double roll = Vector3d.Angle(surfVesRight, vessel.ReferenceTransform.right)
+                        * Math.Sign(Vector3d.Dot(surfVesRight, vessel.ReferenceTransform.forward));
+
+                float bankAngle = (float)Math.Abs(roll);
+
+                if (gearHeight > 5 && gearHeight < 2450)
+                {
+                    float maxBankAngle = Math.Abs(bankAngleCurve.Evaluate(gearHeight));
+                    // check
+                    if (bankAngle > maxBankAngle)
+                    {
+                        // play sound
+                        if (!tools.IsPlaying(Tools.KindOfSound.BANK_ANGLE))
+                        {
+                            tools.PlayOneShot("bank_angle");
+                            Tools.kindOfSound = Tools.KindOfSound.BANK_ANGLE;
+                        }
+                        return true;
                     }
                 }
             }
