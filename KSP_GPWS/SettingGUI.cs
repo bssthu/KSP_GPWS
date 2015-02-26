@@ -129,6 +129,9 @@ namespace KSP_GPWS
 
                     Settings.enableAltitudeCallouts =
                             GUILayout.Toggle(Settings.enableAltitudeCallouts, "Altitude Callouts", thisStyle);
+
+                    Settings.enableBankAngle =
+                            GUILayout.Toggle(Settings.enableBankAngle, "Bank Angle", thisStyle);
                 }
 
                 GUILayout.BeginHorizontal();
