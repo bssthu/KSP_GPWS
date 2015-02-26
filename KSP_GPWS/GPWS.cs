@@ -13,17 +13,6 @@ namespace KSP_GPWS
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class GPWS : UnityEngine.MonoBehaviour
     {
-        // settings
-        private bool enableGroundProximityWarning = true;
-        private int[] groundProximityAltitudeArray = { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
-        public enum UnitOfAltitude
-        {
-            FOOT = 0,
-            METER = 1,
-        };
-        private UnitOfAltitude unitOfAltitude = UnitOfAltitude.FOOT;    // use meters or feet, feet is recommanded.
-        private float descentRateFactor = 1.0f;
-
         private float gearHeight = 0.0f;
         private float lastGearHeight = float.PositiveInfinity;
 
@@ -40,7 +29,7 @@ namespace KSP_GPWS
 
         public void Awake()
         {
-            LoadSettings();
+            Settings.LoadSettings();
             // init curves, points are not accurate
             sinkRateCurve.Add(50, -1000);
             sinkRateCurve.Add(2500, -5000);
@@ -90,7 +79,7 @@ namespace KSP_GPWS
             float gearHeightMeters = tools.GetGearHeightFromGround();
             float gearHeightFeet = gearHeightMeters * 3.2808399f;
             // height in meters/feet
-            gearHeight = (UnitOfAltitude.FOOT == unitOfAltitude) ? gearHeightFeet : gearHeightMeters;
+            gearHeight = (Settings.UnitOfAltitude.FOOT == Settings.unitOfAltitude) ? gearHeightFeet : gearHeightMeters;
             if (gearHeight > 0 && gearHeight < float.PositiveInfinity)
             {
                 if (checkMode_1())  // Excessive Decent Rate
@@ -116,7 +105,7 @@ namespace KSP_GPWS
             {
                 float vSpeed = Math.Abs((gearHeight - lastGearHeight) / (time - lastTime) * 60.0f);   // ft/min, radar altitude
                 // pull up
-                float maxVSpeedPullUp = Math.Abs(pullUpCurve.Evaluate(gearHeight)) * descentRateFactor;
+                float maxVSpeedPullUp = Math.Abs(pullUpCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
                 if (vSpeed > maxVSpeedPullUp)
                 {
                     // play sound
@@ -128,7 +117,7 @@ namespace KSP_GPWS
                     return true;
                 }
                 // sink rate
-                float maxVSpeedSinkRate = Math.Abs(sinkRateCurve.Evaluate(gearHeight)) * descentRateFactor;
+                float maxVSpeedSinkRate = Math.Abs(sinkRateCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
                 if (vSpeed > maxVSpeedSinkRate)
                 {
                     // play sound
@@ -156,7 +145,7 @@ namespace KSP_GPWS
             if ((lastGearHeight != float.PositiveInfinity) && (gearHeight - lastGearHeight < 0))
             {
                 // lower than an altitude
-                foreach (float threshold in groundProximityAltitudeArray)
+                foreach (float threshold in Settings.groundProximityAltitudeArray)
                 {
                     if (lastGearHeight > threshold && gearHeight < threshold)
                     {
@@ -173,60 +162,6 @@ namespace KSP_GPWS
         {
             GameEvents.onVesselChange.Remove(tools.FindGears);
             tools.gearList.Clear();
-        }
-
-        public void LoadSettings()
-        {
-            foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("GPWS_SETTINGS"))
-            {
-                if (node.HasValue("name") && node.GetValue("name") == "gpwsSettings")
-                {
-                    if (node.HasValue("enableGroundProximityWarning"))
-                    {
-                        bool.TryParse(node.GetValue("enableGroundProximityWarning"), out enableGroundProximityWarning);
-                    }
-
-                    if (node.HasValue("groundProximityAltitudeArray"))
-                    {
-                        String[] intstrings = node.GetValue("groundProximityAltitudeArray").Split(',');
-                        if (intstrings.Length > 0)
-                        {
-                            int id = 0;
-                            int[] tempAlt = new int[intstrings.Length];
-                            for (int j = 0; j < intstrings.Length; j++)
-                            {
-                                if (int.TryParse(intstrings[j], out tempAlt[id]))
-                                {
-                                    id++;
-                                }
-                            }
-                            groundProximityAltitudeArray = new int[id];
-                            for (int j = 0; j < id; j++)
-                            {
-                                groundProximityAltitudeArray[j] = tempAlt[j];
-                            }
-                        }
-                    }
-
-                    if (node.HasValue("unitOfAltitude"))
-                    {
-                        try
-                        {
-                            unitOfAltitude = (UnitOfAltitude)Enum.Parse(typeof(UnitOfAltitude),
-                                node.GetValue("unitOfAltitude"), true);
-                        }
-                        catch (Exception ex)
-                        {
-                            Tools.Log("Error: " + ex.Message);
-                        }
-                    }
-
-                    if (node.HasValue("descentRateFactor"))
-                    {
-                        float.TryParse(node.GetValue("descentRateFactor"), out descentRateFactor);
-                    }
-                }   // End of has value "name"
-            }
         }
     }
 }
