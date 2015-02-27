@@ -52,7 +52,8 @@ namespace KSP_GPWS
 
         #region in_memory
 
-        public static Rect guiwindowPosition = new Rect(100, 100, 800, 350);
+        public static Rect guiwindowPosition = new Rect(100, 100, 800, 50);
+        public static bool showConfig = true;
 
         #endregion
 

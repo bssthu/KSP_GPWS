@@ -19,6 +19,7 @@ namespace KSP_GPWS
 
         private String descentRateFactorString;
         private String tooLowGearAltitudeString;
+        private bool showConfig;
 
         public void Awake()
         {
@@ -26,6 +27,7 @@ namespace KSP_GPWS
             GameEvents.onHideUI.Add(HideUI);
             descentRateFactorString = Settings.descentRateFactor.ToString();
             tooLowGearAltitudeString = Settings.tooLowGearAltitude.ToString();
+            showConfig = Settings.showConfig;
         }
 
         public static void toggleSettingGUI()
@@ -55,6 +57,13 @@ namespace KSP_GPWS
             if (isActive && !isHideUI)
             {
                 GUI.skin = HighLogic.Skin;
+                // resize
+                if (Settings.showConfig != showConfig)
+                {
+                    guiwindowPosition.height = 50;
+                    Settings.showConfig = showConfig;
+                }
+                // draw
                 guiwindowPosition = GUILayout.Window("GPWSSetting".GetHashCode(), guiwindowPosition, SettingWindowFunc,
                         "GPWS Setting", GUILayout.ExpandHeight(true));
             }
@@ -100,33 +109,7 @@ namespace KSP_GPWS
                 }
                 GUILayout.Box(text, boxStyle, GUILayout.Height(30));
 
-                drawConfigUI(toggleStyle, boxStyle);
-
-                GUILayout.BeginHorizontal();
-                {
-                    if (GUILayout.Button("Save", buttonStyle, GUILayout.Width(80), GUILayout.Height(30)))
-                    {
-                        float newDescentRateFactor;
-                        if (float.TryParse(descentRateFactorString, out newDescentRateFactor))
-                        {
-                            Settings.descentRateFactor = newDescentRateFactor;
-                        }
-                        float newTooLowGearAltitude;
-                        if (float.TryParse(tooLowGearAltitudeString, out newTooLowGearAltitude))
-                        {
-                            Settings.tooLowGearAltitude = newTooLowGearAltitude;
-                        }
-                        // save
-                        Settings.SaveSettings();
-                        toggleSettingGUI();
-                    }
-                    GUILayout.FlexibleSpace();
-                    if (GUILayout.Button("Cancel", buttonStyle, GUILayout.Width(80), GUILayout.Height(30)))
-                    {
-                        toggleSettingGUI();
-                    }
-                }
-                GUILayout.EndHorizontal();
+                drawConfigUI(toggleStyle, boxStyle, buttonStyle);
             }
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
@@ -134,48 +117,76 @@ namespace KSP_GPWS
             GUI.DragWindow();   // allow moving window
         }
 
-        private void drawConfigUI(GUIStyle toggleStyle, GUIStyle boxStyle)
+        private void drawConfigUI(GUIStyle toggleStyle, GUIStyle boxStyle, GUIStyle buttonStyle)
         {
             GUILayout.BeginVertical();
             {
-                GUILayout.Label("select function", GUILayout.MinWidth(200));
-                Settings.enableSystem =
-                        GUILayout.Toggle(Settings.enableSystem, "System", toggleStyle);
-                if (Settings.enableSystem)
+                showConfig = GUILayout.Toggle(
+                        showConfig, "select function", buttonStyle, GUILayout.Width(200), GUILayout.Height(20));
+
+                if (showConfig)
                 {
+                    Settings.enableSystem =
+                            GUILayout.Toggle(Settings.enableSystem, "System", toggleStyle);
+
+                    // descent rate config
                     Settings.enableDescentRate =
                             GUILayout.Toggle(Settings.enableDescentRate, "Descent Rate", toggleStyle);
-                    if (Settings.enableDescentRate)
+                    GUILayout.BeginHorizontal();
                     {
-                        GUILayout.BeginHorizontal();
-                        {
-                            GUILayout.Label("Descent Rate *");
-                            GUILayout.FlexibleSpace();
-                            descentRateFactorString =
-                                    GUILayout.TextField(descentRateFactorString, GUILayout.Height(30), GUILayout.Width(80));
-                        }
-                        GUILayout.EndHorizontal();
+                        GUILayout.Label("Descent Rate *");
+                        GUILayout.FlexibleSpace();
+                        descentRateFactorString =
+                                GUILayout.TextField(descentRateFactorString, GUILayout.Height(30), GUILayout.Width(80));
                     }
+                    GUILayout.EndHorizontal();
 
+                    // terrain clearance
                     Settings.enableTerrainClearance =
                             GUILayout.Toggle(Settings.enableTerrainClearance, "Terrain Clearance", toggleStyle);
-                    if (Settings.enableTerrainClearance)
+                    GUILayout.BeginHorizontal();
                     {
-                        GUILayout.BeginHorizontal();
-                        {
-                            GUILayout.Label("Gear Alt");
-                            GUILayout.FlexibleSpace();
-                            tooLowGearAltitudeString =
-                                    GUILayout.TextField(tooLowGearAltitudeString, GUILayout.Height(30), GUILayout.Width(80));
-                        }
-                        GUILayout.EndHorizontal();
+                        GUILayout.Label("Gear Alt");
+                        GUILayout.FlexibleSpace();
+                        tooLowGearAltitudeString =
+                                GUILayout.TextField(tooLowGearAltitudeString, GUILayout.Height(30), GUILayout.Width(80));
                     }
+                    GUILayout.EndHorizontal();
 
+                    // altitude
                     Settings.enableAltitudeCallouts =
                             GUILayout.Toggle(Settings.enableAltitudeCallouts, "Altitude Callouts", toggleStyle);
 
+                    // bank angle
                     Settings.enableBankAngle =
                             GUILayout.Toggle(Settings.enableBankAngle, "Bank Angle", toggleStyle);
+
+                    // ok cancel
+                    GUILayout.BeginHorizontal();
+                    {
+                        if (GUILayout.Button("Save", buttonStyle, GUILayout.Width(80), GUILayout.Height(30)))
+                        {
+                            float newDescentRateFactor;
+                            if (float.TryParse(descentRateFactorString, out newDescentRateFactor))
+                            {
+                                Settings.descentRateFactor = newDescentRateFactor;
+                            }
+                            float newTooLowGearAltitude;
+                            if (float.TryParse(tooLowGearAltitudeString, out newTooLowGearAltitude))
+                            {
+                                Settings.tooLowGearAltitude = newTooLowGearAltitude;
+                            }
+                            // save
+                            Settings.SaveSettings();
+                            toggleSettingGUI();
+                        }
+                        GUILayout.FlexibleSpace();
+                        if (GUILayout.Button("Cancel", buttonStyle, GUILayout.Width(80), GUILayout.Height(30)))
+                        {
+                            toggleSettingGUI();
+                        }
+                    }
+                    GUILayout.EndHorizontal();
                 }
             }
             GUILayout.EndVertical();
