@@ -62,11 +62,11 @@ namespace KSP_GPWS
 
         private void SettingWindowFunc(int windowID)
         {
-            GUIStyle thisStyle = new GUIStyle(GUI.skin.toggle);
-            thisStyle.stretchHeight = true;
-            thisStyle.stretchWidth = true;
-            thisStyle.padding = new RectOffset(4, 4, 4, 4);
-            thisStyle.margin = new RectOffset(4, 4, 4, 4);
+            GUIStyle toggleStyle = new GUIStyle(GUI.skin.toggle);
+            toggleStyle.stretchHeight = true;
+            toggleStyle.stretchWidth = true;
+            toggleStyle.padding = new RectOffset(4, 4, 4, 4);
+            toggleStyle.margin = new RectOffset(4, 4, 4, 4);
 
             GUIStyle buttonStyle = new GUIStyle(GUI.skin.button);
             buttonStyle.stretchHeight = true;
@@ -85,54 +85,22 @@ namespace KSP_GPWS
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
             {
-                if (Settings.enableSystem)
+                String text = Tools.kindOfSound.ToString();
+                if (!Settings.enableSystem)
                 {
-                    String text = Tools.kindOfSound.ToString();
-                    if (text != "NONE" && text != "UNAVAILABLE")
-                    {
-                        text = "<color=red>" + text + "</color>";
-                    }
-                    GUILayout.Box(text, boxStyle, GUILayout.Height(30));
+                    text = "UNAVAILABLE";
                 }
-                GUILayout.Label("select function", GUILayout.MinWidth(200));
-                Settings.enableSystem =
-                        GUILayout.Toggle(Settings.enableSystem, "System", thisStyle);
-                if (Settings.enableSystem)
+                if (text == "UNAVAILABLE")
                 {
-                    Settings.enableDescentRate =
-                            GUILayout.Toggle(Settings.enableDescentRate, "Descent Rate", thisStyle);
-                    if (Settings.enableDescentRate)
-                    {
-                        GUILayout.BeginHorizontal();
-                        {
-                            GUILayout.Label("Descent Rate *");
-                            GUILayout.FlexibleSpace();
-                            descentRateFactorString =
-                                    GUILayout.TextField(descentRateFactorString, GUILayout.Height(30), GUILayout.Width(80));
-                        }
-                        GUILayout.EndHorizontal();
-                    }
-
-                    Settings.enableTerrainClearance =
-                            GUILayout.Toggle(Settings.enableTerrainClearance, "Terrain Clearance", thisStyle);
-                    if (Settings.enableTerrainClearance)
-                    {
-                        GUILayout.BeginHorizontal();
-                        {
-                            GUILayout.Label("Gear Alt");
-                            GUILayout.FlexibleSpace();
-                            tooLowGearAltitudeString =
-                                    GUILayout.TextField(tooLowGearAltitudeString, GUILayout.Height(30), GUILayout.Width(80));
-                        }
-                        GUILayout.EndHorizontal();
-                    }
-
-                    Settings.enableAltitudeCallouts =
-                            GUILayout.Toggle(Settings.enableAltitudeCallouts, "Altitude Callouts", thisStyle);
-
-                    Settings.enableBankAngle =
-                            GUILayout.Toggle(Settings.enableBankAngle, "Bank Angle", thisStyle);
+                    text = "<color=white>" + text + "</color>";
                 }
+                else if (text != "NONE")
+                {
+                    text = "<color=red>" + text + "</color>";
+                }
+                GUILayout.Box(text, boxStyle, GUILayout.Height(30));
+
+                drawConfigUI(toggleStyle, boxStyle);
 
                 GUILayout.BeginHorizontal();
                 {
@@ -164,6 +132,53 @@ namespace KSP_GPWS
             GUILayout.EndHorizontal();
 
             GUI.DragWindow();   // allow moving window
+        }
+
+        private void drawConfigUI(GUIStyle toggleStyle, GUIStyle boxStyle)
+        {
+            GUILayout.BeginVertical();
+            {
+                GUILayout.Label("select function", GUILayout.MinWidth(200));
+                Settings.enableSystem =
+                        GUILayout.Toggle(Settings.enableSystem, "System", toggleStyle);
+                if (Settings.enableSystem)
+                {
+                    Settings.enableDescentRate =
+                            GUILayout.Toggle(Settings.enableDescentRate, "Descent Rate", toggleStyle);
+                    if (Settings.enableDescentRate)
+                    {
+                        GUILayout.BeginHorizontal();
+                        {
+                            GUILayout.Label("Descent Rate *");
+                            GUILayout.FlexibleSpace();
+                            descentRateFactorString =
+                                    GUILayout.TextField(descentRateFactorString, GUILayout.Height(30), GUILayout.Width(80));
+                        }
+                        GUILayout.EndHorizontal();
+                    }
+
+                    Settings.enableTerrainClearance =
+                            GUILayout.Toggle(Settings.enableTerrainClearance, "Terrain Clearance", toggleStyle);
+                    if (Settings.enableTerrainClearance)
+                    {
+                        GUILayout.BeginHorizontal();
+                        {
+                            GUILayout.Label("Gear Alt");
+                            GUILayout.FlexibleSpace();
+                            tooLowGearAltitudeString =
+                                    GUILayout.TextField(tooLowGearAltitudeString, GUILayout.Height(30), GUILayout.Width(80));
+                        }
+                        GUILayout.EndHorizontal();
+                    }
+
+                    Settings.enableAltitudeCallouts =
+                            GUILayout.Toggle(Settings.enableAltitudeCallouts, "Altitude Callouts", toggleStyle);
+
+                    Settings.enableBankAngle =
+                            GUILayout.Toggle(Settings.enableBankAngle, "Bank Angle", toggleStyle);
+                }
+            }
+            GUILayout.EndVertical();
         }
 
         public void OnDestory()
