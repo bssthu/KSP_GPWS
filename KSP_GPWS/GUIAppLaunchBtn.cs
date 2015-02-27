@@ -37,17 +37,21 @@ namespace KSP_GPWS
                         () => { },
                         ApplicationLauncher.AppScenes.FLIGHT,
                         (Texture)GameDatabase.Instance.GetTexture("GPWS/gpws", false));
+                if (Settings.guiIsActive)
+                {
+                    appBtn.SetTrue(false);
+                }
             }
         }
 
         private void onAppLaunchToggleOn()
         {
-            SettingGUI.isActive = true;
+            Settings.guiIsActive = true;
         }
 
         private void onAppLaunchToggleOff()
         {
-            SettingGUI.isActive = false;
+            Settings.guiIsActive = false;
         }
 
         public void onGUIAppLauncherDestoryd()

@@ -50,15 +50,22 @@ namespace KSP_GPWS
 
         #endregion
 
-        #region in_memory
+        #region in_xml_file
 
-        public static Rect guiwindowPosition = new Rect(100, 100, 800, 50);
-        public static bool showConfig = true;
+        public static Rect guiwindowPosition = new Rect(100, 100, 100, 50);
+        public static bool showConfigs = true;  // show lower part of the setting GUI
+        public static bool guiIsActive = false;
 
         #endregion
 
 
         public static void LoadSettings()
+        {
+            loadFromCFG();
+            loadFromXML();
+        }
+
+        private static void loadFromCFG()
         {
             foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("GPWS_SETTINGS"))
             {
@@ -135,7 +142,22 @@ namespace KSP_GPWS
             }
         }
 
+        private static void loadFromXML()
+        {
+            KSP.IO.PluginConfiguration config = KSP.IO.PluginConfiguration.CreateForType<SettingGUI>(); // why use template T?
+            config.load();
+            guiwindowPosition = config.GetValue<Rect>("guiwindowPosition", guiwindowPosition);
+            showConfigs = config.GetValue<bool>("showConfig", showConfigs);
+            guiIsActive = config.GetValue<bool>("guiIsActive", guiIsActive);
+        }
+
         public static void SaveSettings()
+        {
+            saveToCFG();
+            saveToXML();
+        }
+
+        private static void saveToCFG()
         {
             ConfigNode config = new ConfigNode();
             ConfigNode gpwsNode = new ConfigNode();
@@ -159,6 +181,15 @@ namespace KSP_GPWS
 
             config.AddNode(gpwsNode);
             config.Save(KSPUtil.ApplicationRootPath + "GameData/GPWS/settings.cfg", "GPWS");
+        }
+
+        public static void saveToXML()
+        {
+            KSP.IO.PluginConfiguration config = KSP.IO.PluginConfiguration.CreateForType<SettingGUI>();
+            config.SetValue("guiwindowPosition", guiwindowPosition);
+            config.SetValue("showConfig", showConfigs);
+            config.SetValue("guiIsActive", guiIsActive);
+            config.save();
         }
     }
 }

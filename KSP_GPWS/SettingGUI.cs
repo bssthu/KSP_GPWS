@@ -13,13 +13,11 @@ namespace KSP_GPWS
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     class SettingGUI : MonoBehaviour
     {
-        public static Rect guiwindowPosition;
-        public static bool isActive = false;
         private bool isHideUI = false;
 
         private String descentRateFactorString;
         private String tooLowGearAltitudeString;
-        private bool showConfig;
+        private bool showConfigs;
 
         public void Awake()
         {
@@ -27,17 +25,17 @@ namespace KSP_GPWS
             GameEvents.onHideUI.Add(HideUI);
             descentRateFactorString = Settings.descentRateFactor.ToString();
             tooLowGearAltitudeString = Settings.tooLowGearAltitude.ToString();
-            showConfig = Settings.showConfig;
+            showConfigs = Settings.showConfigs;
         }
 
         public static void toggleSettingGUI()
         {
-            isActive = !isActive;
-            if (!isActive)
+            Settings.guiIsActive = !Settings.guiIsActive;
+            if (!Settings.guiIsActive)
             {
                 if (!Settings.useBlizzy78Toolbar && GUIAppLaunchBtn.appBtn != null)
                 {
-                    GUIAppLaunchBtn.appBtn.SetFalse();
+                    GUIAppLaunchBtn.appBtn.SetFalse(false);
                 }
             }
         }
@@ -54,18 +52,18 @@ namespace KSP_GPWS
 
         public void OnGUI()
         {
-            if (isActive && !isHideUI)
+            if (Settings.guiIsActive && !isHideUI)
             {
                 GUI.skin = HighLogic.Skin;
-                // resize
-                if (Settings.showConfig != showConfig)
+                // on showConfigs changed: resize window
+                if (Settings.showConfigs != showConfigs)
                 {
-                    guiwindowPosition.height = 50;
-                    Settings.showConfig = showConfig;
+                    Settings.guiwindowPosition.height = 50;
+                    Settings.showConfigs = showConfigs;
                 }
                 // draw
-                guiwindowPosition = GUILayout.Window("GPWSSetting".GetHashCode(), guiwindowPosition, SettingWindowFunc,
-                        "GPWS Setting", GUILayout.ExpandHeight(true));
+                Settings.guiwindowPosition = GUILayout.Window("GPWSSetting".GetHashCode(), Settings.guiwindowPosition,
+                        SettingWindowFunc, "GPWS Setting", GUILayout.ExpandHeight(true));
             }
         }
 
@@ -121,10 +119,10 @@ namespace KSP_GPWS
         {
             GUILayout.BeginVertical();
             {
-                showConfig = GUILayout.Toggle(
-                        showConfig, "select function", buttonStyle, GUILayout.Width(200), GUILayout.Height(20));
+                showConfigs = GUILayout.Toggle(
+                        showConfigs, "select function", buttonStyle, GUILayout.Width(200), GUILayout.Height(20));
 
-                if (showConfig)
+                if (showConfigs)
                 {
                     Settings.enableSystem =
                             GUILayout.Toggle(Settings.enableSystem, "System", toggleStyle);
@@ -161,32 +159,22 @@ namespace KSP_GPWS
                     Settings.enableBankAngle =
                             GUILayout.Toggle(Settings.enableBankAngle, "Bank Angle", toggleStyle);
 
-                    // ok cancel
-                    GUILayout.BeginHorizontal();
+                    // save
+                    if (GUILayout.Button("Save", buttonStyle, GUILayout.Width(200), GUILayout.Height(30)))
                     {
-                        if (GUILayout.Button("Save", buttonStyle, GUILayout.Width(80), GUILayout.Height(30)))
+                        float newDescentRateFactor;
+                        if (float.TryParse(descentRateFactorString, out newDescentRateFactor))
                         {
-                            float newDescentRateFactor;
-                            if (float.TryParse(descentRateFactorString, out newDescentRateFactor))
-                            {
-                                Settings.descentRateFactor = newDescentRateFactor;
-                            }
-                            float newTooLowGearAltitude;
-                            if (float.TryParse(tooLowGearAltitudeString, out newTooLowGearAltitude))
-                            {
-                                Settings.tooLowGearAltitude = newTooLowGearAltitude;
-                            }
-                            // save
-                            Settings.SaveSettings();
-                            toggleSettingGUI();
+                            Settings.descentRateFactor = newDescentRateFactor;
                         }
-                        GUILayout.FlexibleSpace();
-                        if (GUILayout.Button("Cancel", buttonStyle, GUILayout.Width(80), GUILayout.Height(30)))
+                        float newTooLowGearAltitude;
+                        if (float.TryParse(tooLowGearAltitudeString, out newTooLowGearAltitude))
                         {
-                            toggleSettingGUI();
+                            Settings.tooLowGearAltitude = newTooLowGearAltitude;
                         }
+                        // save
+                        Settings.SaveSettings();
                     }
-                    GUILayout.EndHorizontal();
                 }
             }
             GUILayout.EndVertical();
@@ -196,7 +184,7 @@ namespace KSP_GPWS
         {
             GameEvents.onShowUI.Remove(ShowUI);
             GameEvents.onHideUI.Remove(HideUI);
-            isActive = false;
+            Settings.saveToXML();
         }
     }
 }
