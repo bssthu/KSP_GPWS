@@ -28,16 +28,22 @@ namespace KSP_GPWS
             showConfigs = Settings.showConfigs;
         }
 
-        public static void toggleSettingGUI()
+        public static void toggleSettingGUI(bool active)
         {
-            Settings.guiIsActive = !Settings.guiIsActive;
-            if (!Settings.guiIsActive)
+            Settings.guiIsActive = active;
+            if (!active)
             {
                 if (!Settings.useBlizzy78Toolbar && GUIAppLaunchBtn.appBtn != null)
                 {
                     GUIAppLaunchBtn.appBtn.SetFalse(false);
                 }
             }
+            Settings.saveToXML();
+        }
+
+        public static void toggleSettingGUI()
+        {
+            toggleSettingGUI(!Settings.guiIsActive);
         }
 
         public void HideUI()
@@ -55,10 +61,11 @@ namespace KSP_GPWS
             if (Settings.guiIsActive && !isHideUI)
             {
                 GUI.skin = HighLogic.Skin;
-                // on showConfigs changed: resize window
+                // on showConfigs changed: resize window, etc
                 if (Settings.showConfigs != showConfigs)
                 {
                     Settings.guiwindowPosition.height = 50;
+                    Settings.saveToXML();
                     Settings.showConfigs = showConfigs;
                 }
                 // draw

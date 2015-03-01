@@ -46,12 +46,12 @@ namespace KSP_GPWS
 
         private void onAppLaunchToggleOn()
         {
-            Settings.guiIsActive = true;
+            SettingGUI.toggleSettingGUI(true);
         }
 
         private void onAppLaunchToggleOff()
         {
-            Settings.guiIsActive = false;
+            SettingGUI.toggleSettingGUI(false);
         }
 
         public void onGUIAppLauncherDestoryd()
