@@ -108,7 +108,7 @@ namespace KSP_GPWS
                 {
                     text = "<color=white>" + text + "</color>";
                 }
-                else if (text != "NONE")
+                else if (text != "NONE" && text != "ALTITUDE_CALLOUTS")
                 {
                     text = "<color=red>" + text + "</color>";
                 }

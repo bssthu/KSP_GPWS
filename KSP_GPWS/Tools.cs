@@ -40,7 +40,18 @@ namespace KSP_GPWS
             BANK_ANGLE,
             WINDSHEAR,
         };
-        public static KindOfSound kindOfSound = KindOfSound.NONE;    // use meters or feet, feet is recommanded.
+        public static KindOfSound kindOfSound
+        {
+            get
+            {
+                return _kindOfSound;
+            }
+            private set
+            {
+                _kindOfSound = value;
+            }
+        }
+        private static KindOfSound _kindOfSound = KindOfSound.NONE;
 
         public void AudioInitialize()
         {
@@ -60,19 +71,60 @@ namespace KSP_GPWS
             asGPWS.volume = Volume;
         }
 
-        public void PlayOneShot(String filename)
+        public void PlaySound(KindOfSound kind, String detail = "")
         {
             if (Time.time - lastPlayTime < 0.3f)    // check time
             {
                 return;
             }
 
+            switch (kind)
+            {
+                case KindOfSound.SINK_RATE:
+                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.WOOP_WOOP_PULL_UP))
+                    {
+                        PlayOneShot(kind, "sink_rate");
+                    }
+                    break;
+                case KindOfSound.WOOP_WOOP_PULL_UP:
+                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.WOOP_WOOP_PULL_UP))
+                    {
+                        PlayOneShot(kind, "pull_up");
+                    }
+                    break;
+                case KindOfSound.TOO_LOW_GEAR:
+                    if (!IsPlaying(Tools.KindOfSound.TOO_LOW_GEAR)
+                            && !IsPlaying(Tools.KindOfSound.TOO_LOW_TERRAIN)
+                            && !IsPlaying(Tools.KindOfSound.TOO_LOW_FLAPS))
+                    {
+                        PlayOneShot(kind, "too_low_gear");
+                    }
+                    break;
+                case KindOfSound.ALTITUDE_CALLOUTS:
+                    PlayOneShot(kind, "gpws" + detail);
+                    break;
+                case KindOfSound.BANK_ANGLE:
+                    if (!IsPlaying(Tools.KindOfSound.BANK_ANGLE))
+                    {
+                        PlayOneShot(kind, "bank_angle");
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public void PlayOneShot(KindOfSound kind, String filename)
+        {
             if (asGPWS.isPlaying)
             {
                 asGPWS.Stop();
             }
+
             asGPWS.clip = GameDatabase.Instance.GetAudioClip(audioPrefix + "/" + filename);
             asGPWS.Play();
+
+            _kindOfSound = kind;
             lastPlayTime = Time.time;
             Log(String.Format("play " + filename));
         }
@@ -93,6 +145,16 @@ namespace KSP_GPWS
                 return false;
             }
             return true;
+        }
+
+        public static void SetUnavailable()
+        {
+            kindOfSound = KindOfSound.UNAVAILABLE;
+        }
+
+        public static void MarkNotPlaying()
+        {
+            kindOfSound = Tools.KindOfSound.NONE;
         }
 
         public void showScreenMessage(String msg)
