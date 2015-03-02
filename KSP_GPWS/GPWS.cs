@@ -192,7 +192,7 @@ namespace KSP_GPWS
                             }
                         }
                     }
-                    catch (Exception ex) { tools.showScreenMessage(ex.Message); }
+                    catch (Exception) { }
 
                     if (playTooLowGear)
                     {
