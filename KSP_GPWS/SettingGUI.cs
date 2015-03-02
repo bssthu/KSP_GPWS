@@ -65,8 +65,8 @@ namespace KSP_GPWS
                 if (Settings.showConfigs != showConfigs)
                 {
                     Settings.guiwindowPosition.height = 50;
-                    Settings.saveToXML();
                     Settings.showConfigs = showConfigs;
+                    Settings.saveToXML();
                 }
                 // draw
                 Settings.guiwindowPosition = GUILayout.Window("GPWSSetting".GetHashCode(), Settings.guiwindowPosition,
