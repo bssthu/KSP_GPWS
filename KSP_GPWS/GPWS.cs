@@ -13,8 +13,13 @@ namespace KSP_GPWS
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class GPWS : UnityEngine.MonoBehaviour
     {
+        const float M_TO_FT = 3.2808399f;
+
         private float gearHeight = 0.0f;
         private float lastGearHeight = float.PositiveInfinity;
+
+        private float altitude = 0.0f;
+        private float lastAltitude = float.PositiveInfinity;
 
         private Tools tools = new Tools();
 
@@ -26,7 +31,7 @@ namespace KSP_GPWS
         // curves
         private FloatCurve sinkRateCurve = new FloatCurve();    // (alt, vSpeed)
         private FloatCurve pullUpCurve = new FloatCurve();      // (alt, vSpeed)
-        private FloatCurve bankAngleCurve = new FloatCurve();   // (alt, bankAngle)
+        private FloatCurve bankAngleCurve = new FloatCurve();   // (radar alt, bankAngle)
 
         public void Awake()
         {
@@ -35,8 +40,7 @@ namespace KSP_GPWS
             sinkRateCurve.Add(2500, -5000);
             pullUpCurve.Add(50, -1500);
             pullUpCurve.Add(100, -1600);
-            pullUpCurve.Add(2200, -7000);
-            pullUpCurve.Add(2200, -7000);
+            pullUpCurve.Add(2500, -7000);
             bankAngleCurve.Add(5, 10);
             bankAngleCurve.Add(30, 10);
             bankAngleCurve.Add(150, 40);
@@ -54,6 +58,8 @@ namespace KSP_GPWS
                 tools.FindGears(FlightGlobals.ActiveVessel);
             }
 
+            // init
+            lastAltitude = float.PositiveInfinity;
             lastGearHeight = float.PositiveInfinity;
             time0 = Time.time;
             lastTime = time0;
@@ -91,9 +97,17 @@ namespace KSP_GPWS
             }
 
             float gearHeightMeters = tools.GetGearHeightFromGround();
-            float gearHeightFeet = gearHeightMeters * 3.2808399f;
             // height in meters/feet
-            gearHeight = (Settings.UnitOfAltitude.FOOT == Settings.unitOfAltitude) ? gearHeightFeet : gearHeightMeters;
+            if (Settings.UnitOfAltitude.FOOT == Settings.unitOfAltitude)
+            {
+                gearHeight = gearHeightMeters * M_TO_FT;
+                altitude = (float)(FlightGlobals.ship_altitude * M_TO_FT);
+            }
+            else
+            {
+                gearHeight = gearHeightMeters;
+                altitude = (float)FlightGlobals.ship_altitude;
+            }
             if (gearHeight > 0 && gearHeight < float.PositiveInfinity)
             {
                 if (checkMode_1())  // Excessive Decent Rate
@@ -104,6 +118,7 @@ namespace KSP_GPWS
                 { }
             }
             lastGearHeight = gearHeight;    // save last gear height
+            lastAltitude = altitude;
             lastTime = time;        // save time of last frame
 
             if (!tools.IsPlaying())
@@ -122,10 +137,10 @@ namespace KSP_GPWS
         {
             if (Settings.enableDescentRate)
             {
-                // is descending
-                if ((lastGearHeight != float.PositiveInfinity) && (gearHeight - lastGearHeight < 0))
+                // is descending (altitude)
+                if ((altitude < 2500.0f) && (altitude - lastAltitude < 0))
                 {
-                    float vSpeed = Math.Abs((gearHeight - lastGearHeight) / (time - lastTime) * 60.0f);   // ft/min, radar altitude
+                    float vSpeed = Math.Abs((altitude - lastAltitude) / (time - lastTime) * 60.0f);   // ft/min, altitude
                     // pull up
                     float maxVSpeedPullUp = Math.Abs(pullUpCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
                     if (vSpeed > maxVSpeedPullUp)
@@ -212,7 +227,7 @@ namespace KSP_GPWS
             if (Settings.enableAltitudeCallouts)
             {
                 // is descending
-                if ((lastGearHeight != float.PositiveInfinity) && (gearHeight - lastGearHeight < 0))
+                if (gearHeight - lastGearHeight < 0)
                 {
                     // lower than an altitude
                     foreach (float threshold in Settings.altitudeArray)
