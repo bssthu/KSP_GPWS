@@ -31,18 +31,32 @@ namespace KSP_GPWS
         private float lastTime = 0.0f;
 
         // curves
-        private FloatCurve sinkRateCurve = new FloatCurve();    // (alt, vSpeed)
-        private FloatCurve pullUpCurve = new FloatCurve();      // (alt, vSpeed)
-        private FloatCurve bankAngleCurve = new FloatCurve();   // (radar alt, bankAngle)
+        private FloatCurve sinkRateCurve = new FloatCurve();            // (alt, vSpeed)
+        private FloatCurve sinkRatePullUpCurve = new FloatCurve();      // (alt, vSpeed)
+        private FloatCurve terrainCurve = new FloatCurve();             // (radar alt, vSpeed)
+        private FloatCurve terrainPullUpCurve = new FloatCurve();       // (radar alt, vSpeed)
+        private FloatCurve bankAngleCurve = new FloatCurve();           // (radar alt, bankAngle)
+
+        private bool exitClosureToTerrainWarning = false;
 
         public void Awake()
         {
             // init curves, points are not accurate
             sinkRateCurve.Add(50, -1000);
             sinkRateCurve.Add(2500, -5000);
-            pullUpCurve.Add(50, -1500);
-            pullUpCurve.Add(100, -1600);
-            pullUpCurve.Add(2500, -7000);
+            sinkRatePullUpCurve.Add(50, -1500);
+            sinkRatePullUpCurve.Add(100, -1600);
+            sinkRatePullUpCurve.Add(2500, -7000);
+
+            terrainCurve.Add(0, -4000);
+            terrainCurve.Add(1400, -4600);
+            terrainCurve.Add(1900, -7500);
+            terrainCurve.Add(2100, -10000);
+            terrainPullUpCurve.Add(0, -1500);
+            terrainPullUpCurve.Add(1200, -3400);
+            terrainPullUpCurve.Add(1350, -4000);
+            terrainPullUpCurve.Add(1600, -6000);
+
             bankAngleCurve.Add(5, 10);
             bankAngleCurve.Add(30, 10);
             bankAngleCurve.Add(150, 40);
@@ -66,6 +80,7 @@ namespace KSP_GPWS
             isGearDown = false;
             time0 = Time.time;
             lastTime = time0;
+            exitClosureToTerrainWarning = false;
         }
 
         public void Update()
@@ -117,19 +132,21 @@ namespace KSP_GPWS
             {
                 if (checkMode_1())  // Excessive Decent Rate
                 { }
+                else if (checkMode_2())  // Excessive Closure to Terrain
+                { }
                 else if (checkMode_4())  // Unsafe Terrain Clearance
                 { }
                 else if (checkMode_6())  // Advisory Callout
                 { }
+                else if (!tools.IsPlaying())
+                {
+                    Tools.MarkNotPlaying();
+                }
             }
             lastGearHeight = gearHeight;    // save last gear height
             lastAltitude = altitude;
             lastTime = time;        // save time of last frame
 
-            if (!tools.IsPlaying())
-            {
-                Tools.MarkNotPlaying();
-            }
             //tools.showScreenMessage(unitOfAltitude.ToString() + " Time: " + Time.time);
         }
 
@@ -147,11 +164,11 @@ namespace KSP_GPWS
                 {
                     float vSpeed = Math.Abs((altitude - lastAltitude) / (time - lastTime) * 60.0f);   // ft/min, altitude
                     // pull up
-                    float maxVSpeedPullUp = Math.Abs(pullUpCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
+                    float maxVSpeedPullUp = Math.Abs(sinkRatePullUpCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
                     if (vSpeed > maxVSpeedPullUp)
                     {
                         // play sound
-                        tools.PlaySound(Tools.KindOfSound.WOOP_WOOP_PULL_UP);
+                        tools.PlaySound(Tools.KindOfSound.SINK_RATE_PULL_UP);
                         return true;
                     }
                     // sink rate
@@ -162,6 +179,70 @@ namespace KSP_GPWS
                         tools.PlaySound(Tools.KindOfSound.SINK_RATE);
                         return true;
                     }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Excessive Closure to Terrain
+        /// TERRAIN, TERRAIN / PULL UP
+        /// </summary>
+        /// <returns></returns>
+        public bool checkMode_2()
+        {
+            if (Settings.enableClosureToTerrain)
+            {
+                if (!isGearDown)        // Mode A
+                {
+                    // is descending (radar altitude)
+                    if ((altitude < 2200.0f) && (altitude - lastAltitude < 0))
+                    {
+                        // continue playing if terrain clearance continues to decrease
+                        if (!tools.IsPlaying() && !exitClosureToTerrainWarning)
+                        {
+                            if (tools.WasPlaying(Tools.KindOfSound.TERRAIN))
+                            {
+                                Tools.MarkNotPlaying();
+                                tools.PlaySound(Tools.KindOfSound.TERRAIN);
+                            }
+                            else if (tools.WasPlaying(Tools.KindOfSound.TERRAIN_PULL_UP))
+                            {
+                                Tools.MarkNotPlaying();
+                                tools.PlaySound(Tools.KindOfSound.TERRAIN_PULL_UP);
+                            }
+                        }
+                        else
+                        {
+                            // check if should warn
+                            float vSpeed = Math.Abs((gearHeight - lastGearHeight) / (time - lastTime) * 60.0f);   // ft/min, radar altitude
+                            // terrain pull up
+                            float maxVSpeedPullUp = Math.Abs(terrainPullUpCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
+                            if (vSpeed > maxVSpeedPullUp)
+                            {
+                                // play sound
+                                tools.PlaySound(Tools.KindOfSound.TERRAIN_PULL_UP);
+                                exitClosureToTerrainWarning = false;
+                                return true;
+                            }
+                            // terrain, terrain
+                            float maxVSpeedTerrain = Math.Abs(terrainCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
+                            if (vSpeed > maxVSpeedTerrain)
+                            {
+                                // play sound
+                                tools.PlaySound(Tools.KindOfSound.TERRAIN);
+                                exitClosureToTerrainWarning = false;
+                                return true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        exitClosureToTerrainWarning = true;
+                    }
+                }
+                else        // Mode B
+                {
                 }
             }
             return false;

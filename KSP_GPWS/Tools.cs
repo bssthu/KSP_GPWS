@@ -29,8 +29,9 @@ namespace KSP_GPWS
             UNAVAILABLE,
             NONE,
             SINK_RATE,
-            WOOP_WOOP_PULL_UP,
+            SINK_RATE_PULL_UP,
             TERRAIN,
+            TERRAIN_PULL_UP,
             DONT_SINK,
             TOO_LOW_GEAR,
             TOO_LOW_TERRAIN,
@@ -81,15 +82,29 @@ namespace KSP_GPWS
             switch (kind)
             {
                 case KindOfSound.SINK_RATE:
-                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.WOOP_WOOP_PULL_UP))
+                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP))
                     {
                         PlayOneShot(kind, "sink_rate");
                     }
                     break;
-                case KindOfSound.WOOP_WOOP_PULL_UP:
-                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.WOOP_WOOP_PULL_UP))
+                case KindOfSound.SINK_RATE_PULL_UP:
+                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP))
                     {
-                        PlayOneShot(kind, "pull_up");
+                        PlayOneShot(kind, "sink_rate_pull_up");
+                    }
+                    break;
+                case KindOfSound.TERRAIN:
+                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP)
+                        && !IsPlaying(KindOfSound.TERRAIN) && !IsPlaying(KindOfSound.TERRAIN_PULL_UP))
+                    {
+                        PlayOneShot(kind, "terrain");
+                    }
+                    break;
+                case KindOfSound.TERRAIN_PULL_UP:
+                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP)
+                        && !IsPlaying(KindOfSound.TERRAIN) && !IsPlaying(KindOfSound.TERRAIN_PULL_UP))
+                    {
+                        PlayOneShot(kind, "terrain_pull_up");
                     }
                     break;
                 case KindOfSound.TOO_LOW_GEAR:
@@ -114,7 +129,7 @@ namespace KSP_GPWS
             }
         }
 
-        public void PlayOneShot(KindOfSound kind, String filename)
+        private void PlayOneShot(KindOfSound kind, String filename)
         {
             if (asGPWS.isPlaying)
             {
@@ -145,6 +160,11 @@ namespace KSP_GPWS
                 return false;
             }
             return true;
+        }
+
+        public bool WasPlaying(KindOfSound kind)    // was or is playing
+        {
+            return kind == kindOfSound;
         }
 
         public static void SetUnavailable()

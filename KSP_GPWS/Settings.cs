@@ -32,6 +32,7 @@ namespace KSP_GPWS
 
         public static bool enableSystem = true;
         public static bool enableDescentRate = true;
+        public static bool enableClosureToTerrain = true;
         public static bool enableTerrainClearance = true;
         public static bool enableAltitudeCallouts = true;
         public static bool enableBankAngle = false;
@@ -78,6 +79,10 @@ namespace KSP_GPWS
                     if (node.HasValue("enableDescentRate"))
                     {
                         bool.TryParse(node.GetValue("enableDescentRate"), out enableDescentRate);
+                    }
+                    if (node.HasValue("enableClosureToTerrain"))
+                    {
+                        bool.TryParse(node.GetValue("enableClosureToTerrain"), out enableClosureToTerrain);
                     }
                     if (node.HasValue("enableTerrainClearance"))
                     {
@@ -168,6 +173,7 @@ namespace KSP_GPWS
 
             gpwsNode.AddValue("enableSystem", enableSystem);
             gpwsNode.AddValue("enableDescentRate", enableDescentRate);
+            gpwsNode.AddValue("enableClosureToTerrain", enableClosureToTerrain);
             gpwsNode.AddValue("enableTerrainClearance", enableTerrainClearance);
             gpwsNode.AddValue("enableAltitudeCallouts", enableAltitudeCallouts);
             gpwsNode.AddValue("enableBankAngle", enableBankAngle);

@@ -137,6 +137,8 @@ namespace KSP_GPWS
                     // descent rate config
                     Settings.enableDescentRate =
                             GUILayout.Toggle(Settings.enableDescentRate, "Descent Rate", toggleStyle);
+                    Settings.enableClosureToTerrain =
+                            GUILayout.Toggle(Settings.enableClosureToTerrain, "Closure to Terrain", toggleStyle);
                     GUILayout.BeginHorizontal();
                     {
                         GUILayout.Label("Descent Rate *");
