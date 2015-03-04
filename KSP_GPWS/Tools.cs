@@ -208,6 +208,38 @@ namespace KSP_GPWS
             return lowestGearPart;
         }
 
+        public static bool GearIsDown(Part gear)
+        {
+            if (gear != null)
+            {
+                // ModuleLandingGear
+                try
+                {
+                    if (gear.Modules.Contains("ModuleLandingGear") &&
+                            gear.Modules["ModuleLandingGear"].Events["LowerLandingGear"].active)
+                    {
+                        return false;  // not down
+                    }
+                }
+                catch (Exception) { }
+
+                // FSwheel
+                try
+                {
+                    if (gear.Modules.Contains("FSwheel"))
+                    {
+                        PartModule m = gear.Modules["FSwheel"];
+                        if (m.GetType().GetField("deploymentState").GetValue(m).ToString() != "Deployed")
+                        {
+                            return false;  // not down
+                        }
+                    }
+                }
+                catch (Exception) { }
+            }
+            return true;
+        }
+
         /// <summary>
         /// return height from surface to the lowest landing gear, in meters
         /// </summary>

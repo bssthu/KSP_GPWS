@@ -15,13 +15,15 @@ namespace KSP_GPWS
     {
         const float M_TO_FT = 3.2808399f;
 
+        private Tools tools = new Tools();
+
         private float gearHeight = 0.0f;
         private float lastGearHeight = float.PositiveInfinity;
 
         private float altitude = 0.0f;
         private float lastAltitude = float.PositiveInfinity;
 
-        private Tools tools = new Tools();
+        private bool isGearDown = false;
 
         private float time0 = 0.0f;
         // time since scene loaded
@@ -61,6 +63,7 @@ namespace KSP_GPWS
             // init
             lastAltitude = float.PositiveInfinity;
             lastGearHeight = float.PositiveInfinity;
+            isGearDown = false;
             time0 = Time.time;
             lastTime = time0;
         }
@@ -95,6 +98,8 @@ namespace KSP_GPWS
                 Tools.SetUnavailable();
                 return;
             }
+
+            isGearDown = Tools.GearIsDown(tools.GetLowestGear());
 
             float gearHeightMeters = tools.GetGearHeightFromGround();
             // height in meters/feet
@@ -171,46 +176,11 @@ namespace KSP_GPWS
         {
             if (Settings.enableTerrainClearance)
             {
-                Part lowestGear = tools.GetLowestGear();
-                if (lowestGear != null && gearHeight < Settings.tooLowGearAltitude)
+                if (!isGearDown && gearHeight < Settings.tooLowGearAltitude)
                 {
-                    bool playTooLowGear = false;
-                    // ModuleLandingGear
-                    try
-                    {
-                        if (lowestGear.Modules.Contains("ModuleLandingGear") &&
-                                lowestGear.Modules["ModuleLandingGear"].Events["LowerLandingGear"].active)
-                        {
-                            playTooLowGear = true;  // not down
-                        }
-                    }
-                    catch (Exception) { }
-
-                    // FSwheel
-                    try
-                    {
-                        if (lowestGear.Modules.Contains("FSwheel"))
-                        {
-                            PartModule m = lowestGear.Modules["FSwheel"];
-                            if (m.GetType().GetField("deploymentState").GetValue(m).ToString() != "Deployed")
-                            {
-                                playTooLowGear = true;  // not down
-                            }
-                        }
-                    }
-                    catch (Exception) { }
-
-                    if (playTooLowGear)
-                    {
-                        // play sound
-                        if (!tools.IsPlaying(Tools.KindOfSound.TOO_LOW_GEAR)
-                                && !tools.IsPlaying(Tools.KindOfSound.TOO_LOW_TERRAIN)
-                                && !tools.IsPlaying(Tools.KindOfSound.TOO_LOW_FLAPS))
-                        {
-                            tools.PlaySound(Tools.KindOfSound.TOO_LOW_GEAR);
-                        }
-                        return true;
-                    }
+                    // play sound
+                    tools.PlaySound(Tools.KindOfSound.TOO_LOW_GEAR);
+                    return true;
                 }
             }
             return false;
