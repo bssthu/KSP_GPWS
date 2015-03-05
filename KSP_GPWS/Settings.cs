@@ -38,6 +38,7 @@ namespace KSP_GPWS
         public static bool enableTerrainClearance = true;
         public static bool enableAltitudeCallouts = true;
         public static bool enableBankAngle = false;
+        public static bool enableTraffic = true;
 
         public static float descentRateFactor = 1.0f;
         public static float tooLowGearAltitude = 500.0f;
@@ -105,6 +106,10 @@ namespace KSP_GPWS
                     if (node.HasValue("enableBankAngle"))
                     {
                         bool.TryParse(node.GetValue("enableBankAngle"), out enableBankAngle);
+                    }
+                    if (node.HasValue("enableTraffic"))
+                    {
+                        bool.TryParse(node.GetValue("enableTraffic"), out enableTraffic);
                     }
 
                     if (node.HasValue("descentRateFactor"))
@@ -198,6 +203,7 @@ namespace KSP_GPWS
             gpwsNode.AddValue("enableTerrainClearance", enableTerrainClearance);
             gpwsNode.AddValue("enableAltitudeCallouts", enableAltitudeCallouts);
             gpwsNode.AddValue("enableBankAngle", enableBankAngle);
+            gpwsNode.AddValue("enableTraffic", enableTraffic);
 
             gpwsNode.AddValue("descentRateFactor", descentRateFactor);
             gpwsNode.AddValue("tooLowGearAltitude", tooLowGearAltitude);

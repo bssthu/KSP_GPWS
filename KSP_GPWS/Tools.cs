@@ -40,6 +40,7 @@ namespace KSP_GPWS
             ALTITUDE_CALLOUTS,
             BANK_ANGLE,
             WINDSHEAR,
+            TRAFFIC
         };
         public static KindOfSound kindOfSound
         {
@@ -129,6 +130,12 @@ namespace KSP_GPWS
                             && !IsPlaying(Tools.KindOfSound.TOO_LOW_FLAPS))
                     {
                         PlayOneShot(kind, "too_low_terrain");
+                    }
+                    break;
+                case KindOfSound.TRAFFIC:
+                    if (!IsPlaying(Tools.KindOfSound.TRAFFIC))
+                    {
+                        PlayOneShot(kind, "traffic");
                     }
                     break;
                 case KindOfSound.ALTITUDE_CALLOUTS:

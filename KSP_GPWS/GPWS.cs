@@ -175,6 +175,8 @@ namespace KSP_GPWS
                 { }
                 else if (checkMode_4())  // Unsafe Terrain Clearance
                 { }
+                else if (checkMode_Traffic())  // Traffic
+                { }
                 else if (checkMode_6())  // Advisory Callout
                 { }
                 else if (!tools.IsPlaying())
@@ -420,6 +422,36 @@ namespace KSP_GPWS
                             tools.PlaySound(Tools.KindOfSound.BANK_ANGLE);
                         }
                         return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public bool checkMode_Traffic()
+        {
+            Vessel activeVessel = FlightGlobals.ActiveVessel;
+            for (int i = 0; i < FlightGlobals.Vessels.Count; i++)
+            {
+                Vessel vessel = FlightGlobals.Vessels[i];
+                if (!vessel.isActiveVessel && !(vessel.Landed || vessel.Splashed) && vessel.mainBody == activeVessel.mainBody)
+                {
+                    float distance = (float)(vessel.GetWorldPos3D() - activeVessel.GetWorldPos3D()).magnitude;
+                    if (distance < 3889.2)  // 2.1NM
+                    {
+                        if (Math.Abs(vessel.altitude - activeVessel.altitude) < 600 / M_TO_FT)
+                        {
+                            tools.PlaySound(Tools.KindOfSound.TRAFFIC);
+                            return true;
+                        }
+                    }
+                    else if (distance < 6111.6)  // 3.3NM
+                    {
+                        if (Math.Abs(vessel.altitude - activeVessel.altitude) < 850 / M_TO_FT)
+                        {
+                            tools.PlaySound(Tools.KindOfSound.TRAFFIC);
+                            return true;
+                        }
                     }
                 }
             }

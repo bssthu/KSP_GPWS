@@ -174,6 +174,10 @@ namespace KSP_GPWS
                             GUILayout.Toggle(Settings.enableAltitudeCallouts, "Altitude Callouts", toggleStyle);
 
                     // bank angle
+                    Settings.enableTraffic =
+                            GUILayout.Toggle(Settings.enableTraffic, "Traffic", toggleStyle);
+
+                    // traffic
                     Settings.enableBankAngle =
                             GUILayout.Toggle(Settings.enableBankAngle, "Bank Angle", toggleStyle);
 
