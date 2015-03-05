@@ -95,6 +95,7 @@ namespace KSP_GPWS
             boxStyle.margin = new RectOffset(4, 4, 4, 4);
             boxStyle.richText = true;
 
+
             // begin drawing
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
@@ -133,6 +134,10 @@ namespace KSP_GPWS
                 {
                     Settings.enableSystem =
                             GUILayout.Toggle(Settings.enableSystem, "System", toggleStyle);
+
+                    // volume
+                    GUILayout.Label(String.Format("Volume: {0}%", Math.Round(Settings.volume * 100.0f)));
+                    Settings.volume = GUILayout.HorizontalSlider(Settings.volume, 0.0f, 1.0f);
 
                     // descent rate config
                     Settings.enableDescentRate =

@@ -68,7 +68,7 @@ namespace KSP_GPWS
 
         public void UpdateVolume()
         {
-            Volume = GameSettings.VOICE_VOLUME;
+            Volume = GameSettings.VOICE_VOLUME * Settings.volume;
             asGPWS.volume = Volume;
         }
 

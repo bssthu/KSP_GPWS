@@ -86,28 +86,22 @@ namespace KSP_GPWS
             exitClosureToTerrainWarning = false;
         }
 
-        public void Update()
+        private bool preUpdate()
         {
-            // check volume
-            if (tools.Volume != GameSettings.VOICE_VOLUME)
-            {
-                tools.UpdateVolume();
-            }
-
             time = Time.time - t0;
             // check time
             if (time < 2.0f)
             {
                 Tools.SetUnavailable();
                 saveData();
-                return;
+                return false;
             }
 
             // check gear
             if (tools.gearList.Count <= 0)
             {
                 Tools.SetUnavailable();
-                return;
+                return false;
             }
 
             // check atmosphere
@@ -115,7 +109,7 @@ namespace KSP_GPWS
                     FlightGlobals.ship_altitude > FlightGlobals.getMainBody().maxAtmosphereAltitude)
             {
                 Tools.SetUnavailable();
-                return;
+                return false;
             }
 
             // on surface
@@ -124,12 +118,28 @@ namespace KSP_GPWS
                 takeOffTime = time;
                 saveData();
                 Tools.MarkNotPlaying();
+                return false;
+            }
+
+            return true;
+        }
+
+        public void Update()
+        {
+            if (!preUpdate())
+            {
                 return;
             }
 
-            isGearDown = Tools.GearIsDown(tools.GetLowestGear());
+            // check volume
+            if (tools.Volume != GameSettings.VOICE_VOLUME * Settings.volume)
+            {
+                tools.UpdateVolume();
+            }
 
+            isGearDown = Tools.GearIsDown(tools.GetLowestGear());
             float gearHeightMeters = tools.GetGearHeightFromGround();
+
             // height in meters/feet
             if (Settings.UnitOfAltitude.FOOT == Settings.unitOfAltitude)
             {

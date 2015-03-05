@@ -31,6 +31,7 @@ namespace KSP_GPWS
         #region from_file
 
         public static bool enableSystem = true;
+        public static float volume = 0.5f;
         public static bool enableDescentRate = true;
         public static bool enableClosureToTerrain = true;
         public static bool enableTerrainClearance = true;
@@ -75,6 +76,10 @@ namespace KSP_GPWS
                     if (node.HasValue("enableSystem"))
                     {
                         bool.TryParse(node.GetValue("enableSystem"), out enableSystem);
+                    }
+                    if (node.HasValue("volume"))
+                    {
+                        float.TryParse(node.GetValue("volume"), out volume);
                     }
                     if (node.HasValue("enableDescentRate"))
                     {
@@ -145,6 +150,15 @@ namespace KSP_GPWS
                     }
                 }   // End of has value "name"
             }
+            // check legality
+            if (volume < 0.0f)
+            {
+                volume = 0.0f;
+            }
+            if (volume > 1.0f)
+            {
+                volume = 1.0f;
+            }
         }
 
         private static void loadFromXML()
@@ -172,6 +186,7 @@ namespace KSP_GPWS
             gpwsNode.AddValue("name", "gpwsSettings");
 
             gpwsNode.AddValue("enableSystem", enableSystem);
+            gpwsNode.AddValue("volume", volume);
             gpwsNode.AddValue("enableDescentRate", enableDescentRate);
             gpwsNode.AddValue("enableClosureToTerrain", enableClosureToTerrain);
             gpwsNode.AddValue("enableTerrainClearance", enableTerrainClearance);
