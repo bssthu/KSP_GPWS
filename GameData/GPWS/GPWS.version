@@ -1,0 +1,36 @@
+{
+    "NAME":"GPWS",
+    "URL":"https://raw.githubusercontent.com/bssthu/KSP_GPWS/master/GameData/GPWS/GPWS.version",
+    "DOWNLOAD":"https://github.com/bssthu/KSP_GPWS/releases",
+    "GITHUB":
+    {
+        "USERNAME":"bssthu",
+        "REPOSITORY":"GPWS",
+        "ALLOW_PRE_RELEASE":true,
+    },
+    "VERSION":
+    {
+        "MAJOR":0,
+        "MINOR":2,
+        "PATCH":1,
+        "BUILD":0
+    },
+    "KSP_VERSION":
+    {
+        "MAJOR":0,
+        "MINOR":90,
+        "PATCH":0
+    },
+    "KSP_VERSION_MIN":
+    {
+        "MAJOR":0,
+        "MINOR":90,
+        "PATCH":0
+    },
+    "KSP_VERSION_MAX":
+    {
+        "MAJOR":0,
+        "MINOR":90,
+        "PATCH":0
+    }
+} 
