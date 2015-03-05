@@ -17,6 +17,8 @@ namespace KSP_GPWS
 
         private Tools tools = new Tools();
 
+        private Vessel activeVessel = FlightGlobals.ActiveVessel;
+
         private float gearHeight = 0.0f;
         private float lastGearHeight = float.PositiveInfinity;
 
@@ -83,9 +85,10 @@ namespace KSP_GPWS
             tools.AudioInitialize();
 
             GameEvents.onVesselChange.Add(tools.FindGears);
-            if (FlightGlobals.ActiveVessel != null)
+            activeVessel = FlightGlobals.ActiveVessel;
+            if (activeVessel != null)
             {
-                tools.FindGears(FlightGlobals.ActiveVessel);
+                tools.FindGears(activeVessel);
             }
 
             // init
@@ -102,10 +105,24 @@ namespace KSP_GPWS
         private bool preUpdate()
         {
             time = Time.time - t0;
-            // check time
+            // check time, prevent problem
             if (time < 2.0f)
             {
                 Tools.SetUnavailable();
+                saveData();
+                return false;
+            }
+            if (time - takeOffTime < 0.5f)
+            {
+                Tools.MarkNotPlaying();
+                saveData();
+                return false;
+            }
+
+            // just switched
+            if (FlightGlobals.ActiveVessel != activeVessel)
+            {
+                Tools.MarkNotPlaying();
                 saveData();
                 return false;
             }
@@ -126,7 +143,7 @@ namespace KSP_GPWS
             }
 
             // on surface
-            if (FlightGlobals.ActiveVessel.Landed || FlightGlobals.ActiveVessel.Splashed)
+            if (activeVessel.Landed || activeVessel.Splashed)
             {
                 takeOffTime = time;
                 heightJustTakeoff = 0.0f;
@@ -134,6 +151,7 @@ namespace KSP_GPWS
                 Tools.MarkNotPlaying();
                 return false;
             }
+            
 
             return true;
         }
@@ -195,6 +213,7 @@ namespace KSP_GPWS
             lastGearHeight = gearHeight;    // save last gear height
             lastAltitude = altitude;
             lastTime = time;        // save time of last frame
+            activeVessel = FlightGlobals.ActiveVessel;
         }
 
         /// <summary>
@@ -397,16 +416,14 @@ namespace KSP_GPWS
             // Bank Angle Callout
             if (Settings.enableBankAngle)
             {
-                Vessel vessel = FlightGlobals.ActiveVessel;
-
-                // https://github.com/Crzyrndm/Pilot-Assistant/blob/ebd426fe1a9a0fc75a674e5a45d69b1c6c66a438/PilotAssistant/Utility/FlightData.cs
+                // bank angle from https://github.com/Crzyrndm/Pilot-Assistant/blob/ebd426fe1a9a0fc75a674e5a45d69b1c6c66a438/PilotAssistant/Utility/FlightData.cs
                 // surface vectors
-                Vector3d planetUp = (vessel.findWorldCenterOfMass() - vessel.mainBody.position).normalized;
+                Vector3d planetUp = (activeVessel.findWorldCenterOfMass() - activeVessel.mainBody.position).normalized;
                 // Vessel forward and right vetors, parallel to the surface
-                Vector3d surfVesRight = Vector3d.Cross(planetUp, vessel.ReferenceTransform.up).normalized;
+                Vector3d surfVesRight = Vector3d.Cross(planetUp, activeVessel.ReferenceTransform.up).normalized;
                 // roll
-                double roll = Vector3d.Angle(surfVesRight, vessel.ReferenceTransform.right)
-                        * Math.Sign(Vector3d.Dot(surfVesRight, vessel.ReferenceTransform.forward));
+                double roll = Vector3d.Angle(surfVesRight, activeVessel.ReferenceTransform.right)
+                        * Math.Sign(Vector3d.Dot(surfVesRight, activeVessel.ReferenceTransform.forward));
 
                 float bankAngle = (float)Math.Abs(roll);
 
@@ -432,7 +449,6 @@ namespace KSP_GPWS
         {
             if (Settings.enableTraffic)
             {
-                Vessel activeVessel = FlightGlobals.ActiveVessel;
                 for (int i = 0; i < FlightGlobals.Vessels.Count; i++)
                 {
                     Vessel vessel = FlightGlobals.Vessels[i];
