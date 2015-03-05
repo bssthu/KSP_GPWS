@@ -37,6 +37,8 @@ namespace KSP_GPWS
         private FloatCurve sinkRatePullUpCurve = new FloatCurve();      // (alt, vSpeed)
         private FloatCurve terrainCurve = new FloatCurve();             // (radar alt, vSpeed)
         private FloatCurve terrainPullUpCurve = new FloatCurve();       // (radar alt, vSpeed)
+        private FloatCurve terrainBCurve = new FloatCurve();             // (radar alt, vSpeed)
+        private FloatCurve terrainPullUpBCurve = new FloatCurve();       // (radar alt, vSpeed)
         private FloatCurve bankAngleCurve = new FloatCurve();           // (radar alt, bankAngle)
 
         private bool exitClosureToTerrainWarning = false;
@@ -58,6 +60,10 @@ namespace KSP_GPWS
             terrainPullUpCurve.Add(1200, -3400);
             terrainPullUpCurve.Add(1350, -4000);
             terrainPullUpCurve.Add(1600, -6000);
+            terrainBCurve.Add(0, -2000);
+            terrainBCurve.Add(800, -2900);
+            terrainPullUpBCurve.Add(0, -2400);
+            terrainPullUpBCurve.Add(750, -3100);
 
             bankAngleCurve.Add(5, 10);
             bankAngleCurve.Add(30, 10);
@@ -222,7 +228,32 @@ namespace KSP_GPWS
         {
             if (Settings.enableClosureToTerrain)
             {
-                if (!isGearDown)        // Mode A
+                if (isGearDown || (time - takeOffTime > 30))        // Mode B
+                {
+                    // is descending (radar altitude)
+                    if ((altitude < 800.0f) && (altitude - lastAltitude < 0))
+                    {
+                        // check if should warn
+                        float vSpeed = Math.Abs((gearHeight - lastGearHeight) / (time - lastTime) * 60.0f);   // ft/min, radar altitude
+                        // terrain pull up
+                        float maxVSpeedPullUp = Math.Abs(terrainPullUpBCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
+                        if (vSpeed > maxVSpeedPullUp)
+                        {
+                            // play sound
+                            tools.PlaySound(Tools.KindOfSound.TERRAIN_PULL_UP);
+                            return true;
+                        }
+                        // terrain, terrain
+                        float maxVSpeedTerrain = Math.Abs(terrainBCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
+                        if (vSpeed > maxVSpeedTerrain)
+                        {
+                            // play sound
+                            tools.PlaySound(Tools.KindOfSound.TERRAIN);
+                            return true;
+                        }
+                    }
+                }
+                else        // Mode A
                 {
                     // is descending (radar altitude)
                     if ((altitude < 2200.0f) && (altitude - lastAltitude < 0))
@@ -264,9 +295,6 @@ namespace KSP_GPWS
                     {
                         exitClosureToTerrainWarning = true;
                     }
-                }
-                else        // Mode B
-                {
                 }
             }
             return false;
