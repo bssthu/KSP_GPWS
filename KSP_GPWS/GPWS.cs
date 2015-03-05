@@ -198,44 +198,39 @@ namespace KSP_GPWS
                     // is descending (radar altitude)
                     if ((altitude < 2200.0f) && (altitude - lastAltitude < 0))
                     {
-                        // continue playing if terrain clearance continues to decrease
+                        // check if should warn
+                        float vSpeed = Math.Abs((gearHeight - lastGearHeight) / (time - lastTime) * 60.0f);   // ft/min, radar altitude
+                        // terrain pull up
+                        float maxVSpeedPullUp = Math.Abs(terrainPullUpCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
+                        if (vSpeed > maxVSpeedPullUp)
+                        {
+                            // play sound
+                            tools.PlaySound(Tools.KindOfSound.TERRAIN_PULL_UP);
+                            exitClosureToTerrainWarning = false;
+                            return true;
+                        }
+                        // terrain, terrain
+                        float maxVSpeedTerrain = Math.Abs(terrainCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
+                        if (vSpeed > maxVSpeedTerrain)
+                        {
+                            // play sound
+                            tools.PlaySound(Tools.KindOfSound.TERRAIN);
+                            exitClosureToTerrainWarning = false;
+                            return true;
+                        }
+                        // continue warning if terrain clearance continues to decrease
                         if (!tools.IsPlaying() && !exitClosureToTerrainWarning)
                         {
                             if (tools.WasPlaying(Tools.KindOfSound.TERRAIN))
                             {
-                                Tools.MarkNotPlaying();
-                                tools.PlaySound(Tools.KindOfSound.TERRAIN);
+                                tools.PlaySound(Tools.KindOfSound.TERRAIN, "silence");
                             }
                             else if (tools.WasPlaying(Tools.KindOfSound.TERRAIN_PULL_UP))
                             {
-                                Tools.MarkNotPlaying();
-                                tools.PlaySound(Tools.KindOfSound.TERRAIN_PULL_UP);
+                                tools.PlaySound(Tools.KindOfSound.TERRAIN_PULL_UP, "silence");
                             }
                         }
-                        else
-                        {
-                            // check if should warn
-                            float vSpeed = Math.Abs((gearHeight - lastGearHeight) / (time - lastTime) * 60.0f);   // ft/min, radar altitude
-                            // terrain pull up
-                            float maxVSpeedPullUp = Math.Abs(terrainPullUpCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
-                            if (vSpeed > maxVSpeedPullUp)
-                            {
-                                // play sound
-                                tools.PlaySound(Tools.KindOfSound.TERRAIN_PULL_UP);
-                                exitClosureToTerrainWarning = false;
-                                return true;
-                            }
-                            // terrain, terrain
-                            float maxVSpeedTerrain = Math.Abs(terrainCurve.Evaluate(gearHeight)) * Settings.descentRateFactor;
-                            if (vSpeed > maxVSpeedTerrain)
-                            {
-                                // play sound
-                                tools.PlaySound(Tools.KindOfSound.TERRAIN);
-                                exitClosureToTerrainWarning = false;
-                                return true;
-                            }
-                        }
-                    }
+                    }   // End of if is descending (RA)
                     else
                     {
                         exitClosureToTerrainWarning = true;
