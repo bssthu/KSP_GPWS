@@ -160,7 +160,7 @@ namespace KSP_GPWS
             if (Settings.enableDescentRate)
             {
                 // is descending (altitude)
-                if ((altitude < 2500.0f) && (altitude - lastAltitude < 0))
+                if ((altitude < 30000.0f) && (altitude - lastAltitude < 0))
                 {
                     float vSpeed = Math.Abs((altitude - lastAltitude) / (time - lastTime) * 60.0f);   // ft/min, altitude
                     // pull up
