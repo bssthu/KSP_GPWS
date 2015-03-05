@@ -25,9 +25,11 @@ namespace KSP_GPWS
 
         private bool isGearDown = false;
 
-        private float time0 = 0.0f;
+        private float t0 = 0.0f;
         // time since scene loaded
         private float time = 0.0f;
+        // time of takeoff
+        private float takeOffTime = float.NegativeInfinity;
         private float lastTime = 0.0f;
 
         // curves
@@ -78,8 +80,9 @@ namespace KSP_GPWS
             lastAltitude = float.PositiveInfinity;
             lastGearHeight = float.PositiveInfinity;
             isGearDown = false;
-            time0 = Time.time;
-            lastTime = time0;
+            t0 = Time.time;
+            takeOffTime = float.NegativeInfinity;
+            lastTime = t0;
             exitClosureToTerrainWarning = false;
         }
 
@@ -91,9 +94,9 @@ namespace KSP_GPWS
                 tools.UpdateVolume();
             }
 
-            time = Time.time - time0;
+            time = Time.time - t0;
             // check time
-            if (time < 3.0f)
+            if (time < 2.0f)
             {
                 Tools.SetUnavailable();
                 return;
@@ -111,6 +114,13 @@ namespace KSP_GPWS
                     FlightGlobals.ship_altitude > FlightGlobals.getMainBody().maxAtmosphereAltitude)
             {
                 Tools.SetUnavailable();
+                return;
+            }
+
+            // on surface
+            if (FlightGlobals.ActiveVessel.Landed || FlightGlobals.ActiveVessel.Splashed)
+            {
+                takeOffTime = time;
                 return;
             }
 
@@ -227,7 +237,7 @@ namespace KSP_GPWS
                             }
                             else if (tools.WasPlaying(Tools.KindOfSound.TERRAIN_PULL_UP))
                             {
-                                tools.PlaySound(Tools.KindOfSound.TERRAIN_PULL_UP, "silence");
+                                tools.PlaySound(Tools.KindOfSound.TERRAIN, "silence");
                             }
                         }
                     }   // End of if is descending (RA)
