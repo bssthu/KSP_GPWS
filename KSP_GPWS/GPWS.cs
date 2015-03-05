@@ -151,7 +151,6 @@ namespace KSP_GPWS
                 Tools.MarkNotPlaying();
                 return false;
             }
-            
 
             return true;
         }
@@ -204,8 +203,6 @@ namespace KSP_GPWS
             }
 
             saveData();
-
-            //tools.showScreenMessage(unitOfAltitude.ToString() + " Time: " + Time.time);
         }
 
         private void saveData() // after Update
