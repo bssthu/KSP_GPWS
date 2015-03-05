@@ -207,7 +207,7 @@ namespace KSP_GPWS
             if (Settings.enableDescentRate)
             {
                 // is descending (altitude)
-                if ((altitude < 30000.0f) && (altitude - lastAltitude < 0))
+                if ((altitude < 2500.0f) && (altitude - lastAltitude < 0))
                 {
                     float vSpeed = Math.Abs((altitude - lastAltitude) / (time - lastTime) * 60.0f);   // ft/min, altitude
                     // pull up
@@ -430,27 +430,30 @@ namespace KSP_GPWS
 
         public bool checkMode_Traffic()
         {
-            Vessel activeVessel = FlightGlobals.ActiveVessel;
-            for (int i = 0; i < FlightGlobals.Vessels.Count; i++)
+            if (Settings.enableTraffic)
             {
-                Vessel vessel = FlightGlobals.Vessels[i];
-                if (!vessel.isActiveVessel && !(vessel.Landed || vessel.Splashed) && vessel.mainBody == activeVessel.mainBody)
+                Vessel activeVessel = FlightGlobals.ActiveVessel;
+                for (int i = 0; i < FlightGlobals.Vessels.Count; i++)
                 {
-                    float distance = (float)(vessel.GetWorldPos3D() - activeVessel.GetWorldPos3D()).magnitude;
-                    if (distance < 3889.2)  // 2.1NM
+                    Vessel vessel = FlightGlobals.Vessels[i];
+                    if (!vessel.isActiveVessel && !(vessel.Landed || vessel.Splashed) && vessel.mainBody == activeVessel.mainBody)
                     {
-                        if (Math.Abs(vessel.altitude - activeVessel.altitude) < 600 / M_TO_FT)
+                        float distance = (float)(vessel.GetWorldPos3D() - activeVessel.GetWorldPos3D()).magnitude;
+                        if (distance < 3889.2)  // 2.1NM
                         {
-                            tools.PlaySound(Tools.KindOfSound.TRAFFIC);
-                            return true;
+                            if (Math.Abs(vessel.altitude - activeVessel.altitude) < 600 / M_TO_FT)
+                            {
+                                tools.PlaySound(Tools.KindOfSound.TRAFFIC);
+                                return true;
+                            }
                         }
-                    }
-                    else if (distance < 6111.6)  // 3.3NM
-                    {
-                        if (Math.Abs(vessel.altitude - activeVessel.altitude) < 850 / M_TO_FT)
+                        else if (distance < 6111.6)  // 3.3NM
                         {
-                            tools.PlaySound(Tools.KindOfSound.TRAFFIC);
-                            return true;
+                            if (Math.Abs(vessel.altitude - activeVessel.altitude) < 850 / M_TO_FT)
+                            {
+                                tools.PlaySound(Tools.KindOfSound.TRAFFIC);
+                                return true;
+                            }
                         }
                     }
                 }

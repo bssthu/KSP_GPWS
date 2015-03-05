@@ -161,14 +161,10 @@ namespace KSP_GPWS
                 }   // End of has value "name"
             }
             // check legality
-            if (volume < 0.0f)
-            {
-                volume = 0.0f;
-            }
-            if (volume > 1.0f)
-            {
-                volume = 1.0f;
-            }
+            descentRateFactor = Math.Max(descentRateFactor, 0.1f);
+            descentRateFactor = Math.Min(descentRateFactor, 10.0f);
+            volume = Math.Max(volume, 0.0f);
+            volume = Math.Min(volume, 1.0f);
         }
 
         private static void loadFromXML()

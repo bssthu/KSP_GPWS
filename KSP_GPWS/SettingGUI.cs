@@ -15,7 +15,7 @@ namespace KSP_GPWS
     {
         private bool isHideUI = false;
 
-        private String descentRateFactorString;
+        private float _descentRateFactor;
         private String tooLowGearAltitudeString;
         private bool showConfigs;
 
@@ -23,7 +23,7 @@ namespace KSP_GPWS
         {
             GameEvents.onShowUI.Add(ShowUI);
             GameEvents.onHideUI.Add(HideUI);
-            descentRateFactorString = Settings.descentRateFactor.ToString();
+            _descentRateFactor = (float)Math.Log10(Settings.descentRateFactor);
             tooLowGearAltitudeString = Settings.tooLowGearAltitude.ToString();
             showConfigs = Settings.showConfigs;
         }
@@ -144,14 +144,9 @@ namespace KSP_GPWS
                             GUILayout.Toggle(Settings.enableDescentRate, "Descent Rate", toggleStyle);
                     Settings.enableClosureToTerrain =
                             GUILayout.Toggle(Settings.enableClosureToTerrain, "Closure to Terrain", toggleStyle);
-                    GUILayout.BeginHorizontal();
-                    {
-                        GUILayout.Label("Descent Rate *");
-                        GUILayout.FlexibleSpace();
-                        descentRateFactorString =
-                                GUILayout.TextField(descentRateFactorString, GUILayout.Height(30), GUILayout.Width(80));
-                    }
-                    GUILayout.EndHorizontal();
+                    GUILayout.Label(String.Format("Descent Rate Factor: {0}", Settings.descentRateFactor));
+                    _descentRateFactor = GUILayout.HorizontalSlider(_descentRateFactor, -1.0f, 1.0f);
+                    Settings.descentRateFactor = (float)Math.Round(Math.Pow(10, _descentRateFactor), 1);
 
                     // altitude loss
                     Settings.enableAltitudeLoss =
@@ -184,11 +179,6 @@ namespace KSP_GPWS
                     // save
                     if (GUILayout.Button("Save", buttonStyle, GUILayout.Width(200), GUILayout.Height(30)))
                     {
-                        float newDescentRateFactor;
-                        if (float.TryParse(descentRateFactorString, out newDescentRateFactor))
-                        {
-                            Settings.descentRateFactor = newDescentRateFactor;
-                        }
                         float newTooLowGearAltitude;
                         if (float.TryParse(tooLowGearAltitudeString, out newTooLowGearAltitude))
                         {
