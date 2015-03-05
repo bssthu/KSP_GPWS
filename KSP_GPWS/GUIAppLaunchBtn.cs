@@ -20,26 +20,29 @@ namespace KSP_GPWS
             if (!Settings.useBlizzy78Toolbar)
             {
                 GameEvents.onGUIApplicationLauncherReady.Add(onGUIAppLauncherReady);
-                GameEvents.onGUIApplicationLauncherDestroyed.Add(onGUIAppLauncherDestoryd);
+                GameEvents.onGUIApplicationLauncherDestroyed.Add(onGUIAppLauncherDestroyed);
             }
         }
 
         public void onGUIAppLauncherReady()
         {
-            if (ApplicationLauncher.Ready && appBtn == null)
+            if (ApplicationLauncher.Ready)
             {
-                appBtn = ApplicationLauncher.Instance.AddModApplication(
-                        onAppLaunchToggleOn,
-                        onAppLaunchToggleOff,
-                        () => { },
-                        () => { },
-                        () => { },
-                        () => { },
-                        ApplicationLauncher.AppScenes.FLIGHT,
-                        (Texture)GameDatabase.Instance.GetTexture("GPWS/gpws", false));
+                if (appBtn == null)
+                {
+                    appBtn = ApplicationLauncher.Instance.AddModApplication(
+                            onAppLaunchToggleOn,
+                            onAppLaunchToggleOff,
+                            () => { },
+                            () => { },
+                            () => { },
+                            () => { },
+                            ApplicationLauncher.AppScenes.FLIGHT,
+                            (Texture)GameDatabase.Instance.GetTexture("GPWS/gpws", false));
+                }
                 if (Settings.guiIsActive)
                 {
-                    appBtn.SetTrue(false);
+                    appBtn.SetTrue();
                 }
             }
         }
@@ -54,10 +57,11 @@ namespace KSP_GPWS
             SettingGUI.toggleSettingGUI(false);
         }
 
-        public void onGUIAppLauncherDestoryd()
+        public void onGUIAppLauncherDestroyed()
         {
             if (appBtn != null)
             {
+                ApplicationLauncher.Instance.RemoveModApplication(appBtn);
                 ApplicationLauncher.Instance.RemoveApplication(appBtn);
                 appBtn = null;
             }
@@ -66,9 +70,10 @@ namespace KSP_GPWS
         public void OnDestroy()
         {
             GameEvents.onGUIApplicationLauncherReady.Remove(onGUIAppLauncherReady);
-            GameEvents.onGUIApplicationLauncherDestroyed.Remove(onGUIAppLauncherDestoryd);
+            GameEvents.onGUIApplicationLauncherDestroyed.Remove(onGUIAppLauncherDestroyed);
             if (appBtn != null)
             {
+                ApplicationLauncher.Instance.RemoveModApplication(appBtn);
                 ApplicationLauncher.Instance.RemoveApplication(appBtn);
                 appBtn = null;
             }

@@ -99,6 +99,7 @@ namespace KSP_GPWS
             if (time < 2.0f)
             {
                 Tools.SetUnavailable();
+                saveData();
                 return;
             }
 
@@ -121,6 +122,8 @@ namespace KSP_GPWS
             if (FlightGlobals.ActiveVessel.Landed || FlightGlobals.ActiveVessel.Splashed)
             {
                 takeOffTime = time;
+                saveData();
+                Tools.MarkNotPlaying();
                 return;
             }
 
@@ -153,11 +156,17 @@ namespace KSP_GPWS
                     Tools.MarkNotPlaying();
                 }
             }
+
+            saveData();
+
+            //tools.showScreenMessage(unitOfAltitude.ToString() + " Time: " + Time.time);
+        }
+
+        private void saveData() // after Update
+        {
             lastGearHeight = gearHeight;    // save last gear height
             lastAltitude = altitude;
             lastTime = time;        // save time of last frame
-
-            //tools.showScreenMessage(unitOfAltitude.ToString() + " Time: " + Time.time);
         }
 
         /// <summary>
