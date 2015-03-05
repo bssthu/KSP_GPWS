@@ -321,7 +321,7 @@ namespace KSP_GPWS
             {
                 if ((time - takeOffTime) < 15 && heightJustTakeoff < 1500)
                 {
-                    if (gearHeight > heightJustTakeoff)
+                    if (gearHeight >= heightJustTakeoff)
                     {
                         heightJustTakeoff = gearHeight;     // record height after takeoff
                     }
@@ -355,6 +355,12 @@ namespace KSP_GPWS
                 {
                     // play sound
                     tools.PlaySound(Tools.KindOfSound.TOO_LOW_GEAR);
+                    return true;
+                }
+                if ((time - takeOffTime) < 5 && (gearHeight < heightJustTakeoff))
+                {
+                    // play sound
+                    tools.PlaySound(Tools.KindOfSound.TOO_LOW_TERRAIN);
                     return true;
                 }
             }

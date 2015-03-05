@@ -123,6 +123,14 @@ namespace KSP_GPWS
                         PlayOneShot(kind, "too_low_gear");
                     }
                     break;
+                case KindOfSound.TOO_LOW_TERRAIN:
+                    if (!IsPlaying(Tools.KindOfSound.TOO_LOW_GEAR)
+                            && !IsPlaying(Tools.KindOfSound.TOO_LOW_TERRAIN)
+                            && !IsPlaying(Tools.KindOfSound.TOO_LOW_FLAPS))
+                    {
+                        PlayOneShot(kind, "too_low_terrain");
+                    }
+                    break;
                 case KindOfSound.ALTITUDE_CALLOUTS:
                     PlayOneShot(kind, "gpws" + detail);
                     break;
