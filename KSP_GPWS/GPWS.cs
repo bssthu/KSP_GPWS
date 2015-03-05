@@ -369,7 +369,7 @@ namespace KSP_GPWS
         {
             if (Settings.enableTerrainClearance)
             {
-                if (!isGearDown && gearHeight < Settings.tooLowGearAltitude)
+                if (!isGearDown && gearHeight < Settings.tooLowGearAltitude && time - takeOffTime > 15)
                 {
                     // play sound
                     tools.PlaySound(Tools.KindOfSound.TOO_LOW_GEAR);
