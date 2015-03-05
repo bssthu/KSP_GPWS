@@ -31,14 +31,17 @@ namespace KSP_GPWS
         // time of takeoff
         private float takeOffTime = float.NegativeInfinity;
         private float lastTime = 0.0f;
+        // max RA when just takeoff
+        private float heightJustTakeoff = 0.0f;
 
         // curves
         private FloatCurve sinkRateCurve = new FloatCurve();            // (alt, vSpeed)
         private FloatCurve sinkRatePullUpCurve = new FloatCurve();      // (alt, vSpeed)
         private FloatCurve terrainCurve = new FloatCurve();             // (radar alt, vSpeed)
         private FloatCurve terrainPullUpCurve = new FloatCurve();       // (radar alt, vSpeed)
-        private FloatCurve terrainBCurve = new FloatCurve();             // (radar alt, vSpeed)
-        private FloatCurve terrainPullUpBCurve = new FloatCurve();       // (radar alt, vSpeed)
+        private FloatCurve terrainBCurve = new FloatCurve();            // (radar alt, vSpeed)
+        private FloatCurve terrainPullUpBCurve = new FloatCurve();      // (radar alt, vSpeed)
+        private FloatCurve dontSinkCurve = new FloatCurve();            // (radar alt, RA loss)
         private FloatCurve bankAngleCurve = new FloatCurve();           // (radar alt, bankAngle)
 
         private bool exitClosureToTerrainWarning = false;
@@ -65,6 +68,9 @@ namespace KSP_GPWS
             terrainPullUpBCurve.Add(0, -2400);
             terrainPullUpBCurve.Add(750, -3100);
 
+            dontSinkCurve.Add(0, -0.1f);
+            dontSinkCurve.Add(1500, -150);
+
             bankAngleCurve.Add(5, 10);
             bankAngleCurve.Add(30, 10);
             bankAngleCurve.Add(150, 40);
@@ -89,6 +95,7 @@ namespace KSP_GPWS
             t0 = Time.time;
             takeOffTime = float.NegativeInfinity;
             lastTime = t0;
+            heightJustTakeoff = 0.0f;
             exitClosureToTerrainWarning = false;
         }
 
@@ -122,6 +129,7 @@ namespace KSP_GPWS
             if (FlightGlobals.ActiveVessel.Landed || FlightGlobals.ActiveVessel.Splashed)
             {
                 takeOffTime = time;
+                heightJustTakeoff = 0.0f;
                 saveData();
                 Tools.MarkNotPlaying();
                 return false;
@@ -162,6 +170,8 @@ namespace KSP_GPWS
                 if (checkMode_1())  // Excessive Decent Rate
                 { }
                 else if (checkMode_2())  // Excessive Closure to Terrain
+                { }
+                else if (checkMode_3())  // Altitude Loss After TakeOff
                 { }
                 else if (checkMode_4())  // Unsafe Terrain Clearance
                 { }
@@ -294,6 +304,38 @@ namespace KSP_GPWS
                     else
                     {
                         exitClosureToTerrainWarning = true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Altitude Loss After TakeOff
+        /// DON'T SINK, DON'T SINK
+        /// </summary>
+        /// <returns></returns>
+        public bool checkMode_3()
+        {
+            if (Settings.enableAltitudeLoss)
+            {
+                if ((time - takeOffTime) < 15 && heightJustTakeoff < 1500)
+                {
+                    if (gearHeight > heightJustTakeoff)
+                    {
+                        heightJustTakeoff = gearHeight;     // record height after takeoff
+                    }
+                    else
+                    {
+                        // loss radar altitude
+                        float heightLoss = heightJustTakeoff - gearHeight;
+                        float maxHeightLoss = Math.Abs(dontSinkCurve.Evaluate(heightJustTakeoff));
+                        if (heightLoss > maxHeightLoss)
+                        {
+                            // play sound
+                            tools.PlaySound(Tools.KindOfSound.DONT_SINK);
+                            return true;
+                        }
                     }
                 }
             }

@@ -153,6 +153,10 @@ namespace KSP_GPWS
                     }
                     GUILayout.EndHorizontal();
 
+                    // altitude loss
+                    Settings.enableAltitudeLoss =
+                            GUILayout.Toggle(Settings.enableAltitudeLoss, "Altitude Loss After Takeoff", toggleStyle);
+
                     // terrain clearance
                     Settings.enableTerrainClearance =
                             GUILayout.Toggle(Settings.enableTerrainClearance, "Terrain Clearance", toggleStyle);

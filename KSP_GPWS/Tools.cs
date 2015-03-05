@@ -107,6 +107,14 @@ namespace KSP_GPWS
                         PlayOneShot(kind, detail == "" ? "terrain_pull_up" : detail);
                     }
                     break;
+                case KindOfSound.DONT_SINK:
+                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP)
+                        && !IsPlaying(KindOfSound.TERRAIN) && !IsPlaying(KindOfSound.TERRAIN_PULL_UP)
+                        && !IsPlaying(KindOfSound.DONT_SINK))
+                    {
+                        PlayOneShot(kind, "dont_sink");
+                    }
+                    break;
                 case KindOfSound.TOO_LOW_GEAR:
                     if (!IsPlaying(Tools.KindOfSound.TOO_LOW_GEAR)
                             && !IsPlaying(Tools.KindOfSound.TOO_LOW_TERRAIN)
