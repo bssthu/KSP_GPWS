@@ -47,8 +47,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AudioManager.cs" />
-    <Compile Include="GPWSPlane.cs" />
+    <Compile Include="Impl\AudioManager.cs" />
+    <Compile Include="GPWS.cs" />
+    <Compile Include="Impl\GPWSLander.cs" />
+    <Compile Include="Impl\GPWSPlane.cs" />
+    <Compile Include="Interfaces\IBasicGPWSFunction.cs" />
+    <Compile Include="Interfaces\IGPWSCommonData.cs" />
+    <Compile Include="Interfaces\ILanderConfig.cs" />
     <Compile Include="SimpleTypes\GPWSGear.cs" />
     <Compile Include="SimpleTypes\KindOfSound.cs" />
     <Compile Include="SimpleTypes\UnitOfAltitude.cs" />

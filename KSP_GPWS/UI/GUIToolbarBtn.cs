@@ -18,7 +18,7 @@ namespace KSP_GPWS
 
         public void Awake()
         {
-            if (Settings.useBlizzy78Toolbar)
+            if (Settings.UseBlizzy78Toolbar)
             {
                 if (ToolbarManager.ToolbarAvailable)
                 {

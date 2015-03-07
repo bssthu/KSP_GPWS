@@ -13,7 +13,6 @@ namespace KSP_GPWS.Interfaces
     public interface IPlaneConfig : IConfigNode
     {
         bool EnableSystem { get; set; }
-        float Volume { get; set; }
         bool EnableDescentRate { get; set; }
         bool EnableClosureToTerrain { get; set; }
         bool EnableAltitudeLoss { get; set; }

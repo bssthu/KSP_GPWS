@@ -9,11 +9,14 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP_GPWS.SimpleTypes;
+using KSP_GPWS.Impl;
 
 namespace KSP_GPWS
 {
     public static class Util
     {
+        public const float M_TO_FT = 3.2808399f;
+
         // Audio
         public static AudioManager audio = new AudioManager();
 
@@ -153,12 +156,7 @@ namespace KSP_GPWS
                 return float.PositiveInfinity;
             }
 
-            float terrainHeight = (float)vessel.terrainAltitude;
-            if (terrainHeight < 0)
-            {
-                terrainHeight = 0;
-            }
-            float radarAltitude = (float)vessel.altitude - terrainHeight;      // from vessel to surface, in meters
+            float radarAltitude = RadarAltitude(vessel);      // from vessel to surface, in meters
 
             Part lowestGearPart = gears[0].part;
             // height from terrain to gear
@@ -177,6 +175,32 @@ namespace KSP_GPWS
                 }
             }
             return lowestGearRA;
+        }
+
+        public static float RadarAltitude(Vessel v)
+        {
+            float terrainHeight = (float)v.terrainAltitude;
+            if (terrainHeight < 0)
+            {
+                terrainHeight = 0;
+            }
+            return (float)(v.altitude - terrainHeight);
+        }
+
+        public static float BankAngle(Vessel v)
+        {
+            // bank angle from https://github.com/Crzyrndm/Pilot-Assistant/blob/ebd426fe1a9a0fc75a674e5a45d69b1c6c66a438/PilotAssistant/Utility/FlightData.cs
+            // surface vectors
+            Vector3d planetUp = (v.findWorldCenterOfMass() - v.mainBody.position).normalized;
+            // Vessel forward and right vetors, parallel to the surface
+            Vector3d surfVesRight = Vector3d.Cross(planetUp, v.ReferenceTransform.up).normalized;
+            // roll
+            double roll = Vector3d.Angle(surfVesRight, v.ReferenceTransform.right)
+                    * Math.Sign(Vector3d.Dot(surfVesRight, v.ReferenceTransform.forward));
+
+            float bankAngle = (float)Math.Abs(roll);
+
+            return bankAngle;
         }
 
         public static void Log(String msg)

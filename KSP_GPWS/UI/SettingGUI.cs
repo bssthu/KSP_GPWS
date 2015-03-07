@@ -31,6 +31,8 @@ namespace KSP_GPWS
         {
             GameEvents.onShowUI.Add(ShowUI);
             GameEvents.onHideUI.Add(HideUI);
+
+            PlaneConfig = Settings.PlaneConfig;
             _descentRateFactor = (float)Math.Log10(Settings.PlaneConfig.DescentRateFactor);
             tooLowGearAltitudeString = Settings.PlaneConfig.TooLowGearAltitude.ToString();
             showConfigs = Settings.showConfigs;
@@ -41,7 +43,7 @@ namespace KSP_GPWS
             Settings.guiIsActive = active;
             if (!active)
             {
-                if (!Settings.useBlizzy78Toolbar && GUIAppLaunchBtn.appBtn != null)
+                if (!Settings.UseBlizzy78Toolbar && GUIAppLaunchBtn.appBtn != null)
                 {
                     GUIAppLaunchBtn.appBtn.SetFalse(false);
                 }
@@ -154,64 +156,71 @@ namespace KSP_GPWS
 
                 if (showConfigs)
                 {
-                    PlaneConfig.EnableSystem =
-                            GUILayout.Toggle(PlaneConfig.EnableSystem, "System", toggleStyle);
-
-                    // volume
-                    GUILayout.Label(String.Format("Volume: {0}%", Math.Round(PlaneConfig.Volume * 100.0f)));
-                    PlaneConfig.Volume = GUILayout.HorizontalSlider(PlaneConfig.Volume, 0.0f, 1.0f);
-
-                    // descent rate config
-                    PlaneConfig.EnableDescentRate =
-                            GUILayout.Toggle(PlaneConfig.EnableDescentRate, "Descent Rate", toggleStyle);
-                    PlaneConfig.EnableClosureToTerrain =
-                            GUILayout.Toggle(PlaneConfig.EnableClosureToTerrain, "Closure to Terrain", toggleStyle);
-                    GUILayout.Label(String.Format("Descent Rate Factor: {0}", PlaneConfig.DescentRateFactor));
-                    _descentRateFactor = GUILayout.HorizontalSlider(_descentRateFactor, -1.0f, 1.0f);
-                    PlaneConfig.DescentRateFactor = (float)Math.Round(Math.Pow(10, _descentRateFactor), 1);
-
-                    // altitude loss
-                    PlaneConfig.EnableAltitudeLoss =
-                            GUILayout.Toggle(PlaneConfig.EnableAltitudeLoss, "Altitude Loss After Takeoff", toggleStyle);
-
-                    // terrain clearance
-                    PlaneConfig.EnableTerrainClearance =
-                            GUILayout.Toggle(PlaneConfig.EnableTerrainClearance, "Terrain Clearance", toggleStyle);
-                    GUILayout.BeginHorizontal();
-                    {
-                        GUILayout.Label("Gear Alt");
-                        GUILayout.FlexibleSpace();
-                        tooLowGearAltitudeString =
-                                GUILayout.TextField(tooLowGearAltitudeString, GUILayout.Height(30), GUILayout.Width(80));
-                    }
-                    GUILayout.EndHorizontal();
-
-                    // altitude
-                    PlaneConfig.EnableAltitudeCallouts =
-                            GUILayout.Toggle(PlaneConfig.EnableAltitudeCallouts, "Altitude Callouts", toggleStyle);
-
-                    // bank angle
-                    PlaneConfig.EnableTraffic =
-                            GUILayout.Toggle(PlaneConfig.EnableTraffic, "Traffic", toggleStyle);
-
-                    // traffic
-                    PlaneConfig.EnableBankAngle =
-                            GUILayout.Toggle(PlaneConfig.EnableBankAngle, "Bank Angle", toggleStyle);
-
-                    // save
-                    if (GUILayout.Button("Save", buttonStyle, GUILayout.Width(200), GUILayout.Height(30)))
-                    {
-                        float newTooLowGearAltitude;
-                        if (float.TryParse(tooLowGearAltitudeString, out newTooLowGearAltitude))
-                        {
-                            PlaneConfig.TooLowGearAltitude = newTooLowGearAltitude;
-                        }
-                        // save
-                        Settings.SaveSettings();
-                    }
+                    drawPlaneSetting();
                 }
             }
             GUILayout.EndVertical();
+        }
+
+        private void drawPlaneSetting()
+        {
+            PlaneConfig.EnableSystem =
+                    GUILayout.Toggle(PlaneConfig.EnableSystem, "System", toggleStyle);
+
+            // volume
+            GUILayout.Label(String.Format("Volume: {0}%", Math.Round(Settings.Volume * 100.0f)));
+            Settings.Volume = (float)Math.Round(GUILayout.HorizontalSlider(Settings.Volume, 0.0f, 1.0f), 2);
+
+            // descent rate config
+            PlaneConfig.EnableDescentRate =
+                    GUILayout.Toggle(PlaneConfig.EnableDescentRate, "Descent Rate", toggleStyle);
+            PlaneConfig.EnableClosureToTerrain =
+                    GUILayout.Toggle(PlaneConfig.EnableClosureToTerrain, "Closure to Terrain", toggleStyle);
+
+            GUILayout.Label(String.Format("Descent Rate Factor: {0}", PlaneConfig.DescentRateFactor));
+            _descentRateFactor = GUILayout.HorizontalSlider(_descentRateFactor, -1.0f, 1.0f);
+            PlaneConfig.DescentRateFactor = (float)Math.Round(Math.Pow(10, _descentRateFactor), 1);
+
+            // altitude loss
+            PlaneConfig.EnableAltitudeLoss =
+                    GUILayout.Toggle(PlaneConfig.EnableAltitudeLoss, "Altitude Loss After Takeoff", toggleStyle);
+
+            // terrain clearance
+            PlaneConfig.EnableTerrainClearance =
+                    GUILayout.Toggle(PlaneConfig.EnableTerrainClearance, "Terrain Clearance", toggleStyle);
+            GUILayout.BeginHorizontal();
+            {
+                GUILayout.Label("Gear Alt");
+                GUILayout.FlexibleSpace();
+                tooLowGearAltitudeString =
+                        GUILayout.TextField(tooLowGearAltitudeString, GUILayout.Height(30), GUILayout.Width(80));
+                GUILayout.Label(PlaneConfig.UnitOfAltitude == UnitOfAltitude.FOOT ? "ft" : "m");
+            }
+            GUILayout.EndHorizontal();
+
+            // altitude
+            PlaneConfig.EnableAltitudeCallouts =
+                    GUILayout.Toggle(PlaneConfig.EnableAltitudeCallouts, "Altitude Callouts", toggleStyle);
+
+            // bank angle
+            PlaneConfig.EnableTraffic =
+                    GUILayout.Toggle(PlaneConfig.EnableTraffic, "Traffic", toggleStyle);
+
+            // traffic
+            PlaneConfig.EnableBankAngle =
+                    GUILayout.Toggle(PlaneConfig.EnableBankAngle, "Bank Angle", toggleStyle);
+
+            // save
+            if (GUILayout.Button("Save", buttonStyle, GUILayout.Width(200), GUILayout.Height(30)))
+            {
+                float newTooLowGearAltitude;
+                if (float.TryParse(tooLowGearAltitudeString, out newTooLowGearAltitude))
+                {
+                    PlaneConfig.TooLowGearAltitude = newTooLowGearAltitude;
+                }
+                // save
+                Settings.SaveSettings();
+            }
         }
 
         public void OnDestory()

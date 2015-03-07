@@ -20,17 +20,20 @@ namespace KSP_GPWS
             // load settings when game start
             Settings.LoadSettings();
             // check toolbar
-            if (Settings.useBlizzy78Toolbar && !ToolbarManager.ToolbarAvailable)
+            if (Settings.UseBlizzy78Toolbar && !ToolbarManager.ToolbarAvailable)
             {
                 Util.Log("Blizzy78 Toolbar not available");
-                Settings.useBlizzy78Toolbar = false;
+                Settings.UseBlizzy78Toolbar = false;
+                Settings.Volume = 0.5f;
             }
+            GPWS.InitializeGPWSFunctions();
         }
     }
 
     static class Settings
     {
-        public static bool useBlizzy78Toolbar = false;
+        public static float Volume { get; set; }
+        public static bool UseBlizzy78Toolbar = false;
         public static IPlaneConfig PlaneConfig { get; private set; }
         private static ConfigNode planeConfigNode;
 
@@ -42,7 +45,6 @@ namespace KSP_GPWS
         {
             PlaneConfig = planeConfig;
             PlaneConfig.EnableSystem = true;
-            PlaneConfig.Volume = 0.5f;
             PlaneConfig.EnableDescentRate = true;
             PlaneConfig.EnableClosureToTerrain = true;
             PlaneConfig.EnableAltitudeLoss = true;
@@ -79,14 +81,13 @@ namespace KSP_GPWS
                         planeConfigNode = node.GetNode("Plane");
                     }
 
-                    Util.ConvertValue(node, "UseBlizzy78Toolbar", ref useBlizzy78Toolbar);
+                    Volume = Util.ConvertValue<float>(node, "Volume");
+                    Util.ConvertValue(node, "UseBlizzy78Toolbar", ref UseBlizzy78Toolbar);
                 }   // End of has value "name"
             }
             // check legality
-            PlaneConfig.DescentRateFactor = Math.Max(PlaneConfig.DescentRateFactor, 0.1f);
-            PlaneConfig.DescentRateFactor = Math.Min(PlaneConfig.DescentRateFactor, 10.0f);
-            PlaneConfig.Volume = Math.Max(PlaneConfig.Volume, 0.0f);
-            PlaneConfig.Volume = Math.Min(PlaneConfig.Volume, 1.0f);
+            Volume = Math.Max(Volume, 0.0f);
+            Volume = Math.Min(Volume, 1.0f);
         }
 
         private static void loadFromXML()
@@ -115,7 +116,6 @@ namespace KSP_GPWS
             ConfigNode planeNode = new ConfigNode();
             planeNode.name = "Plane";
             planeNode.AddValue("EnableSystem", PlaneConfig.EnableSystem);
-            planeNode.AddValue("Volume", PlaneConfig.Volume);
             planeNode.AddValue("EnableDescentRate", PlaneConfig.EnableDescentRate);
             planeNode.AddValue("EnableClosureToTerrain", PlaneConfig.EnableClosureToTerrain);
             planeNode.AddValue("EnableAltitudeLoss", PlaneConfig.EnableAltitudeLoss);
@@ -130,7 +130,8 @@ namespace KSP_GPWS
             planeNode.AddValue("UnitOfAltitude", PlaneConfig.UnitOfAltitude);
 
             gpwsNode.AddNode(planeNode);
-            gpwsNode.AddValue("UseBlizzy78Toolbar", useBlizzy78Toolbar);
+            gpwsNode.AddValue("Volume", Settings.Volume);
+            gpwsNode.AddValue("UseBlizzy78Toolbar", UseBlizzy78Toolbar);
 
             config.AddNode(gpwsNode);
             config.Save(KSPUtil.ApplicationRootPath + "GameData/GPWS/settings.cfg", "GPWS");

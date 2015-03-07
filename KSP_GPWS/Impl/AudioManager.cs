@@ -9,7 +9,7 @@ using System.Text;
 using UnityEngine;
 using KSP_GPWS.SimpleTypes;
 
-namespace KSP_GPWS
+namespace KSP_GPWS.Impl
 {
     public class AudioManager
     {
@@ -55,7 +55,7 @@ namespace KSP_GPWS
 
         public void UpdateVolume()
         {
-            Volume = GameSettings.VOICE_VOLUME * Settings.PlaneConfig.Volume;
+            Volume = GameSettings.VOICE_VOLUME * Settings.Volume;
             asGPWS.volume = Volume;
         }
 

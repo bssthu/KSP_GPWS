@@ -6,35 +6,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
-using KSP_GPWS.SimpleTypes;
 using KSP_GPWS.Interfaces;
+using KSP_GPWS.SimpleTypes;
 
-namespace KSP_GPWS
+namespace KSP_GPWS.Impl
 {
-    [KSPAddon(KSPAddon.Startup.Flight, false)]
-    public class GPWSPlane : UnityEngine.MonoBehaviour, IPlaneConfig
+    public class GPWSPlane : IPlaneConfig, IBasicGPWSFunction
     {
-        const float M_TO_FT = 3.2808399f;
+        private IGPWSCommonData CommonData = null;
 
         private List<GPWSGear> gears = new List<GPWSGear>();     // parts with module "GPWSGear"
 
-        private Vessel activeVessel = FlightGlobals.ActiveVessel;
-
-        private float gearHeight = 0.0f;
-        private float lastGearHeight = float.PositiveInfinity;
-
-        private float altitude = 0.0f;
-        private float lastAltitude = float.PositiveInfinity;
-
         private bool isGearDown = false;
 
-        private float t0 = 0.0f;
-        // time since scene loaded
-        private float time = 0.0f;
         // time of takeoff
         private float takeOffTime = float.NegativeInfinity;
-        private float lastTime = 0.0f;
         // max RA when just takeoff
         private float heightJustTakeoff = 0.0f;
 
@@ -52,7 +38,6 @@ namespace KSP_GPWS
 
         #region IPlaneConfig Members
         public bool EnableSystem { get; set; }
-        public float Volume { get; set; }
         public bool EnableDescentRate { get; set; }
         public bool EnableClosureToTerrain { get; set; }
         public bool EnableAltitudeLoss { get; set; }
@@ -76,7 +61,6 @@ namespace KSP_GPWS
         public void Load(ConfigNode node)
         {
             EnableSystem = Util.ConvertValue<bool>(node, "EnableSystem");
-            Volume = Util.ConvertValue<float>(node, "Volume");
             EnableDescentRate = Util.ConvertValue<bool>(node, "EnableDescentRate");
             EnableClosureToTerrain = Util.ConvertValue<bool>(node, "EnableClosureToTerrain");
             EnableAltitudeLoss = Util.ConvertValue<bool>(node, "EnableAltitudeLoss");
@@ -109,6 +93,9 @@ namespace KSP_GPWS
                 }
             }
             UnitOfAltitude = Util.ConvertValue<UnitOfAltitude>(node, "UnitOfAltitude");
+            // check legality
+            DescentRateFactor = Math.Max(DescentRateFactor, 0.1f);
+            DescentRateFactor = Math.Min(DescentRateFactor, 10.0f);
         }
 
         public void Save(ConfigNode node)
@@ -118,10 +105,20 @@ namespace KSP_GPWS
 
         #endregion
 
-        public void Awake()
+        public void Initialize(IGPWSCommonData data)
         {
-            Settings.InitializePlaneConfig(this as IPlaneConfig);
+            CommonData = data;
 
+            isGearDown = false;
+            takeOffTime = float.NegativeInfinity;
+            heightJustTakeoff = 0.0f;
+            exitClosureToTerrainWarning = false;
+
+            initializeCurves();
+        }
+
+        private void initializeCurves()
+        {
             // init curves, points are not accurate
             sinkRateCurve.Add(50, -1000);
             sinkRateCurve.Add(2500, -5000);
@@ -151,56 +148,17 @@ namespace KSP_GPWS
             bankAngleCurve.Add(2450, 55);
         }
 
-        public void Start()
+        public void Dispose()
         {
-            Util.Log("Start");
-            Util.audio.AudioInitialize();
-
-            GameEvents.onVesselChange.Add(OnVesselChange);
-            activeVessel = FlightGlobals.ActiveVessel;
-            if (activeVessel != null)
-            {
-                Util.FindGears(activeVessel, ref gears);
-            }
-
-            // init
-            lastAltitude = float.PositiveInfinity;
-            lastGearHeight = float.PositiveInfinity;
-            isGearDown = false;
-            t0 = Time.time;
-            takeOffTime = float.NegativeInfinity;
-            lastTime = t0;
-            heightJustTakeoff = 0.0f;
-            exitClosureToTerrainWarning = false;
+            gears.Clear();
         }
 
-        private void OnVesselChange(Vessel v)
+        public bool PreUpdate()
         {
-            Util.FindGears(v, ref gears);
-        }
-
-        private bool preUpdate()
-        {
-            time = Time.time - t0;
-            // check time, prevent problem
-            if (time < 2.0f)
-            {
-                Util.audio.SetUnavailable();
-                saveData();
-                return false;
-            }
-            if (time - takeOffTime < 0.5f)
+            // just takeoff
+            if (CommonData.time - takeOffTime < 0.5f)
             {
                 Util.audio.MarkNotPlaying();
-                saveData();
-                return false;
-            }
-
-            // just switched
-            if (FlightGlobals.ActiveVessel != activeVessel)
-            {
-                Util.audio.MarkNotPlaying();
-                saveData();
                 return false;
             }
 
@@ -220,11 +178,10 @@ namespace KSP_GPWS
             }
 
             // on surface
-            if (activeVessel.Landed || activeVessel.Splashed)
+            if (CommonData.ActiveVessel.Landed || CommonData.ActiveVessel.Splashed)
             {
-                takeOffTime = time;
+                takeOffTime = CommonData.time;
                 heightJustTakeoff = 0.0f;
-                saveData();
                 Util.audio.MarkNotPlaying();
                 return false;
             }
@@ -232,34 +189,22 @@ namespace KSP_GPWS
             return true;
         }
 
-        public void Update()
+        public void UpdateGPWS()
         {
-            if (!preUpdate())
-            {
-                return;
-            }
-
-            // check volume
-            if (Util.audio.Volume != GameSettings.VOICE_VOLUME * Volume)
-            {
-                Util.audio.UpdateVolume();
-            }
-
-            isGearDown = Util.GearIsDown(Util.GetLowestGear(gears));
             float gearHeightMeters = Util.GetGearHeightFromGround(gears);
-
             // height in meters/feet
             if (UnitOfAltitude.FOOT == UnitOfAltitude)
             {
-                gearHeight = gearHeightMeters * M_TO_FT;
-                altitude = (float)(FlightGlobals.ship_altitude * M_TO_FT);
+                CommonData.RadarAltitude = gearHeightMeters * Util.M_TO_FT;
             }
             else
             {
-                gearHeight = gearHeightMeters;
-                altitude = (float)FlightGlobals.ship_altitude;
+                CommonData.RadarAltitude = gearHeightMeters;
             }
-            if (gearHeight > 0 && gearHeight < float.PositiveInfinity)
+
+            isGearDown = Util.GearIsDown(Util.GetLowestGear(gears));
+
+            if (CommonData.RadarAltitude > 0 && CommonData.RadarAltitude < float.PositiveInfinity)
             {
                 if (checkMode_1())  // Excessive Decent Rate
                 { }
@@ -278,16 +223,6 @@ namespace KSP_GPWS
                     Util.audio.MarkNotPlaying();
                 }
             }
-
-            saveData();
-        }
-
-        private void saveData() // after Update
-        {
-            lastGearHeight = gearHeight;    // save last gear height
-            lastAltitude = altitude;
-            lastTime = time;        // save time of last frame
-            activeVessel = FlightGlobals.ActiveVessel;
         }
 
         /// <summary>
@@ -300,11 +235,11 @@ namespace KSP_GPWS
             if (EnableDescentRate)
             {
                 // is descending (altitude)
-                if ((altitude < 2500.0f) && (altitude - lastAltitude < 0))
+                if ((CommonData.Altitude < 2500.0f) && (CommonData.Altitude - CommonData.LastAltitude < 0))
                 {
-                    float vSpeed = Math.Abs((altitude - lastAltitude) / (time - lastTime) * 60.0f);   // ft/min, altitude
+                    float vSpeed = Math.Abs((CommonData.Altitude - CommonData.LastAltitude) / (CommonData.time - CommonData.lastTime) * 60.0f);   // ft/min, altitude
                     // pull up
-                    float maxVSpeedPullUp = Math.Abs(sinkRatePullUpCurve.Evaluate(gearHeight)) * DescentRateFactor;
+                    float maxVSpeedPullUp = Math.Abs(sinkRatePullUpCurve.Evaluate(CommonData.RadarAltitude)) * DescentRateFactor;
                     if (vSpeed > maxVSpeedPullUp)
                     {
                         // play sound
@@ -312,7 +247,7 @@ namespace KSP_GPWS
                         return true;
                     }
                     // sink rate
-                    float maxVSpeedSinkRate = Math.Abs(sinkRateCurve.Evaluate(gearHeight)) * DescentRateFactor;
+                    float maxVSpeedSinkRate = Math.Abs(sinkRateCurve.Evaluate(CommonData.RadarAltitude)) * DescentRateFactor;
                     if (vSpeed > maxVSpeedSinkRate)
                     {
                         // play sound
@@ -333,15 +268,15 @@ namespace KSP_GPWS
         {
             if (EnableClosureToTerrain)
             {
-                if (isGearDown || (time - takeOffTime > 30))        // Mode B
+                if (isGearDown || (CommonData.time - takeOffTime > 30))        // Mode B
                 {
                     // is descending (radar altitude)
-                    if ((altitude < 800.0f) && (altitude - lastAltitude < 0))
+                    if ((CommonData.Altitude < 800.0f) && (CommonData.Altitude - CommonData.LastAltitude < 0))
                     {
                         // check if should warn
-                        float vSpeed = Math.Abs((gearHeight - lastGearHeight) / (time - lastTime) * 60.0f);   // ft/min, radar altitude
+                        float vSpeed = Math.Abs((CommonData.RadarAltitude - CommonData.LastRadarAltitude) / (CommonData.time - CommonData.lastTime) * 60.0f);   // ft/min, radar altitude
                         // terrain pull up
-                        float maxVSpeedPullUp = Math.Abs(terrainPullUpBCurve.Evaluate(gearHeight)) * DescentRateFactor;
+                        float maxVSpeedPullUp = Math.Abs(terrainPullUpBCurve.Evaluate(CommonData.RadarAltitude)) * DescentRateFactor;
                         if (vSpeed > maxVSpeedPullUp)
                         {
                             // play sound
@@ -349,7 +284,7 @@ namespace KSP_GPWS
                             return true;
                         }
                         // terrain, terrain
-                        float maxVSpeedTerrain = Math.Abs(terrainBCurve.Evaluate(gearHeight)) * DescentRateFactor;
+                        float maxVSpeedTerrain = Math.Abs(terrainBCurve.Evaluate(CommonData.RadarAltitude)) * DescentRateFactor;
                         if (vSpeed > maxVSpeedTerrain)
                         {
                             // play sound
@@ -361,12 +296,12 @@ namespace KSP_GPWS
                 else        // Mode A
                 {
                     // is descending (radar altitude)
-                    if ((altitude < 2200.0f) && (altitude - lastAltitude < 0))
+                    if ((CommonData.Altitude < 2200.0f) && (CommonData.Altitude - CommonData.LastAltitude < 0))
                     {
                         // check if should warn
-                        float vSpeed = Math.Abs((gearHeight - lastGearHeight) / (time - lastTime) * 60.0f);   // ft/min, radar altitude
+                        float vSpeed = Math.Abs((CommonData.RadarAltitude - CommonData.LastRadarAltitude) / (CommonData.time - CommonData.lastTime) * 60.0f);   // ft/min, radar altitude
                         // terrain pull up
-                        float maxVSpeedPullUp = Math.Abs(terrainPullUpCurve.Evaluate(gearHeight)) * DescentRateFactor;
+                        float maxVSpeedPullUp = Math.Abs(terrainPullUpCurve.Evaluate(CommonData.RadarAltitude)) * DescentRateFactor;
                         if (vSpeed > maxVSpeedPullUp)
                         {
                             // play sound
@@ -375,7 +310,7 @@ namespace KSP_GPWS
                             return true;
                         }
                         // terrain, terrain
-                        float maxVSpeedTerrain = Math.Abs(terrainCurve.Evaluate(gearHeight)) * DescentRateFactor;
+                        float maxVSpeedTerrain = Math.Abs(terrainCurve.Evaluate(CommonData.RadarAltitude)) * DescentRateFactor;
                         if (vSpeed > maxVSpeedTerrain)
                         {
                             // play sound
@@ -414,16 +349,16 @@ namespace KSP_GPWS
         {
             if (EnableAltitudeLoss)
             {
-                if ((time - takeOffTime) < 15 && heightJustTakeoff < 1500)
+                if ((CommonData.time - takeOffTime) < 15 && heightJustTakeoff < 1500)
                 {
-                    if (gearHeight >= heightJustTakeoff)
+                    if (CommonData.RadarAltitude >= heightJustTakeoff)
                     {
-                        heightJustTakeoff = gearHeight;     // record height after takeoff
+                        heightJustTakeoff = CommonData.RadarAltitude;     // record height after takeoff
                     }
                     else
                     {
                         // loss radar altitude
-                        float heightLoss = heightJustTakeoff - gearHeight;
+                        float heightLoss = heightJustTakeoff - CommonData.RadarAltitude;
                         float maxHeightLoss = Math.Abs(dontSinkCurve.Evaluate(heightJustTakeoff));
                         if (heightLoss > maxHeightLoss)
                         {
@@ -446,13 +381,13 @@ namespace KSP_GPWS
         {
             if (EnableTerrainClearance)
             {
-                if (!isGearDown && gearHeight < TooLowGearAltitude && time - takeOffTime > 15)
+                if (!isGearDown && CommonData.RadarAltitude < TooLowGearAltitude && CommonData.time - takeOffTime > 15)
                 {
                     // play sound
                     Util.audio.PlaySound(KindOfSound.TOO_LOW_GEAR);
                     return true;
                 }
-                if ((time - takeOffTime) < 5 && (gearHeight < heightJustTakeoff))
+                if ((CommonData.time - takeOffTime) < 5 && (CommonData.RadarAltitude < heightJustTakeoff))
                 {
                     // play sound
                     Util.audio.PlaySound(KindOfSound.TOO_LOW_TERRAIN);
@@ -461,7 +396,7 @@ namespace KSP_GPWS
             }
             return false;
         }
-        
+
         /// <summary>
         /// Advisory Callout
         /// Altitude Callouts / Bank Angle Callout
@@ -473,12 +408,12 @@ namespace KSP_GPWS
             if (EnableAltitudeCallouts)
             {
                 // is descending
-                if (gearHeight - lastGearHeight < 0)
+                if (CommonData.RadarAltitude - CommonData.LastRadarAltitude < 0)
                 {
                     // lower than an altitude
                     foreach (float threshold in AltitudeArray)
                     {
-                        if (lastGearHeight > threshold && gearHeight < threshold)
+                        if (CommonData.LastRadarAltitude > threshold && CommonData.RadarAltitude < threshold)
                         {
                             // play sound
                             Util.audio.PlaySound(KindOfSound.ALTITUDE_CALLOUTS, threshold.ToString());
@@ -490,20 +425,11 @@ namespace KSP_GPWS
             // Bank Angle Callout
             if (EnableBankAngle)
             {
-                // bank angle from https://github.com/Crzyrndm/Pilot-Assistant/blob/ebd426fe1a9a0fc75a674e5a45d69b1c6c66a438/PilotAssistant/Utility/FlightData.cs
-                // surface vectors
-                Vector3d planetUp = (activeVessel.findWorldCenterOfMass() - activeVessel.mainBody.position).normalized;
-                // Vessel forward and right vetors, parallel to the surface
-                Vector3d surfVesRight = Vector3d.Cross(planetUp, activeVessel.ReferenceTransform.up).normalized;
-                // roll
-                double roll = Vector3d.Angle(surfVesRight, activeVessel.ReferenceTransform.right)
-                        * Math.Sign(Vector3d.Dot(surfVesRight, activeVessel.ReferenceTransform.forward));
+                float bankAngle = Util.BankAngle(CommonData.ActiveVessel);
 
-                float bankAngle = (float)Math.Abs(roll);
-
-                if (gearHeight > 5 && gearHeight < 2450)
+                if (CommonData.RadarAltitude > 5 && CommonData.RadarAltitude < 2450)
                 {
-                    float maxBankAngle = Math.Abs(bankAngleCurve.Evaluate(gearHeight));
+                    float maxBankAngle = Math.Abs(bankAngleCurve.Evaluate(CommonData.RadarAltitude));
                     // check
                     if (bankAngle > maxBankAngle)
                     {
@@ -526,12 +452,12 @@ namespace KSP_GPWS
                 for (int i = 0; i < FlightGlobals.Vessels.Count; i++)
                 {
                     Vessel vessel = FlightGlobals.Vessels[i];
-                    if (!vessel.isActiveVessel && !(vessel.Landed || vessel.Splashed) && vessel.mainBody == activeVessel.mainBody)
+                    if (!vessel.isActiveVessel && !(vessel.Landed || vessel.Splashed) && vessel.mainBody == CommonData.ActiveVessel.mainBody)
                     {
-                        float distance = (float)(vessel.GetWorldPos3D() - activeVessel.GetWorldPos3D()).magnitude;
+                        float distance = (float)(vessel.GetWorldPos3D() - CommonData.ActiveVessel.GetWorldPos3D()).magnitude;
                         if (distance < 3889.2)  // 2.1NM
                         {
-                            if (Math.Abs(vessel.altitude - activeVessel.altitude) < 600 / M_TO_FT)
+                            if (Math.Abs(vessel.altitude - CommonData.ActiveVessel.altitude) < 600 / Util.M_TO_FT)
                             {
                                 Util.audio.PlaySound(KindOfSound.TRAFFIC);
                                 return true;
@@ -539,7 +465,7 @@ namespace KSP_GPWS
                         }
                         else if (distance < 6111.6)  // 3.3NM
                         {
-                            if (Math.Abs(vessel.altitude - activeVessel.altitude) < 850 / M_TO_FT)
+                            if (Math.Abs(vessel.altitude - CommonData.ActiveVessel.altitude) < 850 / Util.M_TO_FT)
                             {
                                 Util.audio.PlaySound(KindOfSound.TRAFFIC);
                                 return true;
@@ -551,10 +477,12 @@ namespace KSP_GPWS
             return false;
         }
 
-        public void OnDestroy()
+        public void SetVesselInfo(Vessel v)
         {
-            GameEvents.onVesselChange.Remove(OnVesselChange);
-            gears.Clear();
+            if (v != null)
+            {
+                Util.FindGears(v, ref gears);
+            }
         }
     }
 }
