@@ -49,13 +49,17 @@
   <ItemGroup>
     <Compile Include="GPWS.cs" />
     <Compile Include="GPWSGear.cs" />
-    <Compile Include="GUIAppLaunchBtn.cs" />
-    <Compile Include="GUIToolbarBtn.cs" />
+    <Compile Include="UI\GUIAppLaunchBtn.cs" />
+    <Compile Include="UI\GUIToolbarBtn.cs" />
+    <Compile Include="Interfaces\IPlaneConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SettingGUI.cs" />
+    <Compile Include="UI\SettingGUI.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="ToolbarWrapper.cs" />
+    <Compile Include="Interfaces\ToolbarWrapper.cs" />
     <Compile Include="Tools.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Config\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
