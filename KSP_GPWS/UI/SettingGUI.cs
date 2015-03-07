@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using KSP_GPWS.SimpleTypes;
 
 namespace KSP_GPWS
 {
@@ -19,9 +20,9 @@ namespace KSP_GPWS
         private String tooLowGearAltitudeString;
         private bool showConfigs;
 
-        GUIStyle toggleStyle = new GUIStyle(GUI.skin.toggle);
-        GUIStyle buttonStyle = new GUIStyle(GUI.skin.button);
-        GUIStyle boxStyle = new GUIStyle(GUI.skin.box);
+        GUIStyle toggleStyle;
+        GUIStyle buttonStyle;
+        GUIStyle boxStyle;
 
         public void Awake()
         {
@@ -30,23 +31,6 @@ namespace KSP_GPWS
             _descentRateFactor = (float)Math.Log10(Settings.descentRateFactor);
             tooLowGearAltitudeString = Settings.tooLowGearAltitude.ToString();
             showConfigs = Settings.showConfigs;
-
-            toggleStyle.stretchHeight = true;
-            toggleStyle.stretchWidth = true;
-            toggleStyle.padding = new RectOffset(4, 4, 4, 4);
-            toggleStyle.margin = new RectOffset(4, 4, 4, 4);
-
-            buttonStyle.stretchHeight = true;
-            buttonStyle.stretchWidth = true;
-            buttonStyle.padding = new RectOffset(4, 4, 4, 4);
-            buttonStyle.margin = new RectOffset(4, 4, 4, 4);
-
-            boxStyle.stretchHeight = true;
-            boxStyle.stretchWidth = true;
-            boxStyle.padding = new RectOffset(4, 4, 4, 4);
-            boxStyle.margin = new RectOffset(4, 4, 4, 4);
-            boxStyle.richText = true;
-
         }
 
         public static void toggleSettingGUI(bool active)
@@ -95,13 +79,46 @@ namespace KSP_GPWS
             }
         }
 
+        private void ConfigureStyles()
+        {
+            if (toggleStyle == null)
+            {
+                toggleStyle = new GUIStyle(GUI.skin.toggle);
+                toggleStyle.stretchHeight = true;
+                toggleStyle.stretchWidth = true;
+                toggleStyle.padding = new RectOffset(4, 4, 4, 4);
+                toggleStyle.margin = new RectOffset(4, 4, 4, 4);
+            }
+
+            if (buttonStyle == null)
+            {
+                buttonStyle = new GUIStyle(GUI.skin.button);
+                buttonStyle.stretchHeight = true;
+                buttonStyle.stretchWidth = true;
+                buttonStyle.padding = new RectOffset(4, 4, 4, 4);
+                buttonStyle.margin = new RectOffset(4, 4, 4, 4);
+            }
+
+            if (boxStyle == null)
+            {
+                boxStyle = new GUIStyle(GUI.skin.box);
+                boxStyle.stretchHeight = true;
+                boxStyle.stretchWidth = true;
+                boxStyle.padding = new RectOffset(4, 4, 4, 4);
+                boxStyle.margin = new RectOffset(4, 4, 4, 4);
+                boxStyle.richText = true;
+            }
+        }
+
         private void SettingWindowFunc(int windowID)
         {
+            ConfigureStyles();
+
             // begin drawing
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
             {
-                String text = Util.kindOfSound.ToString();
+                String text = Util.audio.kindOfSound.ToString();
                 if (!Settings.enableSystem)
                 {
                     text = "UNAVAILABLE";

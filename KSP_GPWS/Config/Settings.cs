@@ -8,6 +8,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using KSP_GPWS.Interfaces;
+using KSP_GPWS.SimpleTypes;
 
 namespace KSP_GPWS
 {
@@ -44,11 +46,6 @@ namespace KSP_GPWS
         public static float descentRateFactor = 1.0f;
         public static float tooLowGearAltitude = 500.0f;
         public static int[] altitudeArray = { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
-        public enum UnitOfAltitude
-        {
-            FOOT = 0,
-            METER = 1,
-        };
         public static UnitOfAltitude unitOfAltitude = UnitOfAltitude.FOOT;    // use meters or feet, feet is recommanded.
 
         public static bool useBlizzy78Toolbar = false;

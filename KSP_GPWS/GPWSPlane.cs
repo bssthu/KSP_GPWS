@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using KSP_GPWS.SimpleTypes;
 
 namespace KSP_GPWS
 {
@@ -82,7 +83,7 @@ namespace KSP_GPWS
         public void Start()
         {
             Util.Log("Start");
-            tools.AudioInitialize();
+            Util.audio.AudioInitialize();
 
             GameEvents.onVesselChange.Add(tools.FindGears);
             activeVessel = FlightGlobals.ActiveVessel;
@@ -108,13 +109,13 @@ namespace KSP_GPWS
             // check time, prevent problem
             if (time < 2.0f)
             {
-                Util.SetUnavailable();
+                Util.audio.SetUnavailable();
                 saveData();
                 return false;
             }
             if (time - takeOffTime < 0.5f)
             {
-                Util.MarkNotPlaying();
+                Util.audio.MarkNotPlaying();
                 saveData();
                 return false;
             }
@@ -122,7 +123,7 @@ namespace KSP_GPWS
             // just switched
             if (FlightGlobals.ActiveVessel != activeVessel)
             {
-                Util.MarkNotPlaying();
+                Util.audio.MarkNotPlaying();
                 saveData();
                 return false;
             }
@@ -130,7 +131,7 @@ namespace KSP_GPWS
             // check gear
             if (tools.gearList.Count <= 0)
             {
-                Util.SetUnavailable();
+                Util.audio.SetUnavailable();
                 return false;
             }
 
@@ -138,7 +139,7 @@ namespace KSP_GPWS
             if (!FlightGlobals.getMainBody().atmosphere ||
                     FlightGlobals.ship_altitude > FlightGlobals.getMainBody().maxAtmosphereAltitude)
             {
-                Util.SetUnavailable();
+                Util.audio.SetUnavailable();
                 return false;
             }
 
@@ -148,7 +149,7 @@ namespace KSP_GPWS
                 takeOffTime = time;
                 heightJustTakeoff = 0.0f;
                 saveData();
-                Util.MarkNotPlaying();
+                Util.audio.MarkNotPlaying();
                 return false;
             }
 
@@ -163,16 +164,16 @@ namespace KSP_GPWS
             }
 
             // check volume
-            if (tools.Volume != GameSettings.VOICE_VOLUME * Settings.volume)
+            if (Util.audio.Volume != GameSettings.VOICE_VOLUME * Settings.volume)
             {
-                tools.UpdateVolume();
+                Util.audio.UpdateVolume();
             }
 
             isGearDown = Util.GearIsDown(tools.GetLowestGear());
             float gearHeightMeters = tools.GetGearHeightFromGround();
 
             // height in meters/feet
-            if (Settings.UnitOfAltitude.FOOT == Settings.unitOfAltitude)
+            if (UnitOfAltitude.FOOT == Settings.unitOfAltitude)
             {
                 gearHeight = gearHeightMeters * M_TO_FT;
                 altitude = (float)(FlightGlobals.ship_altitude * M_TO_FT);
@@ -196,9 +197,9 @@ namespace KSP_GPWS
                 { }
                 else if (checkMode_6())  // Advisory Callout
                 { }
-                else if (!tools.IsPlaying())
+                else if (!Util.audio.IsPlaying())
                 {
-                    Util.MarkNotPlaying();
+                    Util.audio.MarkNotPlaying();
                 }
             }
 
@@ -231,7 +232,7 @@ namespace KSP_GPWS
                     if (vSpeed > maxVSpeedPullUp)
                     {
                         // play sound
-                        tools.PlaySound(Util.KindOfSound.SINK_RATE_PULL_UP);
+                        Util.audio.PlaySound(KindOfSound.SINK_RATE_PULL_UP);
                         return true;
                     }
                     // sink rate
@@ -239,7 +240,7 @@ namespace KSP_GPWS
                     if (vSpeed > maxVSpeedSinkRate)
                     {
                         // play sound
-                        tools.PlaySound(Util.KindOfSound.SINK_RATE);
+                        Util.audio.PlaySound(KindOfSound.SINK_RATE);
                         return true;
                     }
                 }
@@ -268,7 +269,7 @@ namespace KSP_GPWS
                         if (vSpeed > maxVSpeedPullUp)
                         {
                             // play sound
-                            tools.PlaySound(Util.KindOfSound.TERRAIN_PULL_UP);
+                            Util.audio.PlaySound(KindOfSound.TERRAIN_PULL_UP);
                             return true;
                         }
                         // terrain, terrain
@@ -276,7 +277,7 @@ namespace KSP_GPWS
                         if (vSpeed > maxVSpeedTerrain)
                         {
                             // play sound
-                            tools.PlaySound(Util.KindOfSound.TERRAIN);
+                            Util.audio.PlaySound(KindOfSound.TERRAIN);
                             return true;
                         }
                     }
@@ -293,7 +294,7 @@ namespace KSP_GPWS
                         if (vSpeed > maxVSpeedPullUp)
                         {
                             // play sound
-                            tools.PlaySound(Util.KindOfSound.TERRAIN_PULL_UP);
+                            Util.audio.PlaySound(KindOfSound.TERRAIN_PULL_UP);
                             exitClosureToTerrainWarning = false;
                             return true;
                         }
@@ -302,20 +303,20 @@ namespace KSP_GPWS
                         if (vSpeed > maxVSpeedTerrain)
                         {
                             // play sound
-                            tools.PlaySound(Util.KindOfSound.TERRAIN);
+                            Util.audio.PlaySound(KindOfSound.TERRAIN);
                             exitClosureToTerrainWarning = false;
                             return true;
                         }
                         // continue warning if terrain clearance continues to decrease
-                        if (!tools.IsPlaying() && !exitClosureToTerrainWarning)
+                        if (!Util.audio.IsPlaying() && !exitClosureToTerrainWarning)
                         {
-                            if (tools.WasPlaying(Util.KindOfSound.TERRAIN))
+                            if (Util.audio.WasPlaying(KindOfSound.TERRAIN))
                             {
-                                tools.PlaySound(Util.KindOfSound.TERRAIN, "silence");
+                                Util.audio.PlaySound(KindOfSound.TERRAIN, "silence");
                             }
-                            else if (tools.WasPlaying(Util.KindOfSound.TERRAIN_PULL_UP))
+                            else if (Util.audio.WasPlaying(KindOfSound.TERRAIN_PULL_UP))
                             {
-                                tools.PlaySound(Util.KindOfSound.TERRAIN, "silence");
+                                Util.audio.PlaySound(KindOfSound.TERRAIN, "silence");
                             }
                         }
                     }   // End of if is descending (RA)
@@ -351,7 +352,7 @@ namespace KSP_GPWS
                         if (heightLoss > maxHeightLoss)
                         {
                             // play sound
-                            tools.PlaySound(Util.KindOfSound.DONT_SINK);
+                            Util.audio.PlaySound(KindOfSound.DONT_SINK);
                             return true;
                         }
                     }
@@ -372,13 +373,13 @@ namespace KSP_GPWS
                 if (!isGearDown && gearHeight < Settings.tooLowGearAltitude && time - takeOffTime > 15)
                 {
                     // play sound
-                    tools.PlaySound(Util.KindOfSound.TOO_LOW_GEAR);
+                    Util.audio.PlaySound(KindOfSound.TOO_LOW_GEAR);
                     return true;
                 }
                 if ((time - takeOffTime) < 5 && (gearHeight < heightJustTakeoff))
                 {
                     // play sound
-                    tools.PlaySound(Util.KindOfSound.TOO_LOW_TERRAIN);
+                    Util.audio.PlaySound(KindOfSound.TOO_LOW_TERRAIN);
                     return true;
                 }
             }
@@ -404,7 +405,7 @@ namespace KSP_GPWS
                         if (lastGearHeight > threshold && gearHeight < threshold)
                         {
                             // play sound
-                            tools.PlaySound(Util.KindOfSound.ALTITUDE_CALLOUTS, threshold.ToString());
+                            Util.audio.PlaySound(KindOfSound.ALTITUDE_CALLOUTS, threshold.ToString());
                             return true;
                         }
                     }
@@ -431,9 +432,9 @@ namespace KSP_GPWS
                     if (bankAngle > maxBankAngle)
                     {
                         // play sound
-                        if (!tools.IsPlaying(Util.KindOfSound.BANK_ANGLE))
+                        if (!Util.audio.IsPlaying(KindOfSound.BANK_ANGLE))
                         {
-                            tools.PlaySound(Util.KindOfSound.BANK_ANGLE);
+                            Util.audio.PlaySound(KindOfSound.BANK_ANGLE);
                         }
                         return true;
                     }
@@ -456,7 +457,7 @@ namespace KSP_GPWS
                         {
                             if (Math.Abs(vessel.altitude - activeVessel.altitude) < 600 / M_TO_FT)
                             {
-                                tools.PlaySound(Util.KindOfSound.TRAFFIC);
+                                Util.audio.PlaySound(KindOfSound.TRAFFIC);
                                 return true;
                             }
                         }
@@ -464,7 +465,7 @@ namespace KSP_GPWS
                         {
                             if (Math.Abs(vessel.altitude - activeVessel.altitude) < 850 / M_TO_FT)
                             {
-                                tools.PlaySound(Util.KindOfSound.TRAFFIC);
+                                Util.audio.PlaySound(KindOfSound.TRAFFIC);
                                 return true;
                             }
                         }
