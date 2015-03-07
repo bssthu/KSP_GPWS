@@ -17,7 +17,7 @@ namespace KSP_GPWS
 
         public void Awake()
         {
-            if (!Settings.useBlizzy78Toolbar)
+            if (!Settings.useBlizzy78Toolbar || !ToolbarManager.ToolbarAvailable)
             {
                 GameEvents.onGUIApplicationLauncherReady.Add(onGUIAppLauncherReady);
                 GameEvents.onGUIApplicationLauncherDestroyed.Add(onGUIAppLauncherDestroyed);
@@ -31,8 +31,8 @@ namespace KSP_GPWS
                 if (appBtn == null)
                 {
                     appBtn = ApplicationLauncher.Instance.AddModApplication(
-                            onAppLaunchToggleOn,
-                            onAppLaunchToggleOff,
+                            onAppLaunchToggleOnOff,
+                            onAppLaunchToggleOnOff,
                             () => { },
                             () => { },
                             () => { },
@@ -47,14 +47,10 @@ namespace KSP_GPWS
             }
         }
 
-        private void onAppLaunchToggleOn()
+        private void onAppLaunchToggleOnOff()
         {
-            SettingGUI.toggleSettingGUI(true);
-        }
-
-        private void onAppLaunchToggleOff()
-        {
-            SettingGUI.toggleSettingGUI(false);
+            SettingGUI.toggleSettingGUI();
+            appBtn.SetFalse(false);
         }
 
         public void onGUIAppLauncherDestroyed()
