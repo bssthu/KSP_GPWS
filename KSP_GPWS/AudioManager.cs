@@ -13,11 +13,11 @@ namespace KSP_GPWS
 {
     public class AudioManager
     {
-        private GameObject audioPlayer = new GameObject();
+        private GameObject audioPlayer;
         private string audioPrefix = "GPWS/Sounds";
         public float Volume { get; set; }
 
-        private AudioSource asGPWS = new AudioSource();
+        private AudioSource asGPWS;
         private float lastPlayTime = 0.0f;
 
         public KindOfSound kindOfSound
@@ -37,6 +37,14 @@ namespace KSP_GPWS
         {
             Volume = GameSettings.VOICE_VOLUME;
 
+            if (audioPlayer == null)
+            {
+                audioPlayer = new GameObject();
+            }
+            if (asGPWS == null)
+            {
+                asGPWS = new AudioSource();
+            }
             asGPWS = audioPlayer.AddComponent<AudioSource>();
             asGPWS.volume = Volume;
             asGPWS.panLevel = 0;

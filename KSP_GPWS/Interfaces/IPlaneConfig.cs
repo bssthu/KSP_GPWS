@@ -10,7 +10,7 @@ using KSP_GPWS.SimpleTypes;
 
 namespace KSP_GPWS.Interfaces
 {
-    public interface IPlaneConfig
+    public interface IPlaneConfig : IConfigNode
     {
         bool EnableSystem { get; set; }
         float Volume { get; set; }

@@ -15,30 +15,9 @@ namespace KSP_GPWS
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class GPWSPlane : UnityEngine.MonoBehaviour, IPlaneConfig
     {
-        #region IPlaneConfig Members
-        public bool EnableSystem { get; set; }
-        public float Volume { get; set; }
-        public bool EnableDescentRate { get; set; }
-        public bool EnableClosureToTerrain { get; set; }
-        public bool EnableAltitudeLoss { get; set; }
-        public bool EnableTerrainClearance { get; set; }
-        public bool EnableAltitudeCallouts { get; set; }
-        public bool EnableBankAngle { get; set; }
-        public bool EnableTraffic { get; set; }
-
-        public float DescentRateFactor { get; set; }
-        public float TooLowGearAltitude { get; set; }
-        public int[] AltitudeArray { get; set; }
-
-        /// <summary>
-        /// use meters or feet, feet is recommanded.
-        /// </summary>
-        public UnitOfAltitude UnitOfAltitude { get; set; }
-        #endregion
-
         const float M_TO_FT = 3.2808399f;
 
-        private Util tools = new Util();
+        private List<GPWSGear> gears = new List<GPWSGear>();     // parts with module "GPWSGear"
 
         private Vessel activeVessel = FlightGlobals.ActiveVessel;
 
@@ -71,13 +50,78 @@ namespace KSP_GPWS
 
         private bool exitClosureToTerrainWarning = false;
 
-        public GPWSPlane()
+        #region IPlaneConfig Members
+        public bool EnableSystem { get; set; }
+        public float Volume { get; set; }
+        public bool EnableDescentRate { get; set; }
+        public bool EnableClosureToTerrain { get; set; }
+        public bool EnableAltitudeLoss { get; set; }
+        public bool EnableTerrainClearance { get; set; }
+        public bool EnableAltitudeCallouts { get; set; }
+        public bool EnableBankAngle { get; set; }
+        public bool EnableTraffic { get; set; }
+
+        public float DescentRateFactor { get; set; }
+        public float TooLowGearAltitude { get; set; }
+        public int[] AltitudeArray { get; set; }
+
+        /// <summary>
+        /// use meters or feet, feet is recommanded.
+        /// </summary>
+        public UnitOfAltitude UnitOfAltitude { get; set; }
+        #endregion
+
+        #region IConfigNode Members
+
+        public void Load(ConfigNode node)
         {
-            Settings.InitializePlaneConfig(this as IPlaneConfig);
+            EnableSystem = Util.ConvertValue<bool>(node, "EnableSystem");
+            Volume = Util.ConvertValue<float>(node, "Volume");
+            EnableDescentRate = Util.ConvertValue<bool>(node, "EnableDescentRate");
+            EnableClosureToTerrain = Util.ConvertValue<bool>(node, "EnableClosureToTerrain");
+            EnableAltitudeLoss = Util.ConvertValue<bool>(node, "EnableAltitudeLoss");
+            EnableTerrainClearance = Util.ConvertValue<bool>(node, "EnableTerrainClearance");
+            EnableAltitudeCallouts = Util.ConvertValue<bool>(node, "EnableAltitudeCallouts");
+            EnableBankAngle = Util.ConvertValue<bool>(node, "EnableBankAngle");
+            EnableTraffic = Util.ConvertValue<bool>(node, "EnableTraffic");
+
+            DescentRateFactor = Util.ConvertValue<float>(node, "DescentRateFactor");
+            TooLowGearAltitude = Util.ConvertValue<float>(node, "TooLowGearAltitude");
+            if (node.HasValue("AltitudeArray"))
+            {
+                String[] intstrings = node.GetValue("AltitudeArray").Split(',');
+                if (intstrings.Length > 0)
+                {
+                    int id = 0;
+                    int[] tempAlt = new int[intstrings.Length];
+                    for (int j = 0; j < intstrings.Length; j++)
+                    {
+                        if (int.TryParse(intstrings[j], out tempAlt[id]))
+                        {
+                            id++;
+                        }
+                    }
+                    AltitudeArray = new int[id];
+                    for (int j = 0; j < id; j++)
+                    {
+                        AltitudeArray[j] = tempAlt[j];
+                    }
+                }
+            }
+            UnitOfAltitude = Util.ConvertValue<UnitOfAltitude>(node, "UnitOfAltitude");
         }
+
+        public void Save(ConfigNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
 
         public void Awake()
         {
+            Settings.InitializePlaneConfig(this as IPlaneConfig);
+
             // init curves, points are not accurate
             sinkRateCurve.Add(50, -1000);
             sinkRateCurve.Add(2500, -5000);
@@ -112,11 +156,11 @@ namespace KSP_GPWS
             Util.Log("Start");
             Util.audio.AudioInitialize();
 
-            GameEvents.onVesselChange.Add(tools.FindGears);
+            GameEvents.onVesselChange.Add(OnVesselChange);
             activeVessel = FlightGlobals.ActiveVessel;
             if (activeVessel != null)
             {
-                tools.FindGears(activeVessel);
+                Util.FindGears(activeVessel, ref gears);
             }
 
             // init
@@ -128,6 +172,11 @@ namespace KSP_GPWS
             lastTime = t0;
             heightJustTakeoff = 0.0f;
             exitClosureToTerrainWarning = false;
+        }
+
+        private void OnVesselChange(Vessel v)
+        {
+            Util.FindGears(v, ref gears);
         }
 
         private bool preUpdate()
@@ -156,7 +205,7 @@ namespace KSP_GPWS
             }
 
             // check gear
-            if (tools.gearList.Count <= 0)
+            if (gears.Count <= 0)
             {
                 Util.audio.SetUnavailable();
                 return false;
@@ -196,8 +245,8 @@ namespace KSP_GPWS
                 Util.audio.UpdateVolume();
             }
 
-            isGearDown = Util.GearIsDown(tools.GetLowestGear());
-            float gearHeightMeters = tools.GetGearHeightFromGround();
+            isGearDown = Util.GearIsDown(Util.GetLowestGear(gears));
+            float gearHeightMeters = Util.GetGearHeightFromGround(gears);
 
             // height in meters/feet
             if (UnitOfAltitude.FOOT == UnitOfAltitude)
@@ -504,8 +553,8 @@ namespace KSP_GPWS
 
         public void OnDestroy()
         {
-            GameEvents.onVesselChange.Remove(tools.FindGears);
-            tools.gearList.Clear();
+            GameEvents.onVesselChange.Remove(OnVesselChange);
+            gears.Clear();
         }
     }
 }

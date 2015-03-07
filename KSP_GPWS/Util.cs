@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -11,10 +12,8 @@ using KSP_GPWS.SimpleTypes;
 
 namespace KSP_GPWS
 {
-    public class Util
+    public static class Util
     {
-        public List<GPWSGear> gearList = new List<GPWSGear>();     // parts with module "GPWSGear"
-
         // Audio
         public static AudioManager audio = new AudioManager();
 
@@ -27,9 +26,43 @@ namespace KSP_GPWS
             ScreenMessages.PostScreenMessage(screenMsg);
         }
 
-        public void FindGears(Vessel v)
+        public static T ConvertValue<T>(ConfigNode node, String key, T def = default(T))
         {
-            gearList.Clear();
+            T value;
+            return TryConvertValue(node, key, out value) ? value : def;
+        }
+
+        public static void ConvertValue<T>(ConfigNode node, String key, ref T value)
+        {
+            value = ConvertValue(node, key, value);
+        }
+
+        public static bool TryConvertValue<T>(ConfigNode node, String key, out T value)
+        {
+            value = default(T);
+
+            if (!node.HasValue(key))
+            {
+                return false;
+            }
+
+            String str = node.GetValue(key);
+            var typeConverter = TypeDescriptor.GetConverter(typeof(T));
+
+            try
+            {
+                value = (T)typeConverter.ConvertFromInvariantString(str);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public static void FindGears(Vessel v, ref List<GPWSGear> gears)
+        {
+            gears.Clear();
 
             if (null == v)
             {
@@ -41,23 +74,23 @@ namespace KSP_GPWS
                 Part p = v.parts[i];
                 if (p.Modules.Contains("GPWSGear"))
                 {
-                    gearList.Add(p.Modules["GPWSGear"] as GPWSGear);
+                    gears.Add(p.Modules["GPWSGear"] as GPWSGear);
                     Log(String.Format("find {0}", p.name));
                 }
             }
         }
 
-        public Part GetLowestGear()
+        public static Part GetLowestGear(List<GPWSGear> gears)
         {
-            if (gearList.Count <= 0)    // no vessel
+            if (gears.Count <= 0)    // no vessel
             {
                 return null;
             }
-            Part lowestGearPart = gearList[0].part;
+            Part lowestGearPart = gears[0].part;
             float lowestGearAlt = float.PositiveInfinity;
-            for (int i = 0; i < gearList.Count; i++)    // find lowest gear
+            for (int i = 0; i < gears.Count; i++)    // find lowest gear
             {
-                Part p = gearList[i].part;
+                Part p = gears[i].part;
                 // pos of part, rotate to fit ground coord.
                 Vector3 rotatedPos = p.vessel.srfRelRotation * p.orgPos;
                 float gearAltitude = (float)(FlightGlobals.ActiveVessel.altitude - rotatedPos.z);
@@ -107,14 +140,14 @@ namespace KSP_GPWS
         /// return height from surface to the lowest landing gear, in meters
         /// </summary>
         /// <returns></returns>
-        public float GetGearHeightFromGround()
+        public static float GetGearHeightFromGround(List<GPWSGear> gears)
         {
-            if (gearList.Count <= 0)    // no vessel
+            if (gears.Count <= 0)    // no vessel
             {
                 return float.PositiveInfinity;
             }
 
-            Vessel vessel = gearList[0].part.vessel;
+            Vessel vessel = gears[0].part.vessel;
             if (FlightGlobals.ActiveVessel != vessel)   // not right vessel?
             {
                 return float.PositiveInfinity;
@@ -127,12 +160,12 @@ namespace KSP_GPWS
             }
             float radarAltitude = (float)vessel.altitude - terrainHeight;      // from vessel to surface, in meters
 
-            Part lowestGearPart = gearList[0].part;
+            Part lowestGearPart = gears[0].part;
             // height from terrain to gear
             float lowestGearRA = float.PositiveInfinity;
-            for (int i = 0; i < gearList.Count; i++)    // find lowest gear
+            for (int i = 0; i < gears.Count; i++)    // find lowest gear
             {
-                Part p = gearList[i].part;
+                Part p = gears[i].part;
                 // pos of part, rotate to fit ground coord.
                 Vector3 rotatedPos = p.vessel.srfRelRotation * p.orgPos;
                 float gearRadarAltitude = radarAltitude - rotatedPos.z;
@@ -148,7 +181,7 @@ namespace KSP_GPWS
 
         public static void Log(String msg)
         {
-            UnityEngine.Debug.Log("[GPWS] " + msg);
+            UnityEngine.Debug.Log("[GPWS]Info: " + msg);
         }
     }
 }
