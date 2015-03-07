@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -73,53 +74,20 @@ namespace KSP_GPWS
         {
             foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("GPWS_SETTINGS"))
             {
-                if (node.HasValue("name") && node.GetValue("name") == "gpwsSettings")
+                if (ConvertValue(node, "name", "") == "gpwsSettings")
                 {
-                    if (node.HasValue("enableSystem"))
-                    {
-                        bool.TryParse(node.GetValue("enableSystem"), out enableSystem);
-                    }
-                    if (node.HasValue("volume"))
-                    {
-                        float.TryParse(node.GetValue("volume"), out volume);
-                    }
-                    if (node.HasValue("enableDescentRate"))
-                    {
-                        bool.TryParse(node.GetValue("enableDescentRate"), out enableDescentRate);
-                    }
-                    if (node.HasValue("enableClosureToTerrain"))
-                    {
-                        bool.TryParse(node.GetValue("enableClosureToTerrain"), out enableClosureToTerrain);
-                    }
-                    if (node.HasValue("enableAltitudeLoss"))
-                    {
-                        bool.TryParse(node.GetValue("enableAltitudeLoss"), out enableAltitudeLoss);
-                    }
-                    if (node.HasValue("enableTerrainClearance"))
-                    {
-                        bool.TryParse(node.GetValue("enableTerrainClearance"), out enableTerrainClearance);
-                    }
-                    if (node.HasValue("enableAltitudeCallouts"))
-                    {
-                        bool.TryParse(node.GetValue("enableAltitudeCallouts"), out enableAltitudeCallouts);
-                    }
-                    if (node.HasValue("enableBankAngle"))
-                    {
-                        bool.TryParse(node.GetValue("enableBankAngle"), out enableBankAngle);
-                    }
-                    if (node.HasValue("enableTraffic"))
-                    {
-                        bool.TryParse(node.GetValue("enableTraffic"), out enableTraffic);
-                    }
+                    ConvertValue(node, "enableSystem", ref enableSystem);
+                    ConvertValue(node, "volume", ref volume);
+                    ConvertValue(node, "enableDescentRate", ref enableDescentRate);
+                    ConvertValue(node, "enableClosureToTerrain", ref enableClosureToTerrain);
+                    ConvertValue(node, "enableAltitudeLoss", ref enableAltitudeLoss);
+                    ConvertValue(node, "enableTerrainClearance", ref enableTerrainClearance);
+                    ConvertValue(node, "enableAltitudeCallouts", ref enableAltitudeCallouts);
+                    ConvertValue(node, "enableBankAngle", ref enableBankAngle);
+                    ConvertValue(node, "enableTraffic", ref enableTraffic);
 
-                    if (node.HasValue("descentRateFactor"))
-                    {
-                        float.TryParse(node.GetValue("descentRateFactor"), out descentRateFactor);
-                    }
-                    if (node.HasValue("tooLowGearAltitude"))
-                    {
-                        float.TryParse(node.GetValue("tooLowGearAltitude"), out tooLowGearAltitude);
-                    }
+                    ConvertValue(node, "descentRateFactor", ref descentRateFactor);
+                    ConvertValue(node, "tooLowGearAltitude", ref tooLowGearAltitude);
                     if (node.HasValue("altitudeArray"))
                     {
                         String[] intstrings = node.GetValue("altitudeArray").Split(',');
@@ -141,23 +109,9 @@ namespace KSP_GPWS
                             }
                         }
                     }
-                    if (node.HasValue("unitOfAltitude"))
-                    {
-                        try
-                        {
-                            unitOfAltitude = (UnitOfAltitude)Enum.Parse(typeof(UnitOfAltitude),
-                                node.GetValue("unitOfAltitude"), true);
-                        }
-                        catch (Exception ex)
-                        {
-                            Tools.Log("Error: " + ex.Message);
-                        }
-                    }
+                    ConvertValue(node, "unitOfAltitude", ref unitOfAltitude);
 
-                    if (node.HasValue("useBlizzy78Toolbar"))
-                    {
-                        bool.TryParse(node.GetValue("useBlizzy78Toolbar"), out useBlizzy78Toolbar);
-                    }
+                    ConvertValue(node, "useBlizzy78Toolbar", ref useBlizzy78Toolbar);
                 }   // End of has value "name"
             }
             // check legality
@@ -165,6 +119,40 @@ namespace KSP_GPWS
             descentRateFactor = Math.Min(descentRateFactor, 10.0f);
             volume = Math.Max(volume, 0.0f);
             volume = Math.Min(volume, 1.0f);
+        }
+
+        private static T ConvertValue<T>(ConfigNode node, String key, T def = default(T))
+        {
+            T value;
+            return TryConvertValue(node, key, out value) ? value : def;
+        }
+
+        private static void ConvertValue<T>(ConfigNode node, String key, ref T value)
+        {
+            value = ConvertValue(node, key, value);
+        }
+
+        private static bool TryConvertValue<T>(ConfigNode node, String key, out T value)
+        {
+            value = default(T);
+
+            if (!node.HasValue(key))
+            {
+                return false;
+            }
+
+            String str = node.GetValue(key);
+            var typeConverter = TypeDescriptor.GetConverter(typeof(T));
+
+            try
+            {
+                value = (T)typeConverter.ConvertFromInvariantString(str);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         private static void loadFromXML()
