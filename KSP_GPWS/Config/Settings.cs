@@ -31,35 +31,31 @@ namespace KSP_GPWS
 
     static class Settings
     {
-        #region from_file
-
-        public static bool enableSystem = true;
-        public static float volume = 0.5f;
-        public static bool enableDescentRate = true;
-        public static bool enableClosureToTerrain = true;
-        public static bool enableAltitudeLoss = true;
-        public static bool enableTerrainClearance = true;
-        public static bool enableAltitudeCallouts = true;
-        public static bool enableBankAngle = false;
-        public static bool enableTraffic = true;
-
-        public static float descentRateFactor = 1.0f;
-        public static float tooLowGearAltitude = 500.0f;
-        public static int[] altitudeArray = { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
-        public static UnitOfAltitude unitOfAltitude = UnitOfAltitude.FOOT;    // use meters or feet, feet is recommanded.
-
         public static bool useBlizzy78Toolbar = false;
-
-        #endregion
-
-        #region in_xml_file
+        public static IPlaneConfig PlaneConfig { get; private set; }
 
         public static Rect guiwindowPosition = new Rect(100, 100, 100, 50);
         public static bool showConfigs = true;  // show lower part of the setting GUI
         public static bool guiIsActive = false;
 
-        #endregion
+        public static void InitializePlaneConfig(IPlaneConfig planeConfig)
+        {
+            PlaneConfig = planeConfig;
+            PlaneConfig.EnableSystem = true;
+            PlaneConfig.Volume = 0.5f;
+            PlaneConfig.EnableDescentRate = true;
+            PlaneConfig.EnableClosureToTerrain = true;
+            PlaneConfig.EnableAltitudeLoss = true;
+            PlaneConfig.EnableTerrainClearance = true;
+            PlaneConfig.EnableAltitudeCallouts = true;
+            PlaneConfig.EnableBankAngle = false;
+            PlaneConfig.EnableTraffic = true;
 
+            PlaneConfig.DescentRateFactor = 1.0f;
+            PlaneConfig.TooLowGearAltitude = 500.0f;
+            PlaneConfig.AltitudeArray = new int[] { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
+            PlaneConfig.UnitOfAltitude = UnitOfAltitude.FOOT;
+        }
 
         public static void LoadSettings()
         {
@@ -73,18 +69,18 @@ namespace KSP_GPWS
             {
                 if (ConvertValue(node, "name", "") == "gpwsSettings")
                 {
-                    ConvertValue(node, "enableSystem", ref enableSystem);
-                    ConvertValue(node, "volume", ref volume);
-                    ConvertValue(node, "enableDescentRate", ref enableDescentRate);
-                    ConvertValue(node, "enableClosureToTerrain", ref enableClosureToTerrain);
-                    ConvertValue(node, "enableAltitudeLoss", ref enableAltitudeLoss);
-                    ConvertValue(node, "enableTerrainClearance", ref enableTerrainClearance);
-                    ConvertValue(node, "enableAltitudeCallouts", ref enableAltitudeCallouts);
-                    ConvertValue(node, "enableBankAngle", ref enableBankAngle);
-                    ConvertValue(node, "enableTraffic", ref enableTraffic);
+                    PlaneConfig.EnableSystem = ConvertValue<bool>(node, "enableSystem");
+                    PlaneConfig.Volume = ConvertValue<float>(node, "volume");
+                    PlaneConfig.EnableDescentRate = ConvertValue<bool>(node, "enableDescentRate");
+                    PlaneConfig.EnableClosureToTerrain = ConvertValue<bool>(node, "enableClosureToTerrain");
+                    PlaneConfig.EnableAltitudeLoss = ConvertValue<bool>(node, "enableAltitudeLoss");
+                    PlaneConfig.EnableTerrainClearance = ConvertValue<bool>(node, "enableTerrainClearance");
+                    PlaneConfig.EnableAltitudeCallouts = ConvertValue<bool>(node, "enableAltitudeCallouts");
+                    PlaneConfig.EnableBankAngle = ConvertValue<bool>(node, "enableBankAngle");
+                    PlaneConfig.EnableTraffic = ConvertValue<bool>(node, "enableTraffic");
 
-                    ConvertValue(node, "descentRateFactor", ref descentRateFactor);
-                    ConvertValue(node, "tooLowGearAltitude", ref tooLowGearAltitude);
+                    PlaneConfig.DescentRateFactor = ConvertValue<float>(node, "descentRateFactor");
+                    PlaneConfig.TooLowGearAltitude = ConvertValue<float>(node, "tooLowGearAltitude");
                     if (node.HasValue("altitudeArray"))
                     {
                         String[] intstrings = node.GetValue("altitudeArray").Split(',');
@@ -99,23 +95,23 @@ namespace KSP_GPWS
                                     id++;
                                 }
                             }
-                            altitudeArray = new int[id];
+                            PlaneConfig.AltitudeArray = new int[id];
                             for (int j = 0; j < id; j++)
                             {
-                                altitudeArray[j] = tempAlt[j];
+                                PlaneConfig.AltitudeArray[j] = tempAlt[j];
                             }
                         }
                     }
-                    ConvertValue(node, "unitOfAltitude", ref unitOfAltitude);
+                    PlaneConfig.UnitOfAltitude = ConvertValue<UnitOfAltitude>(node, "unitOfAltitude");
 
                     ConvertValue(node, "useBlizzy78Toolbar", ref useBlizzy78Toolbar);
                 }   // End of has value "name"
             }
             // check legality
-            descentRateFactor = Math.Max(descentRateFactor, 0.1f);
-            descentRateFactor = Math.Min(descentRateFactor, 10.0f);
-            volume = Math.Max(volume, 0.0f);
-            volume = Math.Min(volume, 1.0f);
+            PlaneConfig.DescentRateFactor = Math.Max(PlaneConfig.DescentRateFactor, 0.1f);
+            PlaneConfig.DescentRateFactor = Math.Min(PlaneConfig.DescentRateFactor, 10.0f);
+            PlaneConfig.Volume = Math.Max(PlaneConfig.Volume, 0.0f);
+            PlaneConfig.Volume = Math.Min(PlaneConfig.Volume, 1.0f);
         }
 
         private static T ConvertValue<T>(ConfigNode node, String key, T def = default(T))
@@ -176,20 +172,20 @@ namespace KSP_GPWS
 
             gpwsNode.AddValue("name", "gpwsSettings");
 
-            gpwsNode.AddValue("enableSystem", enableSystem);
-            gpwsNode.AddValue("volume", volume);
-            gpwsNode.AddValue("enableDescentRate", enableDescentRate);
-            gpwsNode.AddValue("enableClosureToTerrain", enableClosureToTerrain);
-            gpwsNode.AddValue("enableAltitudeLoss", enableAltitudeLoss);
-            gpwsNode.AddValue("enableTerrainClearance", enableTerrainClearance);
-            gpwsNode.AddValue("enableAltitudeCallouts", enableAltitudeCallouts);
-            gpwsNode.AddValue("enableBankAngle", enableBankAngle);
-            gpwsNode.AddValue("enableTraffic", enableTraffic);
+            gpwsNode.AddValue("enableSystem", PlaneConfig.EnableSystem);
+            gpwsNode.AddValue("volume", PlaneConfig.Volume);
+            gpwsNode.AddValue("enableDescentRate", PlaneConfig.EnableDescentRate);
+            gpwsNode.AddValue("enableClosureToTerrain", PlaneConfig.EnableClosureToTerrain);
+            gpwsNode.AddValue("enableAltitudeLoss", PlaneConfig.EnableAltitudeLoss);
+            gpwsNode.AddValue("enableTerrainClearance", PlaneConfig.EnableTerrainClearance);
+            gpwsNode.AddValue("enableAltitudeCallouts", PlaneConfig.EnableAltitudeCallouts);
+            gpwsNode.AddValue("enableBankAngle", PlaneConfig.EnableBankAngle);
+            gpwsNode.AddValue("enableTraffic", PlaneConfig.EnableTraffic);
 
-            gpwsNode.AddValue("descentRateFactor", descentRateFactor);
-            gpwsNode.AddValue("tooLowGearAltitude", tooLowGearAltitude);
-            gpwsNode.AddValue("altitudeArray", String.Join(",", Array.ConvertAll(altitudeArray, x => x.ToString())));
-            gpwsNode.AddValue("unitOfAltitude", unitOfAltitude);
+            gpwsNode.AddValue("descentRateFactor", PlaneConfig.DescentRateFactor);
+            gpwsNode.AddValue("tooLowGearAltitude", PlaneConfig.TooLowGearAltitude);
+            gpwsNode.AddValue("altitudeArray", String.Join(",", Array.ConvertAll(PlaneConfig.AltitudeArray, x => x.ToString())));
+            gpwsNode.AddValue("unitOfAltitude", PlaneConfig.UnitOfAltitude);
 
             gpwsNode.AddValue("useBlizzy78Toolbar", useBlizzy78Toolbar);
 

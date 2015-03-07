@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP_GPWS.SimpleTypes;
+using KSP_GPWS.Interfaces;
 
 namespace KSP_GPWS
 {
@@ -20,6 +21,8 @@ namespace KSP_GPWS
         private String tooLowGearAltitudeString;
         private bool showConfigs;
 
+        private IPlaneConfig PlaneConfig;
+
         GUIStyle toggleStyle;
         GUIStyle buttonStyle;
         GUIStyle boxStyle;
@@ -28,8 +31,8 @@ namespace KSP_GPWS
         {
             GameEvents.onShowUI.Add(ShowUI);
             GameEvents.onHideUI.Add(HideUI);
-            _descentRateFactor = (float)Math.Log10(Settings.descentRateFactor);
-            tooLowGearAltitudeString = Settings.tooLowGearAltitude.ToString();
+            _descentRateFactor = (float)Math.Log10(Settings.PlaneConfig.DescentRateFactor);
+            tooLowGearAltitudeString = Settings.PlaneConfig.TooLowGearAltitude.ToString();
             showConfigs = Settings.showConfigs;
         }
 
@@ -112,6 +115,7 @@ namespace KSP_GPWS
 
         private void SettingWindowFunc(int windowID)
         {
+            PlaneConfig = Settings.PlaneConfig;
             ConfigureStyles();
 
             // begin drawing
@@ -119,7 +123,7 @@ namespace KSP_GPWS
             GUILayout.BeginVertical();
             {
                 String text = Util.audio.kindOfSound.ToString();
-                if (!Settings.enableSystem)
+                if (!PlaneConfig.EnableSystem)
                 {
                     text = "UNAVAILABLE";
                 }
@@ -150,29 +154,29 @@ namespace KSP_GPWS
 
                 if (showConfigs)
                 {
-                    Settings.enableSystem =
-                            GUILayout.Toggle(Settings.enableSystem, "System", toggleStyle);
+                    PlaneConfig.EnableSystem =
+                            GUILayout.Toggle(PlaneConfig.EnableSystem, "System", toggleStyle);
 
                     // volume
-                    GUILayout.Label(String.Format("Volume: {0}%", Math.Round(Settings.volume * 100.0f)));
-                    Settings.volume = GUILayout.HorizontalSlider(Settings.volume, 0.0f, 1.0f);
+                    GUILayout.Label(String.Format("Volume: {0}%", Math.Round(PlaneConfig.Volume * 100.0f)));
+                    PlaneConfig.Volume = GUILayout.HorizontalSlider(PlaneConfig.Volume, 0.0f, 1.0f);
 
                     // descent rate config
-                    Settings.enableDescentRate =
-                            GUILayout.Toggle(Settings.enableDescentRate, "Descent Rate", toggleStyle);
-                    Settings.enableClosureToTerrain =
-                            GUILayout.Toggle(Settings.enableClosureToTerrain, "Closure to Terrain", toggleStyle);
-                    GUILayout.Label(String.Format("Descent Rate Factor: {0}", Settings.descentRateFactor));
+                    PlaneConfig.EnableDescentRate =
+                            GUILayout.Toggle(PlaneConfig.EnableDescentRate, "Descent Rate", toggleStyle);
+                    PlaneConfig.EnableClosureToTerrain =
+                            GUILayout.Toggle(PlaneConfig.EnableClosureToTerrain, "Closure to Terrain", toggleStyle);
+                    GUILayout.Label(String.Format("Descent Rate Factor: {0}", PlaneConfig.DescentRateFactor));
                     _descentRateFactor = GUILayout.HorizontalSlider(_descentRateFactor, -1.0f, 1.0f);
-                    Settings.descentRateFactor = (float)Math.Round(Math.Pow(10, _descentRateFactor), 1);
+                    PlaneConfig.DescentRateFactor = (float)Math.Round(Math.Pow(10, _descentRateFactor), 1);
 
                     // altitude loss
-                    Settings.enableAltitudeLoss =
-                            GUILayout.Toggle(Settings.enableAltitudeLoss, "Altitude Loss After Takeoff", toggleStyle);
+                    PlaneConfig.EnableAltitudeLoss =
+                            GUILayout.Toggle(PlaneConfig.EnableAltitudeLoss, "Altitude Loss After Takeoff", toggleStyle);
 
                     // terrain clearance
-                    Settings.enableTerrainClearance =
-                            GUILayout.Toggle(Settings.enableTerrainClearance, "Terrain Clearance", toggleStyle);
+                    PlaneConfig.EnableTerrainClearance =
+                            GUILayout.Toggle(PlaneConfig.EnableTerrainClearance, "Terrain Clearance", toggleStyle);
                     GUILayout.BeginHorizontal();
                     {
                         GUILayout.Label("Gear Alt");
@@ -183,16 +187,16 @@ namespace KSP_GPWS
                     GUILayout.EndHorizontal();
 
                     // altitude
-                    Settings.enableAltitudeCallouts =
-                            GUILayout.Toggle(Settings.enableAltitudeCallouts, "Altitude Callouts", toggleStyle);
+                    PlaneConfig.EnableAltitudeCallouts =
+                            GUILayout.Toggle(PlaneConfig.EnableAltitudeCallouts, "Altitude Callouts", toggleStyle);
 
                     // bank angle
-                    Settings.enableTraffic =
-                            GUILayout.Toggle(Settings.enableTraffic, "Traffic", toggleStyle);
+                    PlaneConfig.EnableTraffic =
+                            GUILayout.Toggle(PlaneConfig.EnableTraffic, "Traffic", toggleStyle);
 
                     // traffic
-                    Settings.enableBankAngle =
-                            GUILayout.Toggle(Settings.enableBankAngle, "Bank Angle", toggleStyle);
+                    PlaneConfig.EnableBankAngle =
+                            GUILayout.Toggle(PlaneConfig.EnableBankAngle, "Bank Angle", toggleStyle);
 
                     // save
                     if (GUILayout.Button("Save", buttonStyle, GUILayout.Width(200), GUILayout.Height(30)))
@@ -200,7 +204,7 @@ namespace KSP_GPWS
                         float newTooLowGearAltitude;
                         if (float.TryParse(tooLowGearAltitudeString, out newTooLowGearAltitude))
                         {
-                            Settings.tooLowGearAltitude = newTooLowGearAltitude;
+                            PlaneConfig.TooLowGearAltitude = newTooLowGearAltitude;
                         }
                         // save
                         Settings.SaveSettings();
