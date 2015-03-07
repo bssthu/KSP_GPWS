@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace KSP_GPWS
 {
-    public class Tools
+    public class Util
     {
         public List<GPWSGear> gearList = new List<GPWSGear>();     // parts with module "GPWSGear"
 
@@ -117,23 +117,23 @@ namespace KSP_GPWS
                     }
                     break;
                 case KindOfSound.TOO_LOW_GEAR:
-                    if (!IsPlaying(Tools.KindOfSound.TOO_LOW_GEAR)
-                            && !IsPlaying(Tools.KindOfSound.TOO_LOW_TERRAIN)
-                            && !IsPlaying(Tools.KindOfSound.TOO_LOW_FLAPS))
+                    if (!IsPlaying(Util.KindOfSound.TOO_LOW_GEAR)
+                            && !IsPlaying(Util.KindOfSound.TOO_LOW_TERRAIN)
+                            && !IsPlaying(Util.KindOfSound.TOO_LOW_FLAPS))
                     {
                         PlayOneShot(kind, "too_low_gear");
                     }
                     break;
                 case KindOfSound.TOO_LOW_TERRAIN:
-                    if (!IsPlaying(Tools.KindOfSound.TOO_LOW_GEAR)
-                            && !IsPlaying(Tools.KindOfSound.TOO_LOW_TERRAIN)
-                            && !IsPlaying(Tools.KindOfSound.TOO_LOW_FLAPS))
+                    if (!IsPlaying(Util.KindOfSound.TOO_LOW_GEAR)
+                            && !IsPlaying(Util.KindOfSound.TOO_LOW_TERRAIN)
+                            && !IsPlaying(Util.KindOfSound.TOO_LOW_FLAPS))
                     {
                         PlayOneShot(kind, "too_low_terrain");
                     }
                     break;
                 case KindOfSound.TRAFFIC:
-                    if (!IsPlaying(Tools.KindOfSound.TRAFFIC))
+                    if (!IsPlaying(Util.KindOfSound.TRAFFIC))
                     {
                         PlayOneShot(kind, "traffic");
                     }
@@ -142,7 +142,7 @@ namespace KSP_GPWS
                     PlayOneShot(kind, "gpws" + detail);
                     break;
                 case KindOfSound.BANK_ANGLE:
-                    if (!IsPlaying(Tools.KindOfSound.BANK_ANGLE))
+                    if (!IsPlaying(Util.KindOfSound.BANK_ANGLE))
                     {
                         PlayOneShot(kind, "bank_angle");
                     }
@@ -197,7 +197,7 @@ namespace KSP_GPWS
 
         public static void MarkNotPlaying()
         {
-            kindOfSound = Tools.KindOfSound.NONE;
+            kindOfSound = Util.KindOfSound.NONE;
         }
 
         public void showScreenMessage(String msg)

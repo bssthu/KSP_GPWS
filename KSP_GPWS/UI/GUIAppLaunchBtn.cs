@@ -17,7 +17,7 @@ namespace KSP_GPWS
 
         public void Awake()
         {
-            if (!Settings.useBlizzy78Toolbar || !ToolbarManager.ToolbarAvailable)
+            if (!Settings.useBlizzy78Toolbar)
             {
                 GameEvents.onGUIApplicationLauncherReady.Add(onGUIAppLauncherReady);
                 GameEvents.onGUIApplicationLauncherDestroyed.Add(onGUIAppLauncherDestroyed);

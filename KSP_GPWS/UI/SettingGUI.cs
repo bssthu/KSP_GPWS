@@ -19,6 +19,10 @@ namespace KSP_GPWS
         private String tooLowGearAltitudeString;
         private bool showConfigs;
 
+        GUIStyle toggleStyle = new GUIStyle(GUI.skin.toggle);
+        GUIStyle buttonStyle = new GUIStyle(GUI.skin.button);
+        GUIStyle boxStyle = new GUIStyle(GUI.skin.box);
+
         public void Awake()
         {
             GameEvents.onShowUI.Add(ShowUI);
@@ -26,6 +30,23 @@ namespace KSP_GPWS
             _descentRateFactor = (float)Math.Log10(Settings.descentRateFactor);
             tooLowGearAltitudeString = Settings.tooLowGearAltitude.ToString();
             showConfigs = Settings.showConfigs;
+
+            toggleStyle.stretchHeight = true;
+            toggleStyle.stretchWidth = true;
+            toggleStyle.padding = new RectOffset(4, 4, 4, 4);
+            toggleStyle.margin = new RectOffset(4, 4, 4, 4);
+
+            buttonStyle.stretchHeight = true;
+            buttonStyle.stretchWidth = true;
+            buttonStyle.padding = new RectOffset(4, 4, 4, 4);
+            buttonStyle.margin = new RectOffset(4, 4, 4, 4);
+
+            boxStyle.stretchHeight = true;
+            boxStyle.stretchWidth = true;
+            boxStyle.padding = new RectOffset(4, 4, 4, 4);
+            boxStyle.margin = new RectOffset(4, 4, 4, 4);
+            boxStyle.richText = true;
+
         }
 
         public static void toggleSettingGUI(bool active)
@@ -76,31 +97,11 @@ namespace KSP_GPWS
 
         private void SettingWindowFunc(int windowID)
         {
-            GUIStyle toggleStyle = new GUIStyle(GUI.skin.toggle);
-            toggleStyle.stretchHeight = true;
-            toggleStyle.stretchWidth = true;
-            toggleStyle.padding = new RectOffset(4, 4, 4, 4);
-            toggleStyle.margin = new RectOffset(4, 4, 4, 4);
-
-            GUIStyle buttonStyle = new GUIStyle(GUI.skin.button);
-            buttonStyle.stretchHeight = true;
-            buttonStyle.stretchWidth = true;
-            buttonStyle.padding = new RectOffset(4, 4, 4, 4);
-            buttonStyle.margin = new RectOffset(4, 4, 4, 4);
-
-            GUIStyle boxStyle = new GUIStyle(GUI.skin.box);
-            boxStyle.stretchHeight = true;
-            boxStyle.stretchWidth = true;
-            boxStyle.padding = new RectOffset(4, 4, 4, 4);
-            boxStyle.margin = new RectOffset(4, 4, 4, 4);
-            boxStyle.richText = true;
-
-
             // begin drawing
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
             {
-                String text = Tools.kindOfSound.ToString();
+                String text = Util.kindOfSound.ToString();
                 if (!Settings.enableSystem)
                 {
                     text = "UNAVAILABLE";
@@ -115,7 +116,7 @@ namespace KSP_GPWS
                 }
                 GUILayout.Box(text, boxStyle, GUILayout.Height(30));
 
-                drawConfigUI(toggleStyle, boxStyle, buttonStyle);
+                drawConfigUI();
             }
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
@@ -123,7 +124,7 @@ namespace KSP_GPWS
             GUI.DragWindow();   // allow moving window
         }
 
-        private void drawConfigUI(GUIStyle toggleStyle, GUIStyle boxStyle, GUIStyle buttonStyle)
+        private void drawConfigUI()
         {
             GUILayout.BeginVertical();
             {
