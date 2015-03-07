@@ -42,7 +42,7 @@ namespace KSP_GPWS
                 }
                 if (Settings.guiIsActive)
                 {
-                    appBtn.SetTrue();
+                    SettingGUI.toggleSettingGUI(true);
                 }
             }
         }
