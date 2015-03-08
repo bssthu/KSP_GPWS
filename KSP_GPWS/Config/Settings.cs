@@ -34,35 +34,53 @@ namespace KSP_GPWS
     {
         public static float Volume { get; set; }
         public static bool UseBlizzy78Toolbar = false;
-        public static IPlaneConfig PlaneConfig { get; private set; }
-        private static ConfigNode planeConfigNode;
+
+        public static IPlaneConfig PlaneConfig
+        {
+            get
+            {
+                return _planeConfig;
+            }
+            set
+            {
+                if (_planeConfig == null)
+                {
+                    _planeConfig = value;
+                    if (planeConfigNode != null)
+                    {
+                        (_planeConfig as IConfigNode).Load(planeConfigNode);
+                    }
+                }
+            }
+        }
+        private static IPlaneConfig _planeConfig = null;
+
+        public static ILanderConfig LanderConfig
+        {
+            get
+            {
+                return _landerConfig;
+            }
+            set
+            {
+                if (_landerConfig == null)
+                {
+                    _landerConfig = value;
+                    if (landerConfigNode != null)
+                    {
+                        (_landerConfig as IConfigNode).Load(landerConfigNode);
+                    }
+                }
+            }
+        }
+        private static ILanderConfig _landerConfig = null;
+
+        private static ConfigNode planeConfigNode = null;
+        private static ConfigNode landerConfigNode = null;
 
         public static Rect guiwindowPosition = new Rect(100, 100, 100, 50);
         public static bool showConfigs = true;  // show lower part of the setting GUI
         public static bool guiIsActive = false;
-
-        public static void InitializePlaneConfig(IPlaneConfig planeConfig)
-        {
-            PlaneConfig = planeConfig;
-            PlaneConfig.EnableSystem = true;
-            PlaneConfig.EnableDescentRate = true;
-            PlaneConfig.EnableClosureToTerrain = true;
-            PlaneConfig.EnableAltitudeLoss = true;
-            PlaneConfig.EnableTerrainClearance = true;
-            PlaneConfig.EnableAltitudeCallouts = true;
-            PlaneConfig.EnableBankAngle = false;
-            PlaneConfig.EnableTraffic = true;
-
-            PlaneConfig.DescentRateFactor = 1.0f;
-            PlaneConfig.TooLowGearAltitude = 500.0f;
-            PlaneConfig.AltitudeArray = new int[] { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
-            PlaneConfig.UnitOfAltitude = UnitOfAltitude.FOOT;
-
-            if (planeConfigNode != null)
-            {
-                (planeConfig as IConfigNode).Load(planeConfigNode);
-            }
-        }
 
         public static void LoadSettings()
         {
@@ -79,6 +97,10 @@ namespace KSP_GPWS
                     if (node.HasNode("Plane"))
                     {
                         planeConfigNode = node.GetNode("Plane");
+                    }
+                    if (node.HasNode("Lander"))
+                    {
+                        landerConfigNode = node.GetNode("Lander");
                     }
 
                     Volume = Util.ConvertValue<float>(node, "Volume");

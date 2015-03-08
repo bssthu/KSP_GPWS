@@ -14,6 +14,10 @@ namespace KSP_GPWS.Impl
     {
         private IGPWSCommonData CommonData = null;
 
+        #region ILanderConfig
+
+        #endregion
+
         #region IConfigNode Members
 
         public void Load(ConfigNode node)
@@ -28,6 +32,10 @@ namespace KSP_GPWS.Impl
 
         #endregion
 
+        public void InitializeConfig()
+        {
+        }
+
         public void Initialize(IGPWSCommonData data)
         {
             CommonData = data;
@@ -35,6 +43,12 @@ namespace KSP_GPWS.Impl
 
         public bool PreUpdate()
         {
+            // on surface
+            if (CommonData.ActiveVessel.Landed || CommonData.ActiveVessel.Splashed)
+            {
+                Util.audio.MarkNotPlaying();
+                return false;
+            }
             return true;
         }
 

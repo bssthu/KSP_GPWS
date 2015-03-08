@@ -34,23 +34,26 @@ namespace KSP_GPWS
 
         public float lastTime { get; private set; }
 
-        private static GPWSPlane Plane;
+        private static GPWSPlane Plane = null;
+        private static GPWSLander Lander = null;
 
-        private static bool InitializeGPWSFunctionsCalled = false;
+        private IBasicGPWSFunction GPWSFunc;
+
         public static void InitializeGPWSFunctions()
         {
-            if (!InitializeGPWSFunctionsCalled)
+            if (Plane == null && Lander == null)    // call once
             {
-                InitializeGPWSFunctionsCalled = true;
-
                 Plane = new GPWSPlane();
-                Settings.InitializePlaneConfig(Plane as IPlaneConfig);
+                Settings.PlaneConfig = Plane as IPlaneConfig;
+                Lander = new GPWSLander();
+                Settings.LanderConfig = Lander as ILanderConfig;
             }
         }
 
         public void Awake()
         {
             Plane.Initialize(this as IGPWSCommonData);
+            Lander.Initialize(this as IGPWSCommonData);
             initializeVariables();
         }
 
@@ -76,11 +79,13 @@ namespace KSP_GPWS
             GameEvents.onVesselChange.Add(OnVesselChange);
             ActiveVessel = FlightGlobals.ActiveVessel;
             Plane.SetVesselInfo(ActiveVessel);
+            Lander.SetVesselInfo(ActiveVessel);
         }
 
         private void OnVesselChange(Vessel v)
         {
             Plane.SetVesselInfo(ActiveVessel);
+            Lander.SetVesselInfo(ActiveVessel);
         }
 
         private bool preUpdate()
@@ -106,7 +111,17 @@ namespace KSP_GPWS
                 Util.audio.UpdateVolume();
             }
 
-            if (!Plane.PreUpdate())
+            if (Plane.GearCount > 0)
+            {
+                GPWSFunc = Plane as IBasicGPWSFunction;
+            }
+            else
+            {
+                GPWSFunc = Lander as IBasicGPWSFunction;
+            }
+
+
+            if (!GPWSFunc.PreUpdate())
             {
                 return false;
             }
@@ -128,19 +143,16 @@ namespace KSP_GPWS
                 Altitude = (float)FlightGlobals.ship_altitude;
             }
 
-            Plane.UpdateGPWS();
+            GPWSFunc.UpdateGPWS();
         }
 
         public void Update()
         {
-            Util.Log("update");
             if (preUpdate())
             {
-                Util.Log("UpdateGPWS");
                 UpdateGPWS();
             }
 
-            Util.Log("saveData");
             saveData();
         }
 

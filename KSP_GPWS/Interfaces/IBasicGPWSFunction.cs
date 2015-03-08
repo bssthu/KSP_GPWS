@@ -11,6 +11,11 @@ namespace KSP_GPWS.Interfaces
 {
     interface IBasicGPWSFunction
     {
+        /// <summary>
+        /// Run once.
+        /// </summary>
+        void InitializeConfig();
+
         void Initialize(IGPWSCommonData data);
 
         bool PreUpdate();

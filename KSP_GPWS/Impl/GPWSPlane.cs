@@ -36,7 +36,16 @@ namespace KSP_GPWS.Impl
 
         private bool exitClosureToTerrainWarning = false;
 
+        public int GearCount
+        {
+            get
+            {
+                return gears.Count;
+            }
+        }
+
         #region IPlaneConfig Members
+
         public bool EnableSystem { get; set; }
         public bool EnableDescentRate { get; set; }
         public bool EnableClosureToTerrain { get; set; }
@@ -54,6 +63,7 @@ namespace KSP_GPWS.Impl
         /// use meters or feet, feet is recommanded.
         /// </summary>
         public UnitOfAltitude UnitOfAltitude { get; set; }
+
         #endregion
 
         #region IConfigNode Members
@@ -104,6 +114,23 @@ namespace KSP_GPWS.Impl
         }
 
         #endregion
+
+        public void InitializeConfig()
+        {
+            EnableSystem = true;
+            EnableDescentRate = true;
+            EnableClosureToTerrain = true;
+            EnableAltitudeLoss = true;
+            EnableTerrainClearance = true;
+            EnableAltitudeCallouts = true;
+            EnableBankAngle = false;
+            EnableTraffic = true;
+
+            DescentRateFactor = 1.0f;
+            TooLowGearAltitude = 500.0f;
+            AltitudeArray = new int[] { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
+            UnitOfAltitude = UnitOfAltitude.FOOT;
+        }
 
         public void Initialize(IGPWSCommonData data)
         {
