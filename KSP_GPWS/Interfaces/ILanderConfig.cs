@@ -17,6 +17,14 @@ namespace KSP_GPWS.Interfaces
         bool EnableHorizontalSpeed { get; set; }
         bool EnableAltitudeCallouts { get; set; }
 
+        float TouchDownSpeed { get; set; }
+        float HorizontalSpeedCheckAltitude { get; set; }
+
+        /// <summary>
+        /// max hSpeed = vSpeed * factor
+        /// </summary>
+        float HorizontalSpeedFactor { get; set; }
+
         int[] AltitudeArray { get; set; }
 
         /// <summary>

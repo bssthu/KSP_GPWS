@@ -112,6 +112,11 @@ namespace KSP_GPWS.Impl
             }
             UnitOfAltitude = Util.ConvertValue<UnitOfAltitude>(node, "UnitOfAltitude");
             // check legality
+            CheckConfigLegality();
+        }
+
+        public void CheckConfigLegality()
+        {
             DescentRateFactor = Math.Max(DescentRateFactor, 0.1f);
             DescentRateFactor = Math.Min(DescentRateFactor, 10.0f);
         }

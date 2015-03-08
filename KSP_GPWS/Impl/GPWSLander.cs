@@ -20,6 +20,10 @@ namespace KSP_GPWS.Impl
         public bool EnableDescentRate { get; set; }
         public bool EnableHorizontalSpeed { get; set; }
         public bool EnableAltitudeCallouts { get; set; }
+
+        public float TouchDownSpeed { get; set; }
+        public float HorizontalSpeedCheckAltitude { get; set; }
+        public float HorizontalSpeedFactor { get; set; }
         public int[] AltitudeArray { get; set; }
 
         /// <summary>
@@ -32,7 +36,45 @@ namespace KSP_GPWS.Impl
 
         public void Load(ConfigNode node)
         {
-            throw new NotImplementedException();
+            EnableSystem = Util.ConvertValue<bool>(node, "EnableSystem");
+            EnableDescentRate = Util.ConvertValue<bool>(node, "EnableDescentRate");
+            EnableHorizontalSpeed = Util.ConvertValue<bool>(node, "EnableHorizontalSpeed");
+            EnableAltitudeCallouts = Util.ConvertValue<bool>(node, "EnableAltitudeCallouts");
+
+            TouchDownSpeed = Util.ConvertValue<float>(node, "TouchDownSpeed");
+            HorizontalSpeedCheckAltitude = Util.ConvertValue<float>(node, "HorizontalSpeedCheckAltitude");
+            HorizontalSpeedFactor = Util.ConvertValue<float>(node, "HorizontalSpeedFactor");
+            if (node.HasValue("AltitudeArray"))
+            {
+                String[] intstrings = node.GetValue("AltitudeArray").Split(',');
+                if (intstrings.Length > 0)
+                {
+                    int id = 0;
+                    int[] tempAlt = new int[intstrings.Length];
+                    for (int j = 0; j < intstrings.Length; j++)
+                    {
+                        if (int.TryParse(intstrings[j], out tempAlt[id]))
+                        {
+                            id++;
+                        }
+                    }
+                    AltitudeArray = new int[id];
+                    for (int j = 0; j < id; j++)
+                    {
+                        AltitudeArray[j] = tempAlt[j];
+                    }
+                }
+            }
+            UnitOfAltitude = Util.ConvertValue<UnitOfAltitude>(node, "UnitOfAltitude");
+            // check legality
+            CheckConfigLegality();
+        }
+
+        public void CheckConfigLegality()
+        {
+            TouchDownSpeed = Math.Max(TouchDownSpeed, 0.1f);
+            HorizontalSpeedFactor = Math.Max(HorizontalSpeedFactor, 0.1f);
+            HorizontalSpeedFactor = Math.Min(HorizontalSpeedFactor, 3.0f);
         }
 
         public void Save(ConfigNode node)
@@ -54,6 +96,9 @@ namespace KSP_GPWS.Impl
             EnableHorizontalSpeed = true;
             EnableAltitudeCallouts = true;
 
+            TouchDownSpeed = 5;
+            HorizontalSpeedCheckAltitude = 400;
+            HorizontalSpeedFactor = 0.2f;
             AltitudeArray = new int[] { 2500, 1000, 500, 100, 50, 40, 30, 20, 10 };
             UnitOfAltitude = UnitOfAltitude.METER;
         }
