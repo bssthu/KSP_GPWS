@@ -188,11 +188,6 @@ namespace KSP_GPWS.Impl
             bankAngleCurve.Add(2450, 55);
         }
 
-        public void Dispose()
-        {
-            gears.Clear();
-        }
-
         public bool PreUpdate()
         {
             // just takeoff
@@ -231,15 +226,16 @@ namespace KSP_GPWS.Impl
 
         public void UpdateGPWS()
         {
-            float gearHeightMeters = Util.GetLowestGearRadarAltitude(gears);
+            // change RA to RA of lowest gear
+            float gearAltitudeInMeter = Util.GetLowestGearRadarAltitude(gears);
             // height in meters/feet
             if (UnitOfAltitude.FOOT == UnitOfAltitude)
             {
-                CommonData.RadarAltitude = gearHeightMeters * Util.M_TO_FT;
+                CommonData.RadarAltitude = gearAltitudeInMeter * Util.M_TO_FT;
             }
             else
             {
-                CommonData.RadarAltitude = gearHeightMeters;
+                CommonData.RadarAltitude = gearAltitudeInMeter;
             }
 
             isGearDown = Util.GearDeployed(Util.GetLowestGear(gears));
@@ -270,7 +266,7 @@ namespace KSP_GPWS.Impl
         /// SINK RATE / WOOP WOOP PULL UP
         /// </summary>
         /// <returns></returns>
-        public bool checkMode_1()
+        private bool checkMode_1()
         {
             if (EnableDescentRate)
             {
@@ -304,7 +300,7 @@ namespace KSP_GPWS.Impl
         /// TERRAIN, TERRAIN / PULL UP
         /// </summary>
         /// <returns></returns>
-        public bool checkMode_2()
+        private bool checkMode_2()
         {
             if (EnableClosureToTerrain)
             {
@@ -385,7 +381,7 @@ namespace KSP_GPWS.Impl
         /// DON'T SINK, DON'T SINK
         /// </summary>
         /// <returns></returns>
-        public bool checkMode_3()
+        private bool checkMode_3()
         {
             if (EnableAltitudeLoss)
             {
@@ -417,7 +413,7 @@ namespace KSP_GPWS.Impl
         /// TOO LOW TERRAIN / TOO LOW GEAR / TOO LOW FLAPS
         /// </summary>
         /// <returns></returns>
-        public bool checkMode_4()
+        private bool checkMode_4()
         {
             if (EnableTerrainClearance)
             {
@@ -442,7 +438,7 @@ namespace KSP_GPWS.Impl
         /// Altitude Callouts / Bank Angle Callout
         /// </summary>
         /// <returns></returns>
-        public bool checkMode_6()
+        private bool checkMode_6()
         {
             // Altitude Callouts
             if (EnableAltitudeCallouts)
@@ -485,7 +481,7 @@ namespace KSP_GPWS.Impl
             return false;
         }
 
-        public bool checkMode_Traffic()
+        private bool checkMode_Traffic()
         {
             if (EnableTraffic)
             {
@@ -523,6 +519,11 @@ namespace KSP_GPWS.Impl
             {
                 Util.UpdateGearList(v, ref gears);
             }
+        }
+
+        public void Clear()
+        {
+            gears.Clear();
         }
     }
 }

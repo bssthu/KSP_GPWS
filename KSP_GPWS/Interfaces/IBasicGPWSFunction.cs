@@ -6,11 +6,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using KSP_GPWS.SimpleTypes;
 
 namespace KSP_GPWS.Interfaces
 {
     interface IBasicGPWSFunction
     {
+        bool EnableSystem { get; set; }
+        UnitOfAltitude UnitOfAltitude { get; set; }
+
         /// <summary>
         /// Run once.
         /// </summary>
@@ -23,5 +27,7 @@ namespace KSP_GPWS.Interfaces
         void UpdateGPWS();
 
         void ChangeVessel(Vessel v);
+
+        void Clear();
     }
 }

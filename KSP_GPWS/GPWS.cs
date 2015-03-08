@@ -109,6 +109,19 @@ namespace KSP_GPWS
         private bool preUpdate()
         {
             time = Time.time - t0;
+
+            // height in meters/feet
+            if (UnitOfAltitude.FOOT == GPWSFunc.UnitOfAltitude)
+            {
+                RadarAltitude = Util.RadarAltitude(ActiveVessel) * Util.M_TO_FT;
+                Altitude = (float)(FlightGlobals.ship_altitude * Util.M_TO_FT);
+            }
+            else
+            {
+                RadarAltitude = Util.RadarAltitude(ActiveVessel);
+                Altitude = (float)FlightGlobals.ship_altitude;
+            }
+
             // check time, prevent problem
             if (time < 2.0f)
             {
@@ -155,29 +168,20 @@ namespace KSP_GPWS
 
         void UpdateGPWS()
         {
-            // height in meters/feet
-            if (UnitOfAltitude.FOOT == Settings.PlaneConfig.UnitOfAltitude)
-            {
-                RadarAltitude = Util.RadarAltitude(ActiveVessel) * Util.M_TO_FT;
-                Altitude = (float)(FlightGlobals.ship_altitude * Util.M_TO_FT);
-            }
-            else
-            {
-                RadarAltitude = Util.RadarAltitude(ActiveVessel);
-                Altitude = (float)FlightGlobals.ship_altitude;
-            }
-
             GPWSFunc.UpdateGPWS();
         }
 
         public void Update()
         {
-            if (preUpdate())
+            if (GPWSFunc.EnableSystem)
             {
-                UpdateGPWS();
-            }
+                if (preUpdate())
+                {
+                    UpdateGPWS();
+                }
 
-            saveData();
+                saveData();
+            }
         }
 
         private void saveData() // after Update
@@ -190,6 +194,8 @@ namespace KSP_GPWS
 
         public void OnDestroy()
         {
+            Plane.Clear();
+            Lander.Clear();
         }
     }
 }

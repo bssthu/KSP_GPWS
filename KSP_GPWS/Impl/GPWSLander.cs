@@ -82,9 +82,62 @@ namespace KSP_GPWS.Impl
 
         public void UpdateGPWS()
         {
+            if (CommonData.RadarAltitude > 0 && CommonData.RadarAltitude < float.PositiveInfinity)
+            {
+                if (checkMode_sinkRate())   // Decent Rate
+                { }
+                if (checkMode_hSpeed())   // Horizontal Speed
+                { }
+                else if (!Util.audio.IsPlaying())
+                {
+                    Util.audio.MarkNotPlaying();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Descent Rate
+        /// SINK RATE / MASTER WARN
+        /// </summary>
+        /// <returns></returns>
+        private bool checkMode_sinkRate()
+        {
+            if (EnableDescentRate)
+            {
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Horizontal Speed
+        /// HORIZONTAL SPEED
+        /// </summary>
+        /// <returns></returns>
+        private bool checkMode_hSpeed()
+        {
+            if (EnableHorizontalSpeed)
+            {
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Altitude Callouts
+        /// </summary>
+        /// <returns></returns>
+        private bool checkMode_altitudeCallout()
+        {
+            if (EnableAltitudeCallouts)
+            {
+            }
+            return false;
         }
 
         public void ChangeVessel(Vessel v)
+        {
+        }
+
+        public void Clear()
         {
         }
     }
