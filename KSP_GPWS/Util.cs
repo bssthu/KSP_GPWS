@@ -114,13 +114,16 @@ namespace KSP_GPWS
                 // ModuleLandingGear
                 try
                 {
-                    if (gear.Modules.Contains("ModuleLandingGear") &&
-                            gear.Modules["ModuleLandingGear"].Events["LowerLandingGear"].active)
+                    if (gear.Modules.Contains("ModuleLandingGear"))
                     {
-                        return false;  // not down
+                        ModuleLandingGear landingGear = gear.Modules["ModuleLandingGear"] as ModuleLandingGear;
+                        if (landingGear.gearState != ModuleLandingGear.GearStates.DEPLOYED)
+                        {
+                            return false;  // not down
+                        }
                     }
                 }
-                catch (Exception) { }
+                catch (Exception ex) { Util.showScreenMessage(ex.Message); }
 
                 // FSwheel
                 try

@@ -168,7 +168,8 @@ namespace KSP_GPWS.UI
                 if (vesselType != SimpleTypes.VesselType.NONE)
                 {
                     showConfigs = GUILayout.Toggle(
-                            showConfigs, String.Format("select {0} function", vesselType.ToString().ToLower()), buttonStyle, GUILayout.Width(200), GUILayout.Height(20));
+                            showConfigs, String.Format("select {0} function", vesselType.ToString().ToLower()),
+                            buttonStyle, GUILayout.Width(200), GUILayout.Height(20));
 
                     if (showConfigs)
                     {
