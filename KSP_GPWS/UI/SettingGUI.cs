@@ -19,6 +19,10 @@ namespace KSP_GPWS.UI
 
         private float _descentRateFactor;
         private String tooLowGearAltitudeString;
+
+        private String touchDownSpeedString;
+        private String horizontalSpeedCheckAltitudeString;
+
         private bool showConfigs;
 
         private IPlaneConfig PlaneConfig;
@@ -38,8 +42,12 @@ namespace KSP_GPWS.UI
             PlaneConfig = Settings.PlaneConfig;
             LanderConfig = Settings.LanderConfig;
 
-            _descentRateFactor = (float)Math.Log10(Settings.PlaneConfig.DescentRateFactor);
-            tooLowGearAltitudeString = Settings.PlaneConfig.TooLowGearAltitude.ToString();
+            _descentRateFactor = (float)Math.Log10(PlaneConfig.DescentRateFactor);
+            tooLowGearAltitudeString = PlaneConfig.TooLowGearAltitude.ToString();
+
+            touchDownSpeedString = LanderConfig.TouchDownSpeed.ToString();
+            horizontalSpeedCheckAltitudeString = LanderConfig.HorizontalSpeedCheckAltitude.ToString();
+
             showConfigs = Settings.showConfigs;
 
             vesselType = SimpleTypes.VesselType.NONE;
@@ -201,10 +209,18 @@ namespace KSP_GPWS.UI
             // save
             if (GUILayout.Button("Save", buttonStyle, GUILayout.Width(200), GUILayout.Height(30)))
             {
-                float newTooLowGearAltitude;
-                if (float.TryParse(tooLowGearAltitudeString, out newTooLowGearAltitude))
+                float newFloat;
+                if (float.TryParse(tooLowGearAltitudeString, out newFloat))
                 {
-                    PlaneConfig.TooLowGearAltitude = newTooLowGearAltitude;
+                    PlaneConfig.TooLowGearAltitude = newFloat;
+                }
+                if (float.TryParse(touchDownSpeedString, out newFloat))
+                {
+                    LanderConfig.TouchDownSpeed = newFloat;
+                }
+                if (float.TryParse(horizontalSpeedCheckAltitudeString, out newFloat))
+                {
+                    LanderConfig.HorizontalSpeedCheckAltitude = newFloat;
                 }
                 // save
                 Settings.SaveSettings();
@@ -239,7 +255,7 @@ namespace KSP_GPWS.UI
                 GUILayout.FlexibleSpace();
                 tooLowGearAltitudeString =
                         GUILayout.TextField(tooLowGearAltitudeString, GUILayout.Height(30), GUILayout.Width(80));
-                GUILayout.Label(PlaneConfig.UnitOfAltitude == UnitOfAltitude.FOOT ? "ft" : "m");
+                GUILayout.Label(Util.GetShortString(PlaneConfig.UnitOfAltitude));
             }
             GUILayout.EndHorizontal();
 
@@ -264,10 +280,31 @@ namespace KSP_GPWS.UI
             // descent rate
             LanderConfig.EnableDescentRate =
                     GUILayout.Toggle(LanderConfig.EnableDescentRate, "Descent Rate", toggleStyle);
+            GUILayout.BeginHorizontal();
+            {
+                GUILayout.Label("Final Speed");
+                GUILayout.FlexibleSpace();
+                touchDownSpeedString =
+                        GUILayout.TextField(touchDownSpeedString, GUILayout.Height(30), GUILayout.Width(80));
+                GUILayout.Label(Util.GetShortString(LanderConfig.UnitOfAltitude) + "/s");
+            }
+            GUILayout.EndHorizontal();
 
             // horizontal speed
             LanderConfig.EnableHorizontalSpeed =
                     GUILayout.Toggle(LanderConfig.EnableHorizontalSpeed, "Horizontal Speed", toggleStyle);
+            GUILayout.BeginHorizontal();
+            {
+                GUILayout.Label("vh Check Alt");
+                GUILayout.FlexibleSpace();
+                horizontalSpeedCheckAltitudeString =
+                        GUILayout.TextField(horizontalSpeedCheckAltitudeString, GUILayout.Height(30), GUILayout.Width(80));
+                GUILayout.Label(Util.GetShortString(LanderConfig.UnitOfAltitude));
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Label(String.Format("Horizontal Speed Factor: {0}", LanderConfig.HorizontalSpeedFactor));
+            LanderConfig.HorizontalSpeedFactor = (float)Math.Round(GUILayout.HorizontalSlider(LanderConfig.HorizontalSpeedFactor, 0.1f, 3.0f), 2);
 
             // altitude
             LanderConfig.EnableAltitudeCallouts =

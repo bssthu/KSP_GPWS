@@ -218,6 +218,22 @@ namespace KSP_GPWS
             return bankAngle;
         }
 
+        public static String GetShortString(UnitOfAltitude unitOfAltitude)
+        {
+            if (unitOfAltitude == UnitOfAltitude.FOOT)
+            {
+                return "ft";
+            }
+            else if (unitOfAltitude == UnitOfAltitude.METER)
+            {
+                return "m";
+            }
+            else
+            {
+                return "";
+            }
+        }
+
         public static void Log(String msg)
         {
             UnityEngine.Debug.Log("[GPWS]Info: " + msg);
