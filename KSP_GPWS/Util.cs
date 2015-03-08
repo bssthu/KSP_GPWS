@@ -15,14 +15,22 @@ namespace KSP_GPWS
 {
     public static class Util
     {
+        /// <summary>
+        /// m to feet
+        /// </summary>
         public const float M_TO_FT = 3.2808399f;
+
+        /// <summary>
+        /// nmi to m
+        /// </summary>
+        public const float NM_TO_M = 1852.0f;
 
         // Audio
         public static AudioManager audio = new AudioManager();
 
         private static ScreenMessage screenMsg = new ScreenMessage("", 1, ScreenMessageStyle.UPPER_CENTER);
 
-        public static void showScreenMessage(String msg)
+        public static void ShowScreenMessage(String msg)
         {
             screenMsg.message = msg;
             ScreenMessages.RemoveMessage(screenMsg);
@@ -63,7 +71,7 @@ namespace KSP_GPWS
             }
         }
 
-        public static void FindGears(Vessel v, ref List<GPWSGear> gears)
+        public static void UpdateGearList(Vessel v, ref List<GPWSGear> gears)
         {
             gears.Clear();
 
@@ -78,36 +86,12 @@ namespace KSP_GPWS
                 if (p.Modules.Contains("GPWSGear"))
                 {
                     gears.Add(p.Modules["GPWSGear"] as GPWSGear);
-                    Log(String.Format("find {0}", p.name));
+                    Log(String.Format("find {0} in {1}", p.name, p.vessel.name));
                 }
             }
         }
 
-        public static Part GetLowestGear(List<GPWSGear> gears)
-        {
-            if (gears.Count <= 0)    // no vessel
-            {
-                return null;
-            }
-            Part lowestGearPart = gears[0].part;
-            float lowestGearAlt = float.PositiveInfinity;
-            for (int i = 0; i < gears.Count; i++)    // find lowest gear
-            {
-                Part p = gears[i].part;
-                // pos of part, rotate to fit ground coord.
-                Vector3 rotatedPos = p.vessel.srfRelRotation * p.orgPos;
-                float gearAltitude = (float)(FlightGlobals.ActiveVessel.altitude - rotatedPos.z);
-
-                if (gearAltitude < lowestGearAlt)
-                {
-                    lowestGearPart = p;
-                    lowestGearAlt = gearAltitude;
-                }
-            }
-            return lowestGearPart;
-        }
-
-        public static bool GearIsDown(Part gear)
+        public static bool GearDeployed(Part gear)
         {
             if (gear != null)
             {
@@ -123,7 +107,7 @@ namespace KSP_GPWS
                         }
                     }
                 }
-                catch (Exception ex) { Util.showScreenMessage(ex.Message); }
+                catch (Exception) { }
 
                 // FSwheel
                 try
@@ -142,57 +126,83 @@ namespace KSP_GPWS
             return true;
         }
 
+        public static Part GetLowestGear(List<GPWSGear> gears)
+        {
+            if (gears.Count <= 0)    // no gear
+            {
+                return null;
+            }
+
+            Part lowestGearPart = gears[0].part;
+            // height from vessel to gear
+            float lowestGearFromVessel = float.PositiveInfinity;
+            for (int i = 0; i < gears.Count; i++)    // find lowest gear
+            {
+                Part p = gears[i].part;
+                float gearFromVessel = AltitudeFromVessel(p);
+
+                if (gearFromVessel < lowestGearFromVessel)
+                {
+                    lowestGearPart = p;
+                    lowestGearFromVessel = gearFromVessel;
+                }
+            }
+            return lowestGearPart;
+        }
+
         /// <summary>
         /// return height from surface to the lowest landing gear, in meters
         /// </summary>
         /// <returns></returns>
-        public static float GetGearHeightFromGround(List<GPWSGear> gears)
+        public static float GetLowestGearRadarAltitude(List<GPWSGear> gears)
         {
-            if (gears.Count <= 0)    // no vessel
-            {
-                return float.PositiveInfinity;
-            }
-
-            Vessel vessel = gears[0].part.vessel;
-            if (FlightGlobals.ActiveVessel != vessel)   // not right vessel?
-            {
-                return float.PositiveInfinity;
-            }
-
-            float radarAltitude = RadarAltitude(vessel);      // from vessel to surface, in meters
-
-            Part lowestGearPart = gears[0].part;
-            // height from terrain to gear
-            float lowestGearRA = float.PositiveInfinity;
-            for (int i = 0; i < gears.Count; i++)    // find lowest gear
-            {
-                Part p = gears[i].part;
-                // pos of part, rotate to fit ground coord.
-                Vector3 rotatedPos = p.vessel.srfRelRotation * p.orgPos;
-                float gearRadarAltitude = radarAltitude - rotatedPos.z;
-
-                if (gearRadarAltitude < lowestGearRA)
-                {
-                    lowestGearPart = p;
-                    lowestGearRA = gearRadarAltitude;
-                }
-            }
-            return lowestGearRA;
+            return RadarAltitude(GetLowestGear(gears));
         }
 
         public static float RadarAltitude(Vessel v)
         {
-            float terrainHeight = (float)v.terrainAltitude;
-            if (terrainHeight < 0)
+            if (v == null)
             {
-                terrainHeight = 0;
+                return float.PositiveInfinity;
             }
-            return (float)(v.altitude - terrainHeight);
+
+            float terrainAltitude = Math.Max((float)v.terrainAltitude, 0);
+
+            return (float)(v.altitude - terrainAltitude);
         }
 
+        public static float RadarAltitude(Part p)
+        {
+            if (p == null)
+            {
+                return float.PositiveInfinity;
+            }
+
+            float radarAltitude = RadarAltitude(p.vessel);      // from vessel to surface, in meters
+
+            return radarAltitude + AltitudeFromVessel(p);
+        }
+
+        private static float AltitudeFromVessel(Part p)
+        {
+            if (p == null)
+            {
+                return float.PositiveInfinity;
+            }
+
+            // pos of part, rotate to fit ground coord.
+            Vector3 rotatedPos = p.vessel.srfRelRotation * p.orgPos;
+
+            return -rotatedPos.z;
+        }
+
+        /// <summary>
+        /// bank angle from https://github.com/Crzyrndm/Pilot-Assistant/blob/ebd426fe1a9a0fc75a674e5a45d69b1c6c66a438/PilotAssistant/Utility/FlightData.cs
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
         public static float BankAngle(Vessel v)
         {
-            // bank angle from https://github.com/Crzyrndm/Pilot-Assistant/blob/ebd426fe1a9a0fc75a674e5a45d69b1c6c66a438/PilotAssistant/Utility/FlightData.cs
             // surface vectors
             Vector3d planetUp = (v.findWorldCenterOfMass() - v.mainBody.position).normalized;
             // Vessel forward and right vetors, parallel to the surface

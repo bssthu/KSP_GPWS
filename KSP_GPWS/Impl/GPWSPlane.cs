@@ -223,7 +223,7 @@ namespace KSP_GPWS.Impl
 
         public void UpdateGPWS()
         {
-            float gearHeightMeters = Util.GetGearHeightFromGround(gears);
+            float gearHeightMeters = Util.GetLowestGearRadarAltitude(gears);
             // height in meters/feet
             if (UnitOfAltitude.FOOT == UnitOfAltitude)
             {
@@ -234,7 +234,7 @@ namespace KSP_GPWS.Impl
                 CommonData.RadarAltitude = gearHeightMeters;
             }
 
-            isGearDown = Util.GearIsDown(Util.GetLowestGear(gears));
+            isGearDown = Util.GearDeployed(Util.GetLowestGear(gears));
 
             if (CommonData.RadarAltitude > 0 && CommonData.RadarAltitude < float.PositiveInfinity)
             {
@@ -487,7 +487,7 @@ namespace KSP_GPWS.Impl
                     if (!vessel.isActiveVessel && !(vessel.Landed || vessel.Splashed) && vessel.mainBody == CommonData.ActiveVessel.mainBody)
                     {
                         float distance = (float)(vessel.GetWorldPos3D() - CommonData.ActiveVessel.GetWorldPos3D()).magnitude;
-                        if (distance < 3889.2)  // 2.1NM
+                        if (distance < 2.1 * Util.NM_TO_M)  // 2.1NM
                         {
                             if (Math.Abs(vessel.altitude - CommonData.ActiveVessel.altitude) < 600 / Util.M_TO_FT)
                             {
@@ -495,7 +495,7 @@ namespace KSP_GPWS.Impl
                                 return true;
                             }
                         }
-                        else if (distance < 6111.6)  // 3.3NM
+                        else if (distance < 3.3 * Util.NM_TO_M)  // 3.3NM
                         {
                             if (Math.Abs(vessel.altitude - CommonData.ActiveVessel.altitude) < 850 / Util.M_TO_FT)
                             {
@@ -513,7 +513,7 @@ namespace KSP_GPWS.Impl
         {
             if (v != null)
             {
-                Util.FindGears(v, ref gears);
+                Util.UpdateGearList(v, ref gears);
             }
         }
     }
