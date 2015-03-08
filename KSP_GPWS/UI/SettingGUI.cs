@@ -304,7 +304,7 @@ namespace KSP_GPWS.UI
             GUILayout.EndHorizontal();
 
             GUILayout.Label(String.Format("Horizontal Speed Factor: {0}", LanderConfig.HorizontalSpeedFactor));
-            LanderConfig.HorizontalSpeedFactor = (float)Math.Round(GUILayout.HorizontalSlider(LanderConfig.HorizontalSpeedFactor, 0.1f, 3.0f), 2);
+            LanderConfig.HorizontalSpeedFactor = (float)Math.Round(GUILayout.HorizontalSlider(LanderConfig.HorizontalSpeedFactor, 0.01f, 1.0f), 2);
 
             // altitude
             LanderConfig.EnableAltitudeCallouts =

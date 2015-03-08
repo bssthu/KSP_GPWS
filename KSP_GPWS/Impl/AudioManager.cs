@@ -133,6 +133,12 @@ namespace KSP_GPWS.Impl
                         PlayOneShot(kind, "bank_angle");
                     }
                     break;
+                case KindOfSound.HORIZONTAL_SPEED:
+                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP))
+                    {
+                        PlayOneShot(kind, "horizontal_speed");
+                    }
+                    break;
                 default:
                     break;
             }

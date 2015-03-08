@@ -90,8 +90,8 @@ namespace KSP_GPWS.Impl
         public void CheckConfigLegality()
         {
             TouchDownSpeed = Math.Max(TouchDownSpeed, 0.1f);
-            HorizontalSpeedFactor = Math.Max(HorizontalSpeedFactor, 0.1f);
-            HorizontalSpeedFactor = Math.Min(HorizontalSpeedFactor, 3.0f);
+            HorizontalSpeedFactor = Math.Max(HorizontalSpeedFactor, 0.01f);
+            HorizontalSpeedFactor = Math.Min(HorizontalSpeedFactor, 1.0f);
         }
 
         public GPWSLander()
@@ -174,6 +174,26 @@ namespace KSP_GPWS.Impl
         {
             if (EnableHorizontalSpeed)
             {
+                if (CommonData.RadarAltitude < HorizontalSpeedCheckAltitude)
+                {
+                    float hSpeed = (float)CommonData.ActiveVessel.horizontalSrfSpeed;
+                    float vSpeed = (float)CommonData.ActiveVessel.verticalSpeed;
+                    // height in meters/feet
+                    if (UnitOfAltitude.FOOT == UnitOfAltitude)
+                    {
+                        hSpeed = hSpeed * Util.M_TO_FT;
+                        vSpeed = vSpeed * Util.M_TO_FT;
+                    }
+                    if (vSpeed < 0)
+                    {
+                        if (hSpeed > (CommonData.RadarAltitude + TouchDownSpeed * 1.0f) * HorizontalSpeedFactor)
+                        {
+                            // play sound
+                            Util.audio.PlaySound(KindOfSound.HORIZONTAL_SPEED);
+                            return true;
+                        }
+                    }
+                }
             }
             return false;
         }

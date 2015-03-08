@@ -25,6 +25,7 @@ namespace KSP_GPWS.SimpleTypes
         ALTITUDE_CALLOUTS,
         BANK_ANGLE,
         WINDSHEAR,
-        TRAFFIC
+        TRAFFIC,
+        HORIZONTAL_SPEED
     };
 }
