@@ -57,6 +57,7 @@
     <Compile Include="SimpleTypes\GPWSGear.cs" />
     <Compile Include="SimpleTypes\KindOfSound.cs" />
     <Compile Include="SimpleTypes\UnitOfAltitude.cs" />
+    <Compile Include="SimpleTypes\VesselType.cs" />
     <Compile Include="UI\GUIAppLaunchBtn.cs" />
     <Compile Include="UI\GUIToolbarBtn.cs" />
     <Compile Include="Interfaces\IPlaneConfig.cs" />

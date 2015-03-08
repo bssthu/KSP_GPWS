@@ -133,7 +133,7 @@ namespace KSP_GPWS.Impl
 
             DescentRateFactor = 1.0f;
             TooLowGearAltitude = 500.0f;
-            AltitudeArray = new int[] { 2500, 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
+            AltitudeArray = new int[] { 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
             UnitOfAltitude = UnitOfAltitude.FOOT;
         }
 

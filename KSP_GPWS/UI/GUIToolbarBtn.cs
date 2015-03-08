@@ -9,7 +9,7 @@ using System.Text;
 using UnityEngine;
 using KSP_GPWS.Interfaces;
 
-namespace KSP_GPWS
+namespace KSP_GPWS.UI
 {
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     class GUIToolbarBtn : MonoBehaviour

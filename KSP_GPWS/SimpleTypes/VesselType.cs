@@ -9,9 +9,10 @@ using System.Text;
 
 namespace KSP_GPWS.SimpleTypes
 {
-    public enum UnitOfAltitude
+    public enum VesselType
     {
-        FOOT = 0,
-        METER = 1,
-    };
+        NONE,
+        PLANE,
+        LANDER
+    }
 }

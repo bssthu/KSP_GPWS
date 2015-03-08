@@ -113,7 +113,7 @@ namespace KSP_GPWS
 
         private static void loadFromXML()
         {
-            KSP.IO.PluginConfiguration config = KSP.IO.PluginConfiguration.CreateForType<SettingGUI>(); // why use template T?
+            KSP.IO.PluginConfiguration config = KSP.IO.PluginConfiguration.CreateForType<SettingsLoader>(); // why use template T?
             config.load();
             guiwindowPosition = config.GetValue<Rect>("guiwindowPosition", guiwindowPosition);
             showConfigs = config.GetValue<bool>("showConfig", showConfigs);
@@ -160,7 +160,7 @@ namespace KSP_GPWS
 
         public static void saveToXML()
         {
-            KSP.IO.PluginConfiguration config = KSP.IO.PluginConfiguration.CreateForType<SettingGUI>();
+            KSP.IO.PluginConfiguration config = KSP.IO.PluginConfiguration.CreateForType<SettingsLoader>();
             config.SetValue("guiwindowPosition", guiwindowPosition);
             config.SetValue("showConfig", showConfigs);
             config.SetValue("guiIsActive", guiIsActive);

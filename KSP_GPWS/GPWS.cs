@@ -39,6 +39,25 @@ namespace KSP_GPWS
 
         private IBasicGPWSFunction GPWSFunc;
 
+        public static SimpleTypes.VesselType ActiveVesselType
+        {
+            get
+            {
+                if (Plane != null && Plane.GearCount > 0)
+                {
+                    return SimpleTypes.VesselType.PLANE;
+                }
+                else if (Lander != null)
+                {
+                    return SimpleTypes.VesselType.LANDER;
+                }
+                else
+                {
+                    return SimpleTypes.VesselType.NONE;
+                }
+            }
+        }
+
         public static void InitializeGPWSFunctions()
         {
             if (Plane == null && Lander == null)    // call once
@@ -76,7 +95,6 @@ namespace KSP_GPWS
             Util.Log("Start");
             Util.audio.AudioInitialize();
 
-            GameEvents.onVesselChange.Add(OnVesselChange);
             ActiveVessel = FlightGlobals.ActiveVessel;
             Plane.ChangeVessel(ActiveVessel);
             Lander.ChangeVessel(ActiveVessel);
@@ -102,6 +120,8 @@ namespace KSP_GPWS
             if (FlightGlobals.ActiveVessel != ActiveVessel)
             {
                 Util.audio.MarkNotPlaying();
+                ActiveVessel = FlightGlobals.ActiveVessel;
+                OnVesselChange(ActiveVessel);
                 return false;
             }
 
@@ -111,13 +131,17 @@ namespace KSP_GPWS
                 Util.audio.UpdateVolume();
             }
 
-            if (Plane.GearCount > 0)
+            if (ActiveVesselType == SimpleTypes.VesselType.PLANE)
             {
                 GPWSFunc = Plane as IBasicGPWSFunction;
             }
-            else
+            else if (ActiveVesselType == SimpleTypes.VesselType.LANDER)
             {
                 GPWSFunc = Lander as IBasicGPWSFunction;
+            }
+            else
+            {
+                return false;
             }
 
 
@@ -166,7 +190,6 @@ namespace KSP_GPWS
 
         public void OnDestroy()
         {
-            GameEvents.onVesselChange.Remove(OnVesselChange);
         }
     }
 }

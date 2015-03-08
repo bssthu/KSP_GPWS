@@ -10,7 +10,7 @@ using UnityEngine;
 using KSP_GPWS.SimpleTypes;
 using KSP_GPWS.Interfaces;
 
-namespace KSP_GPWS
+namespace KSP_GPWS.UI
 {
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     class SettingGUI : MonoBehaviour
@@ -22,10 +22,13 @@ namespace KSP_GPWS
         private bool showConfigs;
 
         private IPlaneConfig PlaneConfig;
+        private ILanderConfig LanderConfig;
 
         GUIStyle toggleStyle;
         GUIStyle buttonStyle;
         GUIStyle boxStyle;
+
+        SimpleTypes.VesselType vesselType;
 
         public void Awake()
         {
@@ -33,9 +36,13 @@ namespace KSP_GPWS
             GameEvents.onHideUI.Add(HideUI);
 
             PlaneConfig = Settings.PlaneConfig;
+            LanderConfig = Settings.LanderConfig;
+
             _descentRateFactor = (float)Math.Log10(Settings.PlaneConfig.DescentRateFactor);
             tooLowGearAltitudeString = Settings.PlaneConfig.TooLowGearAltitude.ToString();
             showConfigs = Settings.showConfigs;
+
+            vesselType = SimpleTypes.VesselType.NONE;
         }
 
         public static void toggleSettingGUI(bool active)
@@ -71,16 +78,21 @@ namespace KSP_GPWS
             if (Settings.guiIsActive && !isHideUI)
             {
                 GUI.skin = HighLogic.Skin;
-                // on showConfigs changed: resize window, etc
+                // on showConfigs changed: resize window, save config
                 if (Settings.showConfigs != showConfigs)
                 {
                     Settings.guiwindowPosition.height = 50;
                     Settings.showConfigs = showConfigs;
                     Settings.saveToXML();
                 }
+                // on vessel type changed: resize window
+                if (vesselType != GPWS.ActiveVesselType)
+                {
+                    Settings.guiwindowPosition.height = 50;
+                }
                 // draw
                 Settings.guiwindowPosition = GUILayout.Window("GPWSSetting".GetHashCode(), Settings.guiwindowPosition,
-                        SettingWindowFunc, "GPWS Setting", GUILayout.ExpandHeight(true));
+                        WindowFunc, "GPWS Setting", GUILayout.ExpandHeight(true));
             }
         }
 
@@ -115,9 +127,10 @@ namespace KSP_GPWS
             }
         }
 
-        private void SettingWindowFunc(int windowID)
+        private void WindowFunc(int windowID)
         {
             PlaneConfig = Settings.PlaneConfig;
+            LanderConfig = Settings.LanderConfig;
             ConfigureStyles();
 
             // begin drawing
@@ -151,25 +164,56 @@ namespace KSP_GPWS
         {
             GUILayout.BeginVertical();
             {
-                showConfigs = GUILayout.Toggle(
-                        showConfigs, "select function", buttonStyle, GUILayout.Width(200), GUILayout.Height(20));
-
-                if (showConfigs)
+                vesselType = GPWS.ActiveVesselType;
+                if (vesselType != SimpleTypes.VesselType.NONE)
                 {
-                    drawPlaneSetting();
+                    showConfigs = GUILayout.Toggle(
+                            showConfigs, String.Format("select {0} function", vesselType.ToString().ToLower()), buttonStyle, GUILayout.Width(200), GUILayout.Height(20));
+
+                    if (showConfigs)
+                    {
+                        drawSetting();
+                    }
                 }
             }
             GUILayout.EndVertical();
         }
 
-        private void drawPlaneSetting()
+        private void drawSetting()
         {
-            PlaneConfig.EnableSystem =
-                    GUILayout.Toggle(PlaneConfig.EnableSystem, "System", toggleStyle);
-
             // volume
             GUILayout.Label(String.Format("Volume: {0}%", Math.Round(Settings.Volume * 100.0f)));
             Settings.Volume = (float)Math.Round(GUILayout.HorizontalSlider(Settings.Volume, 0.0f, 1.0f), 2);
+
+            switch (GPWS.ActiveVesselType)
+            {
+                case SimpleTypes.VesselType.PLANE:
+                    drawPlaneSetting();
+                    break;
+                case SimpleTypes.VesselType.LANDER:
+                    drawLanderSetting();
+                    break;
+                default:
+                    break;
+            }
+
+            // save
+            if (GUILayout.Button("Save", buttonStyle, GUILayout.Width(200), GUILayout.Height(30)))
+            {
+                float newTooLowGearAltitude;
+                if (float.TryParse(tooLowGearAltitudeString, out newTooLowGearAltitude))
+                {
+                    PlaneConfig.TooLowGearAltitude = newTooLowGearAltitude;
+                }
+                // save
+                Settings.SaveSettings();
+            }
+        }
+
+        private void drawPlaneSetting()
+        {
+            PlaneConfig.EnableSystem =
+                    GUILayout.Toggle(PlaneConfig.EnableSystem, "System Enable", toggleStyle);
 
             // descent rate config
             PlaneConfig.EnableDescentRate =
@@ -209,18 +253,24 @@ namespace KSP_GPWS
             // traffic
             PlaneConfig.EnableBankAngle =
                     GUILayout.Toggle(PlaneConfig.EnableBankAngle, "Bank Angle", toggleStyle);
+        }
 
-            // save
-            if (GUILayout.Button("Save", buttonStyle, GUILayout.Width(200), GUILayout.Height(30)))
-            {
-                float newTooLowGearAltitude;
-                if (float.TryParse(tooLowGearAltitudeString, out newTooLowGearAltitude))
-                {
-                    PlaneConfig.TooLowGearAltitude = newTooLowGearAltitude;
-                }
-                // save
-                Settings.SaveSettings();
-            }
+        private void drawLanderSetting()
+        {
+            LanderConfig.EnableSystem =
+                    GUILayout.Toggle(LanderConfig.EnableSystem, "System Enable", toggleStyle);
+
+            // descent rate
+            LanderConfig.EnableDescentRate =
+                    GUILayout.Toggle(LanderConfig.EnableDescentRate, "Descent Rate", toggleStyle);
+
+            // horizontal speed
+            LanderConfig.EnableHorizontalSpeed =
+                    GUILayout.Toggle(LanderConfig.EnableHorizontalSpeed, "Horizontal Speed", toggleStyle);
+
+            // altitude
+            LanderConfig.EnableAltitudeCallouts =
+                    GUILayout.Toggle(LanderConfig.EnableAltitudeCallouts, "Altitude Callouts", toggleStyle);
         }
 
         public void OnDestory()
