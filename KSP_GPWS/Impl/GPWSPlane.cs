@@ -115,6 +115,11 @@ namespace KSP_GPWS.Impl
 
         #endregion
 
+        public GPWSPlane()
+        {
+            InitializeConfig();
+        }
+
         public void InitializeConfig()
         {
             EnableSystem = true;
@@ -504,7 +509,7 @@ namespace KSP_GPWS.Impl
             return false;
         }
 
-        public void SetVesselInfo(Vessel v)
+        public void ChangeVessel(Vessel v)
         {
             if (v != null)
             {

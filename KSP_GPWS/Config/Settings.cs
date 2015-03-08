@@ -24,7 +24,6 @@ namespace KSP_GPWS
             {
                 Util.Log("Blizzy78 Toolbar not available");
                 Settings.UseBlizzy78Toolbar = false;
-                Settings.Volume = 0.5f;
             }
             GPWS.InitializeGPWSFunctions();
         }
@@ -32,7 +31,7 @@ namespace KSP_GPWS
 
     static class Settings
     {
-        public static float Volume { get; set; }
+        public static float Volume = 0.5f;
         public static bool UseBlizzy78Toolbar = false;
 
         public static IPlaneConfig PlaneConfig

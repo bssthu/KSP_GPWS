@@ -78,14 +78,14 @@ namespace KSP_GPWS
 
             GameEvents.onVesselChange.Add(OnVesselChange);
             ActiveVessel = FlightGlobals.ActiveVessel;
-            Plane.SetVesselInfo(ActiveVessel);
-            Lander.SetVesselInfo(ActiveVessel);
+            Plane.ChangeVessel(ActiveVessel);
+            Lander.ChangeVessel(ActiveVessel);
         }
 
         private void OnVesselChange(Vessel v)
         {
-            Plane.SetVesselInfo(ActiveVessel);
-            Lander.SetVesselInfo(ActiveVessel);
+            Plane.ChangeVessel(ActiveVessel);
+            Lander.ChangeVessel(ActiveVessel);
         }
 
         private bool preUpdate()

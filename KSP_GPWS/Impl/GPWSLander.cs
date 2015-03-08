@@ -56,7 +56,7 @@ namespace KSP_GPWS.Impl
         {
         }
 
-        public void SetVesselInfo(Vessel v)
+        public void ChangeVessel(Vessel v)
         {
         }
     }

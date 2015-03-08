@@ -22,6 +22,6 @@ namespace KSP_GPWS.Interfaces
 
         void UpdateGPWS();
 
-        void SetVesselInfo(Vessel v);
+        void ChangeVessel(Vessel v);
     }
 }
