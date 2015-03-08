@@ -135,22 +135,13 @@ namespace KSP_GPWS
             gpwsNode.AddValue("name", "gpwsSettings");
 
             ConfigNode planeNode = new ConfigNode();
-            planeNode.name = "Plane";
-            planeNode.AddValue("EnableSystem", PlaneConfig.EnableSystem);
-            planeNode.AddValue("EnableDescentRate", PlaneConfig.EnableDescentRate);
-            planeNode.AddValue("EnableClosureToTerrain", PlaneConfig.EnableClosureToTerrain);
-            planeNode.AddValue("EnableAltitudeLoss", PlaneConfig.EnableAltitudeLoss);
-            planeNode.AddValue("EnableTerrainClearance", PlaneConfig.EnableTerrainClearance);
-            planeNode.AddValue("EnableAltitudeCallouts", PlaneConfig.EnableAltitudeCallouts);
-            planeNode.AddValue("EnableBankAngle", PlaneConfig.EnableBankAngle);
-            planeNode.AddValue("EnableTraffic", PlaneConfig.EnableTraffic);
-
-            planeNode.AddValue("DescentRateFactor", PlaneConfig.DescentRateFactor);
-            planeNode.AddValue("TooLowGearAltitude", PlaneConfig.TooLowGearAltitude);
-            planeNode.AddValue("AltitudeArray", String.Join(",", Array.ConvertAll(PlaneConfig.AltitudeArray, x => x.ToString())));
-            planeNode.AddValue("UnitOfAltitude", PlaneConfig.UnitOfAltitude);
-
+            PlaneConfig.Save(planeNode);
             gpwsNode.AddNode(planeNode);
+
+            ConfigNode landerNode = new ConfigNode();
+            LanderConfig.Save(landerNode);
+            gpwsNode.AddNode(landerNode);
+
             gpwsNode.AddValue("Volume", Settings.Volume);
             gpwsNode.AddValue("UseBlizzy78Toolbar", UseBlizzy78Toolbar);
 

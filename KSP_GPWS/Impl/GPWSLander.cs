@@ -70,19 +70,29 @@ namespace KSP_GPWS.Impl
             CheckConfigLegality();
         }
 
+        public void Save(ConfigNode node)
+        {
+            node.name = "Lander";
+            node.AddValue("EnableSystem", EnableSystem);
+            node.AddValue("EnableDescentRate", EnableDescentRate);
+            node.AddValue("EnableHorizontalSpeed", EnableHorizontalSpeed);
+            node.AddValue("EnableAltitudeCallouts", EnableAltitudeCallouts);
+
+            node.AddValue("TouchDownSpeed", TouchDownSpeed);
+            node.AddValue("HorizontalSpeedCheckAltitude", HorizontalSpeedCheckAltitude);
+            node.AddValue("HorizontalSpeedFactor", HorizontalSpeedFactor);
+            node.AddValue("AltitudeArray", String.Join(",", Array.ConvertAll(AltitudeArray, x => x.ToString())));
+            node.AddValue("UnitOfAltitude", UnitOfAltitude);
+        }
+
+        #endregion
+
         public void CheckConfigLegality()
         {
             TouchDownSpeed = Math.Max(TouchDownSpeed, 0.1f);
             HorizontalSpeedFactor = Math.Max(HorizontalSpeedFactor, 0.1f);
             HorizontalSpeedFactor = Math.Min(HorizontalSpeedFactor, 3.0f);
         }
-
-        public void Save(ConfigNode node)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
 
         public GPWSLander()
         {

@@ -115,18 +115,31 @@ namespace KSP_GPWS.Impl
             CheckConfigLegality();
         }
 
+        public void Save(ConfigNode node)
+        {
+            node.name = "Plane";
+            node.AddValue("EnableSystem", EnableSystem);
+            node.AddValue("EnableDescentRate", EnableDescentRate);
+            node.AddValue("EnableClosureToTerrain", EnableClosureToTerrain);
+            node.AddValue("EnableAltitudeLoss", EnableAltitudeLoss);
+            node.AddValue("EnableTerrainClearance", EnableTerrainClearance);
+            node.AddValue("EnableAltitudeCallouts", EnableAltitudeCallouts);
+            node.AddValue("EnableBankAngle", EnableBankAngle);
+            node.AddValue("EnableTraffic", EnableTraffic);
+
+            node.AddValue("DescentRateFactor", DescentRateFactor);
+            node.AddValue("TooLowGearAltitude", TooLowGearAltitude);
+            node.AddValue("AltitudeArray", String.Join(",", Array.ConvertAll(AltitudeArray, x => x.ToString())));
+            node.AddValue("UnitOfAltitude", UnitOfAltitude);
+        }
+
+        #endregion
+
         public void CheckConfigLegality()
         {
             DescentRateFactor = Math.Max(DescentRateFactor, 0.1f);
             DescentRateFactor = Math.Min(DescentRateFactor, 10.0f);
         }
-
-        public void Save(ConfigNode node)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
 
         public GPWSPlane()
         {
