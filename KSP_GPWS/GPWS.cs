@@ -16,7 +16,18 @@ namespace KSP_GPWS
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public partial class GPWS : MonoBehaviour, IGPWSCommonData
     {
-        public Vessel ActiveVessel { get; private set; }
+        public Vessel ActiveVessel
+        {
+            get
+            {
+                return _activeVessel;
+            }
+            private set
+            {
+                _activeVessel = value;
+            }
+        }
+        private static Vessel _activeVessel = null;
 
         public float RadarAltitude { get; set; }
 
@@ -43,6 +54,10 @@ namespace KSP_GPWS
         {
             get
             {
+                if (_activeVessel == null || _activeVessel.isEVA)
+                {
+                    return SimpleTypes.VesselType.NONE;
+                }
                 if (Plane != null && Plane.GearCount > 0)
                 {
                     return SimpleTypes.VesselType.PLANE;
@@ -137,6 +152,7 @@ namespace KSP_GPWS
             }
             else
             {
+                Util.audio.SetUnavailable();
                 return false;
             }
 
