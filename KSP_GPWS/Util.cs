@@ -25,7 +25,9 @@ namespace KSP_GPWS
         /// </summary>
         public const float NM_TO_M = 1852.0f;
 
-        // Audio
+        /// <summary>
+        /// Audio
+        /// </summary>
         public static AudioManager audio = new AudioManager();
 
         private static ScreenMessage screenMsg = new ScreenMessage("", 1, ScreenMessageStyle.UPPER_CENTER);

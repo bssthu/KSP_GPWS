@@ -15,13 +15,21 @@ namespace KSP_GPWS.Impl
     {
         private IGPWSCommonData CommonData = null;
 
-        private List<GPWSGear> gears = new List<GPWSGear>();     // parts with module "GPWSGear"
+        /// <summary>
+        /// parts with module "GPWSGear"
+        /// </summary>
+        private List<GPWSGear> gears = new List<GPWSGear>();
 
         private bool isGearDown = false;
 
-        // time of takeoff
+        /// <summary>
+        /// time of takeoff
+        /// </summary>
         private float takeOffTime = float.NegativeInfinity;
-        // max RA when just takeoff
+
+        /// <summary>
+        /// max RA when just takeoff
+        /// </summary>
         private float heightJustTakeoff = 0.0f;
 
         // curves
