@@ -86,7 +86,9 @@ namespace KSP_GPWS.Impl
             {
                 if (checkMode_sinkRate())   // Decent Rate
                 { }
-                if (checkMode_hSpeed())   // Horizontal Speed
+                else if (checkMode_hSpeed())    // Horizontal Speed
+                { }
+                else if (checkMode_altitudeCallout())   // Altitude Callouts
                 { }
                 else if (!Util.audio.IsPlaying())
                 {
@@ -129,6 +131,20 @@ namespace KSP_GPWS.Impl
         {
             if (EnableAltitudeCallouts)
             {
+                // is descending
+                if (CommonData.RadarAltitude - CommonData.LastRadarAltitude < 0)
+                {
+                    // lower than an altitude
+                    foreach (float threshold in AltitudeArray)
+                    {
+                        if (CommonData.LastRadarAltitude > threshold && CommonData.RadarAltitude < threshold)
+                        {
+                            // play sound
+                            Util.audio.PlaySound(KindOfSound.ALTITUDE_CALLOUTS, threshold.ToString());
+                            return true;
+                        }
+                    }
+                }
             }
             return false;
         }

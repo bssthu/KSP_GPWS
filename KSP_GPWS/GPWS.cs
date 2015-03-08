@@ -96,8 +96,7 @@ namespace KSP_GPWS
             Util.audio.AudioInitialize();
 
             ActiveVessel = FlightGlobals.ActiveVessel;
-            Plane.ChangeVessel(ActiveVessel);
-            Lander.ChangeVessel(ActiveVessel);
+            OnVesselChange(ActiveVessel);
         }
 
         private void OnVesselChange(Vessel v)
@@ -110,18 +109,6 @@ namespace KSP_GPWS
         {
             time = Time.time - t0;
 
-            // height in meters/feet
-            if (UnitOfAltitude.FOOT == GPWSFunc.UnitOfAltitude)
-            {
-                RadarAltitude = Util.RadarAltitude(ActiveVessel) * Util.M_TO_FT;
-                Altitude = (float)(FlightGlobals.ship_altitude * Util.M_TO_FT);
-            }
-            else
-            {
-                RadarAltitude = Util.RadarAltitude(ActiveVessel);
-                Altitude = (float)FlightGlobals.ship_altitude;
-            }
-
             // check time, prevent problem
             if (time < 2.0f)
             {
@@ -130,20 +117,16 @@ namespace KSP_GPWS
             }
 
             // just switched
+            bool justSwitched = false;
             if (FlightGlobals.ActiveVessel != ActiveVessel)
             {
                 Util.audio.MarkNotPlaying();
                 ActiveVessel = FlightGlobals.ActiveVessel;
                 OnVesselChange(ActiveVessel);
-                return false;
+                justSwitched = true;
             }
 
-            // check volume
-            if (Util.audio.Volume != GameSettings.VOICE_VOLUME * Settings.Volume)
-            {
-                Util.audio.UpdateVolume();
-            }
-
+            // check vessel type
             if (ActiveVesselType == SimpleTypes.VesselType.PLANE)
             {
                 GPWSFunc = Plane as IBasicGPWSFunction;
@@ -157,6 +140,28 @@ namespace KSP_GPWS
                 return false;
             }
 
+            // height in meters/feet
+            if (UnitOfAltitude.FOOT == GPWSFunc.UnitOfAltitude)
+            {
+                RadarAltitude = Util.RadarAltitude(ActiveVessel) * Util.M_TO_FT;
+                Altitude = (float)(FlightGlobals.ship_altitude * Util.M_TO_FT);
+            }
+            else
+            {
+                RadarAltitude = Util.RadarAltitude(ActiveVessel);
+                Altitude = (float)FlightGlobals.ship_altitude;
+            }
+
+            // check volume
+            if (Util.audio.Volume != GameSettings.VOICE_VOLUME * Settings.Volume)
+            {
+                Util.audio.UpdateVolume();
+            }
+
+            if (justSwitched)
+            {
+                return false;
+            }
 
             if (!GPWSFunc.PreUpdate())
             {
@@ -173,15 +178,12 @@ namespace KSP_GPWS
 
         public void Update()
         {
-            if (GPWSFunc.EnableSystem)
+            if (preUpdate() && GPWSFunc != null && GPWSFunc.EnableSystem)
             {
-                if (preUpdate())
-                {
-                    UpdateGPWS();
-                }
-
-                saveData();
+                UpdateGPWS();
             }
+
+            saveData();
         }
 
         private void saveData() // after Update
