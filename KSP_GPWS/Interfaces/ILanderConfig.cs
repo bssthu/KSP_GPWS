@@ -16,6 +16,7 @@ namespace KSP_GPWS.Interfaces
         bool EnableDescentRate { get; set; }
         bool EnableHorizontalSpeed { get; set; }
         bool EnableAltitudeCallouts { get; set; }
+        bool EnableRetard { get; set; }
 
         float TouchDownSpeed { get; set; }
         float DescentRateCheckAltitude { get; set; }

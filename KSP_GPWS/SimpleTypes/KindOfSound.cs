@@ -26,6 +26,7 @@ namespace KSP_GPWS.SimpleTypes
         BANK_ANGLE,
         WINDSHEAR,
         TRAFFIC,
-        HORIZONTAL_SPEED
+        HORIZONTAL_SPEED,
+        RETARD
     };
 }

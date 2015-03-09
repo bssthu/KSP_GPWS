@@ -143,6 +143,16 @@ namespace KSP_GPWS.Impl
                         PlayOneShot(kind, "horizontal_speed");
                     }
                     break;
+                case KindOfSound.RETARD:
+                    {
+                        if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP)
+                            && !IsPlaying(KindOfSound.TERRAIN) && !IsPlaying(KindOfSound.TERRAIN_PULL_UP)
+                            && !IsPlaying(KindOfSound.DONT_SINK) && !IsPlaying(KindOfSound.RETARD))
+                        {
+                            PlayOneShot(kind, "retard");
+                        }
+                        break;
+                    }
                 default:
                     break;
             }

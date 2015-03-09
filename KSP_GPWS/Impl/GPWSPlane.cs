@@ -60,6 +60,7 @@ namespace KSP_GPWS.Impl
         public bool EnableAltitudeLoss { get; set; }
         public bool EnableTerrainClearance { get; set; }
         public bool EnableAltitudeCallouts { get; set; }
+        public bool EnableRetard { get; set; }
         public bool EnableBankAngle { get; set; }
         public bool EnableTraffic { get; set; }
 
@@ -84,6 +85,7 @@ namespace KSP_GPWS.Impl
             EnableAltitudeLoss = Util.ConvertValue<bool>(node, "EnableAltitudeLoss", EnableAltitudeLoss);
             EnableTerrainClearance = Util.ConvertValue<bool>(node, "EnableTerrainClearance", EnableTerrainClearance);
             EnableAltitudeCallouts = Util.ConvertValue<bool>(node, "EnableAltitudeCallouts", EnableAltitudeCallouts);
+            EnableRetard = Util.ConvertValue<bool>(node, "EnableRetard", EnableRetard);
             EnableBankAngle = Util.ConvertValue<bool>(node, "EnableBankAngle", EnableBankAngle);
             EnableTraffic = Util.ConvertValue<bool>(node, "EnableTraffic", EnableTraffic);
 
@@ -124,6 +126,7 @@ namespace KSP_GPWS.Impl
             node.AddValue("EnableAltitudeLoss", EnableAltitudeLoss);
             node.AddValue("EnableTerrainClearance", EnableTerrainClearance);
             node.AddValue("EnableAltitudeCallouts", EnableAltitudeCallouts);
+            node.AddValue("EnableRetard", EnableRetard);
             node.AddValue("EnableBankAngle", EnableBankAngle);
             node.AddValue("EnableTraffic", EnableTraffic);
 
@@ -154,6 +157,7 @@ namespace KSP_GPWS.Impl
             EnableAltitudeLoss = true;
             EnableTerrainClearance = true;
             EnableAltitudeCallouts = true;
+            EnableRetard = true;
             EnableBankAngle = false;
             EnableTraffic = true;
 
@@ -231,7 +235,7 @@ namespace KSP_GPWS.Impl
             }
 
             // on surface
-            if (CommonData.ActiveVessel.Landed || CommonData.ActiveVessel.Splashed)
+            if (CommonData.ActiveVessel.LandedOrSplashed)
             {
                 takeOffTime = CommonData.time;
                 heightJustTakeoff = 0.0f;
@@ -458,6 +462,25 @@ namespace KSP_GPWS.Impl
         /// <returns></returns>
         private bool checkMode_6()
         {
+            // Throttle Check
+            if (EnableRetard)
+            {
+                // is descending
+                if (CommonData.RadarAltitude - CommonData.LastRadarAltitude < 0)
+                {
+                    // lower than an altitude
+                    if (CommonData.RadarAltitude < 15)
+                    {
+                        Util.ShowScreenMessage("throttle: " + CommonData.ActiveVessel.ctrlState.mainThrottle.ToString());
+                        if ((CommonData.ActiveVessel.ctrlState.mainThrottle > 0) && (CommonData.time - takeOffTime > 5))
+                        {
+                            // play sound
+                            Util.audio.PlaySound(KindOfSound.RETARD);
+                            return true;
+                        }
+                    }
+                }
+            }
             // Altitude Callouts
             if (EnableAltitudeCallouts)
             {
@@ -506,7 +529,7 @@ namespace KSP_GPWS.Impl
                 for (int i = 0; i < FlightGlobals.Vessels.Count; i++)
                 {
                     Vessel vessel = FlightGlobals.Vessels[i];
-                    if (!vessel.isActiveVessel && !(vessel.Landed || vessel.Splashed) && vessel.mainBody == CommonData.ActiveVessel.mainBody)
+                    if (!vessel.isActiveVessel && !(vessel.LandedOrSplashed) && vessel.mainBody == CommonData.ActiveVessel.mainBody)
                     {
                         float distance = (float)(vessel.GetWorldPos3D() - CommonData.ActiveVessel.GetWorldPos3D()).magnitude;
                         if (distance < 2.1 * Util.NM_TO_M)  // 2.1NM

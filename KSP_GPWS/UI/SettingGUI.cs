@@ -250,6 +250,10 @@ namespace KSP_GPWS.UI
             PlaneConfig.EnableAltitudeCallouts =
                     GUILayout.Toggle(PlaneConfig.EnableAltitudeCallouts, "Altitude Callouts", toggleStyle);
 
+            // retard
+            PlaneConfig.EnableRetard =
+                    GUILayout.Toggle(PlaneConfig.EnableRetard, "Retard", toggleStyle);
+
             // bank angle
             PlaneConfig.EnableTraffic =
                     GUILayout.Toggle(PlaneConfig.EnableTraffic, "Traffic", toggleStyle);
@@ -300,6 +304,10 @@ namespace KSP_GPWS.UI
             // altitude
             LanderConfig.EnableAltitudeCallouts =
                     GUILayout.Toggle(LanderConfig.EnableAltitudeCallouts, "Altitude Callouts", toggleStyle);
+
+            // retard
+            LanderConfig.EnableRetard =
+                    GUILayout.Toggle(LanderConfig.EnableRetard, "Retard", toggleStyle);
         }
 
         public void OnDestory()

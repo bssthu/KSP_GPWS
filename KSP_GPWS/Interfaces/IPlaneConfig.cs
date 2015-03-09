@@ -18,6 +18,7 @@ namespace KSP_GPWS.Interfaces
         bool EnableAltitudeLoss { get; set; }
         bool EnableTerrainClearance { get; set; }
         bool EnableAltitudeCallouts { get; set; }
+        bool EnableRetard { get; set; }
         bool EnableBankAngle { get; set; }
         bool EnableTraffic { get; set; }
 

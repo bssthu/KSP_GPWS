@@ -15,11 +15,22 @@ namespace KSP_GPWS.Impl
     {
         private IGPWSCommonData CommonData = null;
 
+        /// <summary>
+        /// time of takeoff
+        /// </summary>
+        private float takeOffTime = float.NegativeInfinity;
+
+        /// <summary>
+        /// time of landing/splashing
+        /// </summary>
+        private float landingTime = float.NegativeInfinity;
+
         #region ILanderConfig
         public bool EnableSystem { get; set; }
         public bool EnableDescentRate { get; set; }
         public bool EnableHorizontalSpeed { get; set; }
         public bool EnableAltitudeCallouts { get; set; }
+        public bool EnableRetard { get; set; }
 
         public float TouchDownSpeed { get; set; }
         public float DescentRateCheckAltitude { get; set; }
@@ -42,6 +53,7 @@ namespace KSP_GPWS.Impl
             EnableDescentRate = Util.ConvertValue<bool>(node, "EnableDescentRate", EnableDescentRate);
             EnableHorizontalSpeed = Util.ConvertValue<bool>(node, "EnableHorizontalSpeed", EnableHorizontalSpeed);
             EnableAltitudeCallouts = Util.ConvertValue<bool>(node, "EnableAltitudeCallouts", EnableAltitudeCallouts);
+            EnableRetard = Util.ConvertValue<bool>(node, "EnableRetard", EnableRetard);
 
             TouchDownSpeed = Util.ConvertValue<float>(node, "TouchDownSpeed", TouchDownSpeed);
             DescentRateCheckAltitude = Util.ConvertValue<float>(node, "DescentRateCheckAltitude", DescentRateCheckAltitude);
@@ -81,6 +93,7 @@ namespace KSP_GPWS.Impl
             node.AddValue("EnableDescentRate", EnableDescentRate);
             node.AddValue("EnableHorizontalSpeed", EnableHorizontalSpeed);
             node.AddValue("EnableAltitudeCallouts", EnableAltitudeCallouts);
+            node.AddValue("EnableRetard", EnableRetard);
 
             node.AddValue("TouchDownSpeed", TouchDownSpeed);
             node.AddValue("DescentRateCheckAltitude", DescentRateCheckAltitude);
@@ -113,6 +126,7 @@ namespace KSP_GPWS.Impl
             EnableDescentRate = true;
             EnableHorizontalSpeed = true;
             EnableAltitudeCallouts = true;
+            EnableRetard = true;
 
             TouchDownSpeed = 5;
             DescentRateCheckAltitude = 10000;
@@ -127,6 +141,9 @@ namespace KSP_GPWS.Impl
         {
             CommonData = data;
 
+            takeOffTime = float.NegativeInfinity;
+            landingTime = float.NegativeInfinity;
+
             initializeCurves();
         }
 
@@ -137,11 +154,21 @@ namespace KSP_GPWS.Impl
         public bool PreUpdate()
         {
             // on surface
-            if (CommonData.ActiveVessel.Landed || CommonData.ActiveVessel.Splashed)
+            if (CommonData.ActiveVessel.LandedOrSplashed)
             {
-                Util.audio.MarkNotPlaying();
-                return false;
+                takeOffTime = CommonData.time;
+                // landed for more than 5 sec
+                if (CommonData.time - landingTime > 5)
+                {
+                    Util.audio.MarkNotPlaying();
+                    return false;
+                }
             }
+            else
+            {
+                landingTime = CommonData.time;
+            }
+
             return true;
         }
 
@@ -152,6 +179,8 @@ namespace KSP_GPWS.Impl
                 if (checkMode_sinkRate())   // Decent Rate
                 { }
                 else if (checkMode_hSpeed())    // Horizontal Speed
+                { }
+                else if (checkMode_retard())    // Throttle Check
                 { }
                 else if (checkMode_altitudeCallout())   // Altitude Callouts
                 { }
@@ -242,6 +271,53 @@ namespace KSP_GPWS.Impl
                         {
                             // play sound
                             Util.audio.PlaySound(KindOfSound.HORIZONTAL_SPEED);
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Throttle Check
+        /// RETARD
+        /// </summary>
+        /// <returns></returns>
+        private bool checkMode_retard()
+        {
+            if (EnableRetard)
+            {
+                Vessel vessel = CommonData.ActiveVessel;
+                if (vessel.ctrlState.mainThrottle > 0)
+                {
+                    // landed
+                    if (vessel.LandedOrSplashed)
+                    {
+                        // play sound
+                        Util.audio.PlaySound(KindOfSound.RETARD);
+                        return true;
+                    }
+
+                    // about to land
+                    if (vessel.orbit.PeA < 0 && vessel.verticalSpeed < 0)
+                    {
+                        double surfaceAlt = vessel.mainBody.Radius + Math.Max(vessel.terrainAltitude, 0);
+                        double surfaceG = vessel.mainBody.gravParameter / (surfaceAlt * surfaceAlt);         // g = GM / r^2
+
+                        double vel = Math.Abs(vessel.verticalSpeed);
+                        double finalV_square = 2 * surfaceG * Util.RadarAltitude(vessel) + vel * vel;
+
+                        double velDown = TouchDownSpeed;
+                        if (UnitOfAltitude == SimpleTypes.UnitOfAltitude.FOOT)
+                        {
+                            velDown = velDown / Util.M_TO_FT;     // to m/s
+                        }
+
+                        if (finalV_square < velDown * velDown)
+                        {
+                            // play sound
+                            Util.audio.PlaySound(KindOfSound.RETARD);
                             return true;
                         }
                     }
