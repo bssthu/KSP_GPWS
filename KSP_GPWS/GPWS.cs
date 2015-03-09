@@ -176,12 +176,19 @@ namespace KSP_GPWS
             // if vessel changed, don't update
             if (ActiveVessel != LastActiveVessel)
             {
-                Util.audio.MarkNotPlaying();
+                Util.audio.SetUnavailable();
                 return false;
             }
 
             if (!GPWSFunc.PreUpdate())
             {
+                return false;
+            }
+
+            // enable
+            if (!GPWSFunc.EnableSystem)
+            {
+                Util.audio.SetUnavailable();
                 return false;
             }
 
@@ -195,7 +202,7 @@ namespace KSP_GPWS
 
         public void Update()
         {
-            if (preUpdate() && GPWSFunc != null && GPWSFunc.EnableSystem)
+            if (preUpdate())
             {
                 UpdateGPWS();
             }
@@ -213,8 +220,8 @@ namespace KSP_GPWS
 
         public void OnDestroy()
         {
-            Plane.Clear();
-            Lander.Clear();
+            Plane.CleanUp();
+            Lander.CleanUp();
         }
     }
 }

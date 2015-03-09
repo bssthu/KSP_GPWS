@@ -145,20 +145,7 @@ namespace KSP_GPWS.UI
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
             {
-                String text = Util.audio.kindOfSound.ToString();
-                if (!PlaneConfig.EnableSystem)
-                {
-                    text = "UNAVAILABLE";
-                }
-                if (text == "UNAVAILABLE")
-                {
-                    text = "<color=white>" + text + "</color>";
-                }
-                else if (text != "NONE" && text != "ALTITUDE_CALLOUTS")
-                {
-                    text = "<color=red>" + text + "</color>";
-                }
-                GUILayout.Box(text, boxStyle, GUILayout.Height(30));
+                GUILayout.Box(Util.audio.GetKindOfSoundRTF(), boxStyle, GUILayout.Height(30));
 
                 drawConfigUI();
             }

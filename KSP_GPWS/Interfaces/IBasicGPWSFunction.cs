@@ -28,6 +28,6 @@ namespace KSP_GPWS.Interfaces
 
         void ChangeVessel(Vessel v);
 
-        void Clear();
+        void CleanUp();
     }
 }

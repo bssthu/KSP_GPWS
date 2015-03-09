@@ -11,6 +11,7 @@ namespace KSP_GPWS.SimpleTypes
 {
     public enum UnitOfAltitude
     {
+        NONE,
         FOOT = 0,
         METER = 1
     };

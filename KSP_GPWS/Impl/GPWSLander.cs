@@ -228,7 +228,7 @@ namespace KSP_GPWS.Impl
         {
         }
 
-        public void Clear()
+        public void CleanUp()
         {
         }
     }

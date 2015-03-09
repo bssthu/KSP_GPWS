@@ -20,7 +20,7 @@ namespace KSP_GPWS.Impl
         private AudioSource asGPWS;
         private float lastPlayTime = 0.0f;
 
-        public KindOfSound kindOfSound
+        public KindOfSound KindOfSound
         {
             get
             {
@@ -32,6 +32,8 @@ namespace KSP_GPWS.Impl
             }
         }
         private static KindOfSound _kindOfSound = KindOfSound.NONE;
+
+        private String detail = "";
 
         public void AudioInitialize()
         {
@@ -49,7 +51,7 @@ namespace KSP_GPWS.Impl
             asGPWS.volume = Volume;
             asGPWS.panLevel = 0;
 
-            kindOfSound = KindOfSound.NONE;
+            KindOfSound = KindOfSound.NONE;
             lastPlayTime = Time.time;
         }
 
@@ -125,6 +127,7 @@ namespace KSP_GPWS.Impl
                     }
                     break;
                 case KindOfSound.ALTITUDE_CALLOUTS:
+                    this.detail = detail;
                     PlayOneShot(kind, "gpws" + detail);
                     break;
                 case KindOfSound.BANK_ANGLE:
@@ -170,7 +173,7 @@ namespace KSP_GPWS.Impl
             {
                 return false;
             }
-            if (kind != kindOfSound)
+            if (kind != KindOfSound)
             {
                 return false;
             }
@@ -179,17 +182,48 @@ namespace KSP_GPWS.Impl
 
         public bool WasPlaying(KindOfSound kind)    // was or is playing
         {
-            return kind == kindOfSound;
+            return kind == KindOfSound;
         }
 
         public void SetUnavailable()
         {
-            kindOfSound = KindOfSound.UNAVAILABLE;
+            KindOfSound = KindOfSound.UNAVAILABLE;
         }
 
         public void MarkNotPlaying()
         {
-            kindOfSound = KindOfSound.NONE;
+            KindOfSound = KindOfSound.NONE;
+        }
+
+        /// <summary>
+        /// get KindOfSound in string in RTF format
+        /// </summary>
+        /// <returns></returns>
+        public String GetKindOfSoundRTF()
+        {
+            String rtfText = KindOfSound.ToString();
+            if (KindOfSound == KindOfSound.UNAVAILABLE)
+            {
+                rtfText = "<color=white>" + rtfText + "</color>";
+            }
+            else if (KindOfSound == KindOfSound.ALTITUDE_CALLOUTS)
+            {
+                UnitOfAltitude unit = UnitOfAltitude.NONE;
+                if (GPWS.ActiveVesselType == SimpleTypes.VesselType.PLANE)
+                {
+                    unit = Settings.PlaneConfig.UnitOfAltitude;
+                }
+                else if (GPWS.ActiveVesselType == SimpleTypes.VesselType.LANDER)
+                {
+                    unit = Settings.LanderConfig.UnitOfAltitude;
+                }
+                rtfText = detail + Util.GetShortString(unit);
+            }
+            else if (KindOfSound != KindOfSound.NONE)
+            {
+                rtfText = "<color=red>" + rtfText + "</color>";
+            }
+            return rtfText;
         }
     }
 }
