@@ -137,7 +137,8 @@ namespace KSP_GPWS.Impl
                     }
                     break;
                 case KindOfSound.HORIZONTAL_SPEED:
-                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP))
+                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP)
+                            && !IsPlaying(KindOfSound.HORIZONTAL_SPEED))
                     {
                         PlayOneShot(kind, "horizontal_speed");
                     }

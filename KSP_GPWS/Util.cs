@@ -218,6 +218,48 @@ namespace KSP_GPWS
             return bankAngle;
         }
 
+        /// <summary>
+        /// max acc, in m/s
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static float GetMaxAcceleration(Vessel v)
+        {
+            return GetMaxThrust(v) / v.GetTotalMass();  // kN / T
+        }
+
+        /// <summary>
+        /// max thrust, in kN
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static float GetMaxThrust(Vessel v)
+        {
+            float maxThrust = 0.0f;
+
+            for (int i = 0; i < v.Parts.Count; i++)
+            {
+                if (v.Parts[i].Modules.Contains("ModuleEngines"))
+                {
+                    ModuleEngines me = v.Parts[i].Modules["ModuleEngines"] as ModuleEngines;
+                    if (!me.engineShutdown && me.EngineIgnited)
+                    {
+                        maxThrust += me.maxThrust;
+                    }
+                }
+                if (v.Parts[i].Modules.Contains("ModuleEnginesFX"))
+                {
+                    ModuleEnginesFX me = v.Parts[i].Modules["ModuleEnginesFX"] as ModuleEnginesFX;
+                    if (!me.engineShutdown && me.EngineIgnited)
+                    {
+                        maxThrust += me.maxThrust;
+                    }
+                }
+            }
+
+            return maxThrust;
+        }
+
         public static String GetShortString(UnitOfAltitude unitOfAltitude)
         {
             if (unitOfAltitude == UnitOfAltitude.FOOT)

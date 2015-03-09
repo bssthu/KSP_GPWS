@@ -161,8 +161,50 @@ namespace KSP_GPWS.Impl
         {
             if (EnableDescentRate)
             {
+                Vessel vessel = CommonData.ActiveVessel;
+                if (CommonData.RadarAltitude < 10000 && vessel.orbit.PeA < 0 && vessel.verticalSpeed < 0)  // landing
+                {
+                    // only simple physics
+                    double acc = Util.GetMaxAcceleration(vessel);
+                    double surfaceAlt = vessel.mainBody.Radius + Math.Max(vessel.terrainAltitude, 0);
+                    double surfaceG = vessel.mainBody.gravParameter / (surfaceAlt * surfaceAlt);         // g = GM / r^2
+                    double vel = Math.Abs(vessel.verticalSpeed);
+                    double vel0 = Settings.LanderConfig.TouchDownSpeed;
+                    if (Settings.LanderConfig.UnitOfAltitude == SimpleTypes.UnitOfAltitude.FOOT)
+                    {
+                        vel0 = vel0 / Util.M_TO_FT;     // to m/s
+                    }
+
+                    // some checks
+                    if (vel < vel0)
+                    {
+                        return false;
+                    }
+                    if (acc < surfaceG)
+                    {
+                        playSinkRate();
+                        return true;
+                    }
+
+                    // I use a bigger g.
+                    // (surfaceG + currentG)/2 is smaller than equivalence g.
+                    // Safety first.
+                    double height = (vel - vel0) * (vel + vel0) * 0.5 / (acc - surfaceG);
+
+                    if (height * 1.5 >= Util.RadarAltitude(vessel))
+                    {
+                        playSinkRate();
+                        return true;
+                    }
+                }
             }
             return false;
+        }
+
+        private void playSinkRate()
+        {
+            // play sound
+            Util.audio.PlaySound(KindOfSound.SINK_RATE);
         }
 
         /// <summary>
@@ -178,7 +220,7 @@ namespace KSP_GPWS.Impl
                 {
                     float hSpeed = (float)CommonData.ActiveVessel.horizontalSrfSpeed;
                     float vSpeed = (float)CommonData.ActiveVessel.verticalSpeed;
-                    // height in meters/feet
+                    // speed in meters/feet per s
                     if (UnitOfAltitude.FOOT == UnitOfAltitude)
                     {
                         hSpeed = hSpeed * Util.M_TO_FT;
