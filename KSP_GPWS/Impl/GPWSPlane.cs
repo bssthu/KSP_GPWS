@@ -471,7 +471,6 @@ namespace KSP_GPWS.Impl
                     // lower than an altitude
                     if (CommonData.RadarAltitude < 15)
                     {
-                        Util.ShowScreenMessage("throttle: " + CommonData.ActiveVessel.ctrlState.mainThrottle.ToString());
                         if ((CommonData.ActiveVessel.ctrlState.mainThrottle > 0) && (CommonData.time - takeOffTime > 5))
                         {
                             // play sound
