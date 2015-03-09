@@ -102,7 +102,7 @@ namespace KSP_GPWS
                         landerConfigNode = node.GetNode("Lander");
                     }
 
-                    Volume = Util.ConvertValue<float>(node, "Volume");
+                    Util.ConvertValue<float>(node, "Volume", ref Volume);
                     Util.ConvertValue(node, "UseBlizzy78Toolbar", ref UseBlizzy78Toolbar);
                 }   // End of has value "name"
             }

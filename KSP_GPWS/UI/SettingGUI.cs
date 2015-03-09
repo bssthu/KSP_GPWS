@@ -267,6 +267,10 @@ namespace KSP_GPWS.UI
             // descent rate
             LanderConfig.EnableDescentRate =
                     GUILayout.Toggle(LanderConfig.EnableDescentRate, "Descent Rate", toggleStyle);
+
+            GUILayout.Label(String.Format("Safety Factor: {0}", LanderConfig.DescentRateSafetyFactor));
+            LanderConfig.DescentRateSafetyFactor = (float)Math.Round(GUILayout.HorizontalSlider(LanderConfig.DescentRateSafetyFactor, 1.0f, 4.0f), 1);
+
             GUILayout.BeginHorizontal();
             {
                 GUILayout.Label("Final Speed");

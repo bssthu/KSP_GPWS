@@ -22,6 +22,8 @@ namespace KSP_GPWS.Impl
         public bool EnableAltitudeCallouts { get; set; }
 
         public float TouchDownSpeed { get; set; }
+        public float DescentRateCheckAltitude { get; set; }
+        public float DescentRateSafetyFactor { get; set; }
         public float HorizontalSpeedCheckAltitude { get; set; }
         public float HorizontalSpeedFactor { get; set; }
         public int[] AltitudeArray { get; set; }
@@ -36,14 +38,16 @@ namespace KSP_GPWS.Impl
 
         public void Load(ConfigNode node)
         {
-            EnableSystem = Util.ConvertValue<bool>(node, "EnableSystem");
-            EnableDescentRate = Util.ConvertValue<bool>(node, "EnableDescentRate");
-            EnableHorizontalSpeed = Util.ConvertValue<bool>(node, "EnableHorizontalSpeed");
-            EnableAltitudeCallouts = Util.ConvertValue<bool>(node, "EnableAltitudeCallouts");
+            EnableSystem = Util.ConvertValue<bool>(node, "EnableSystem", EnableSystem);
+            EnableDescentRate = Util.ConvertValue<bool>(node, "EnableDescentRate", EnableDescentRate);
+            EnableHorizontalSpeed = Util.ConvertValue<bool>(node, "EnableHorizontalSpeed", EnableHorizontalSpeed);
+            EnableAltitudeCallouts = Util.ConvertValue<bool>(node, "EnableAltitudeCallouts", EnableAltitudeCallouts);
 
-            TouchDownSpeed = Util.ConvertValue<float>(node, "TouchDownSpeed");
-            HorizontalSpeedCheckAltitude = Util.ConvertValue<float>(node, "HorizontalSpeedCheckAltitude");
-            HorizontalSpeedFactor = Util.ConvertValue<float>(node, "HorizontalSpeedFactor");
+            TouchDownSpeed = Util.ConvertValue<float>(node, "TouchDownSpeed", TouchDownSpeed);
+            DescentRateCheckAltitude = Util.ConvertValue<float>(node, "DescentRateCheckAltitude", DescentRateCheckAltitude);
+            DescentRateSafetyFactor = Util.ConvertValue<float>(node, "DescentRateSafetyFactor", DescentRateSafetyFactor);
+            HorizontalSpeedCheckAltitude = Util.ConvertValue<float>(node, "HorizontalSpeedCheckAltitude", HorizontalSpeedCheckAltitude);
+            HorizontalSpeedFactor = Util.ConvertValue<float>(node, "HorizontalSpeedFactor", HorizontalSpeedFactor);
             if (node.HasValue("AltitudeArray"))
             {
                 String[] intstrings = node.GetValue("AltitudeArray").Split(',');
@@ -65,7 +69,7 @@ namespace KSP_GPWS.Impl
                     }
                 }
             }
-            UnitOfAltitude = Util.ConvertValue<UnitOfAltitude>(node, "UnitOfAltitude");
+            UnitOfAltitude = Util.ConvertValue<UnitOfAltitude>(node, "UnitOfAltitude", UnitOfAltitude);
             // check legality
             CheckConfigLegality();
         }
@@ -79,6 +83,8 @@ namespace KSP_GPWS.Impl
             node.AddValue("EnableAltitudeCallouts", EnableAltitudeCallouts);
 
             node.AddValue("TouchDownSpeed", TouchDownSpeed);
+            node.AddValue("DescentRateCheckAltitude", DescentRateCheckAltitude);
+            node.AddValue("DescentRateSafetyFactor", DescentRateSafetyFactor);
             node.AddValue("HorizontalSpeedCheckAltitude", HorizontalSpeedCheckAltitude);
             node.AddValue("HorizontalSpeedFactor", HorizontalSpeedFactor);
             node.AddValue("AltitudeArray", String.Join(",", Array.ConvertAll(AltitudeArray, x => x.ToString())));
@@ -90,6 +96,8 @@ namespace KSP_GPWS.Impl
         public void CheckConfigLegality()
         {
             TouchDownSpeed = Math.Max(TouchDownSpeed, 0.1f);
+            DescentRateSafetyFactor = Math.Max(DescentRateSafetyFactor, 1.0f);
+            DescentRateSafetyFactor = Math.Min(DescentRateSafetyFactor, 4.0f);
             HorizontalSpeedFactor = Math.Max(HorizontalSpeedFactor, 0.01f);
             HorizontalSpeedFactor = Math.Min(HorizontalSpeedFactor, 1.0f);
         }
@@ -107,6 +115,8 @@ namespace KSP_GPWS.Impl
             EnableAltitudeCallouts = true;
 
             TouchDownSpeed = 5;
+            DescentRateCheckAltitude = 10000;
+            DescentRateSafetyFactor = 1.5f;
             HorizontalSpeedCheckAltitude = 400;
             HorizontalSpeedFactor = 0.2f;
             AltitudeArray = new int[] { 2500, 1000, 500, 100, 50, 40, 30, 20, 10 };
@@ -162,15 +172,15 @@ namespace KSP_GPWS.Impl
             if (EnableDescentRate)
             {
                 Vessel vessel = CommonData.ActiveVessel;
-                if (CommonData.RadarAltitude < 10000 && vessel.orbit.PeA < 0 && vessel.verticalSpeed < 0)  // landing
+                if (CommonData.RadarAltitude < DescentRateCheckAltitude && vessel.orbit.PeA < 0 && vessel.verticalSpeed < 0)  // landing
                 {
                     // only simple physics
                     double acc = Util.GetMaxAcceleration(vessel);
                     double surfaceAlt = vessel.mainBody.Radius + Math.Max(vessel.terrainAltitude, 0);
                     double surfaceG = vessel.mainBody.gravParameter / (surfaceAlt * surfaceAlt);         // g = GM / r^2
                     double vel = Math.Abs(vessel.verticalSpeed);
-                    double vel0 = Settings.LanderConfig.TouchDownSpeed;
-                    if (Settings.LanderConfig.UnitOfAltitude == SimpleTypes.UnitOfAltitude.FOOT)
+                    double vel0 = TouchDownSpeed;
+                    if (UnitOfAltitude == SimpleTypes.UnitOfAltitude.FOOT)
                     {
                         vel0 = vel0 / Util.M_TO_FT;     // to m/s
                     }
@@ -189,9 +199,9 @@ namespace KSP_GPWS.Impl
                     // I use a bigger g.
                     // (surfaceG + currentG)/2 is smaller than equivalence g.
                     // Safety first.
-                    double height = (vel - vel0) * (vel + vel0) * 0.5 / (acc - surfaceG);
+                    double minRA = (vel - vel0) * (vel + vel0) * 0.5 / (acc - surfaceG);
 
-                    if (height * 1.5 >= Util.RadarAltitude(vessel))
+                    if (minRA * DescentRateSafetyFactor >= Util.RadarAltitude(vessel))
                     {
                         playSinkRate();
                         return true;

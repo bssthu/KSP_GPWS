@@ -18,6 +18,12 @@ namespace KSP_GPWS.Interfaces
         bool EnableAltitudeCallouts { get; set; }
 
         float TouchDownSpeed { get; set; }
+        float DescentRateCheckAltitude { get; set; }
+
+        /// <summary>
+        /// say "SINK RATE" when altitude < DescentRateSafetyFactor * minRA
+        /// </summary>
+        float DescentRateSafetyFactor { get; set; }
         float HorizontalSpeedCheckAltitude { get; set; }
 
         /// <summary>

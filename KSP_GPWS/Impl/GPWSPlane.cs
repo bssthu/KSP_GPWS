@@ -78,17 +78,17 @@ namespace KSP_GPWS.Impl
 
         public void Load(ConfigNode node)
         {
-            EnableSystem = Util.ConvertValue<bool>(node, "EnableSystem");
-            EnableDescentRate = Util.ConvertValue<bool>(node, "EnableDescentRate");
-            EnableClosureToTerrain = Util.ConvertValue<bool>(node, "EnableClosureToTerrain");
-            EnableAltitudeLoss = Util.ConvertValue<bool>(node, "EnableAltitudeLoss");
-            EnableTerrainClearance = Util.ConvertValue<bool>(node, "EnableTerrainClearance");
-            EnableAltitudeCallouts = Util.ConvertValue<bool>(node, "EnableAltitudeCallouts");
-            EnableBankAngle = Util.ConvertValue<bool>(node, "EnableBankAngle");
-            EnableTraffic = Util.ConvertValue<bool>(node, "EnableTraffic");
+            EnableSystem = Util.ConvertValue<bool>(node, "EnableSystem", EnableSystem);
+            EnableDescentRate = Util.ConvertValue<bool>(node, "EnableDescentRate", EnableDescentRate);
+            EnableClosureToTerrain = Util.ConvertValue<bool>(node, "EnableClosureToTerrain", EnableClosureToTerrain);
+            EnableAltitudeLoss = Util.ConvertValue<bool>(node, "EnableAltitudeLoss", EnableAltitudeLoss);
+            EnableTerrainClearance = Util.ConvertValue<bool>(node, "EnableTerrainClearance", EnableTerrainClearance);
+            EnableAltitudeCallouts = Util.ConvertValue<bool>(node, "EnableAltitudeCallouts", EnableAltitudeCallouts);
+            EnableBankAngle = Util.ConvertValue<bool>(node, "EnableBankAngle", EnableBankAngle);
+            EnableTraffic = Util.ConvertValue<bool>(node, "EnableTraffic", EnableTraffic);
 
-            DescentRateFactor = Util.ConvertValue<float>(node, "DescentRateFactor");
-            TooLowGearAltitude = Util.ConvertValue<float>(node, "TooLowGearAltitude");
+            DescentRateFactor = Util.ConvertValue<float>(node, "DescentRateFactor", DescentRateFactor);
+            TooLowGearAltitude = Util.ConvertValue<float>(node, "TooLowGearAltitude", TooLowGearAltitude);
             if (node.HasValue("AltitudeArray"))
             {
                 String[] intstrings = node.GetValue("AltitudeArray").Split(',');
@@ -110,7 +110,7 @@ namespace KSP_GPWS.Impl
                     }
                 }
             }
-            UnitOfAltitude = Util.ConvertValue<UnitOfAltitude>(node, "UnitOfAltitude");
+            UnitOfAltitude = Util.ConvertValue<UnitOfAltitude>(node, "UnitOfAltitude", UnitOfAltitude);
             // check legality
             CheckConfigLegality();
         }
