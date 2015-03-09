@@ -33,6 +33,8 @@ namespace KSP_GPWS
 
         public float Altitude { get; set; }
 
+        private Vessel LastActiveVessel = null;
+
         public float LastRadarAltitude { get; private set; }
 
         public float LastAltitude { get; private set; }
@@ -123,6 +125,7 @@ namespace KSP_GPWS
         private bool preUpdate()
         {
             time = Time.time - t0;
+            ActiveVessel = FlightGlobals.ActiveVessel;
 
             // check time, prevent problem
             if (time < 2.0f)
@@ -131,14 +134,10 @@ namespace KSP_GPWS
                 return false;
             }
 
-            // just switched
-            bool justSwitched = false;
-            if (FlightGlobals.ActiveVessel != ActiveVessel)
+            // just switched, use new vessel
+            if (ActiveVessel != LastActiveVessel)
             {
-                Util.audio.MarkNotPlaying();
-                ActiveVessel = FlightGlobals.ActiveVessel;
                 OnVesselChange(ActiveVessel);
-                justSwitched = true;
             }
 
             // check vessel type
@@ -174,8 +173,10 @@ namespace KSP_GPWS
                 Util.audio.UpdateVolume();
             }
 
-            if (justSwitched)
+            // if vessel changed, don't update
+            if (ActiveVessel != LastActiveVessel)
             {
+                Util.audio.MarkNotPlaying();
                 return false;
             }
 
@@ -207,7 +208,7 @@ namespace KSP_GPWS
             LastRadarAltitude = RadarAltitude;    // save last gear height
             LastAltitude = Altitude;
             lastTime = time;        // save time of last frame
-            ActiveVessel = FlightGlobals.ActiveVessel;
+            LastActiveVessel = ActiveVessel;
         }
 
         public void OnDestroy()
