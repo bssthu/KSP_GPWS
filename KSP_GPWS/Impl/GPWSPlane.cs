@@ -213,7 +213,7 @@ namespace KSP_GPWS.Impl
         public bool PreUpdate()
         {
             // just takeoff
-            if (CommonData.time - takeOffTime < 0.5f)
+            if (CommonData.time - takeOffTime < 1.0f)
             {
                 Util.audio.MarkNotPlaying();
                 return false;
