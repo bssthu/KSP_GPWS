@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using KSP_GPWS.Interfaces;
 
 namespace KSP_GPWS.UI
 {
@@ -17,7 +18,7 @@ namespace KSP_GPWS.UI
 
         public void Awake()
         {
-            if (!Settings.UseBlizzy78Toolbar)
+            if (!Settings.UseBlizzy78Toolbar || !ToolbarManager.ToolbarAvailable)
             {
                 GameEvents.onGUIApplicationLauncherReady.Add(onGUIAppLauncherReady);
                 GameEvents.onGUIApplicationLauncherDestroyed.Add(onGUIAppLauncherDestroyed);

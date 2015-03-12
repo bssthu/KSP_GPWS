@@ -58,7 +58,7 @@ namespace KSP_GPWS.UI
             Settings.guiIsActive = active;
             if (!active)
             {
-                if (!Settings.UseBlizzy78Toolbar && GUIAppLaunchBtn.appBtn != null)
+                if (!(Settings.UseBlizzy78Toolbar && ToolbarManager.ToolbarAvailable) && GUIAppLaunchBtn.appBtn != null)
                 {
                     GUIAppLaunchBtn.appBtn.SetFalse(false);
                 }

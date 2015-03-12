@@ -18,16 +18,13 @@ namespace KSP_GPWS.UI
 
         public void Awake()
         {
-            if (Settings.UseBlizzy78Toolbar)
+            if (Settings.UseBlizzy78Toolbar && ToolbarManager.ToolbarAvailable)
             {
-                if (ToolbarManager.ToolbarAvailable)
-                {
-                    btn = ToolbarManager.Instance.add("GPWS", "GPWSBtn");
-                    btn.TexturePath = "GPWS/gpws";
-                    btn.ToolTip = "GPWS settings";
-                    btn.Visibility = new GameScenesVisibility(GameScenes.FLIGHT);
-                    btn.OnClick += (e) => SettingGUI.toggleSettingGUI();
-                }
+                btn = ToolbarManager.Instance.add("GPWS", "GPWSBtn");
+                btn.TexturePath = "GPWS/gpws";
+                btn.ToolTip = "GPWS settings";
+                btn.Visibility = new GameScenesVisibility(GameScenes.FLIGHT);
+                btn.OnClick += (e) => SettingGUI.toggleSettingGUI();
             }
         }
 

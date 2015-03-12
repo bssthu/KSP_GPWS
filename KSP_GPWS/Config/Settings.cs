@@ -23,7 +23,6 @@ namespace KSP_GPWS
             if (Settings.UseBlizzy78Toolbar && !ToolbarManager.ToolbarAvailable)
             {
                 Util.Log("Blizzy78 Toolbar not available");
-                Settings.UseBlizzy78Toolbar = false;
             }
             GPWS.InitializeGPWSFunctions();
         }
