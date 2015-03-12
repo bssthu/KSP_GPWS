@@ -528,7 +528,7 @@ namespace KSP_GPWS.Impl
                 for (int i = 0; i < FlightGlobals.Vessels.Count; i++)
                 {
                     Vessel vessel = FlightGlobals.Vessels[i];
-                    if (!vessel.isActiveVessel && !vessel.LandedOrSplashed && (vessel.mainBody == CommonData.ActiveVessel.mainBody)
+                    if (!vessel.isActiveVessel && vessel.situation == Vessel.Situations.FLYING && (vessel.mainBody == CommonData.ActiveVessel.mainBody)
                             && (vessel.vesselType != VesselType.Debris))
                     {
                         float distance = (float)(vessel.GetWorldPos3D() - CommonData.ActiveVessel.GetWorldPos3D()).magnitude;
