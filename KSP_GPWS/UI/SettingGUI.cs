@@ -17,7 +17,7 @@ namespace KSP_GPWS.UI
     {
         private bool isHideUI = false;
 
-        private float _descentRateFactor;
+        private float descentRateFactorExp;
         private String tooLowGearAltitudeString;
 
         private String touchDownSpeedString;
@@ -42,7 +42,7 @@ namespace KSP_GPWS.UI
             PlaneConfig = Settings.PlaneConfig;
             LanderConfig = Settings.LanderConfig;
 
-            _descentRateFactor = (float)Math.Log10(PlaneConfig.DescentRateFactor);
+            descentRateFactorExp = (float)Math.Log10(PlaneConfig.DescentRateFactor);
             tooLowGearAltitudeString = PlaneConfig.TooLowGearAltitude.ToString();
 
             touchDownSpeedString = LanderConfig.TouchDownSpeed.ToString();
@@ -226,8 +226,8 @@ namespace KSP_GPWS.UI
                     GUILayout.Toggle(PlaneConfig.EnableClosureToTerrain, "Closure to Terrain", toggleStyle);
 
             GUILayout.Label(String.Format("Descent Rate Factor: {0}", PlaneConfig.DescentRateFactor));
-            _descentRateFactor = GUILayout.HorizontalSlider(_descentRateFactor, -1.0f, 1.0f);
-            PlaneConfig.DescentRateFactor = (float)Math.Round(Math.Pow(10, _descentRateFactor), 1);
+            descentRateFactorExp = GUILayout.HorizontalSlider(descentRateFactorExp, -1.0f, 1.0f);
+            PlaneConfig.DescentRateFactor = (float)Math.Round(Math.Pow(10, descentRateFactorExp), 1);
 
             // altitude loss
             PlaneConfig.EnableAltitudeLoss =

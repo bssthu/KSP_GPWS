@@ -58,7 +58,6 @@ namespace KSP_GPWS.UI
             if (appBtn != null)
             {
                 ApplicationLauncher.Instance.RemoveModApplication(appBtn);
-                ApplicationLauncher.Instance.RemoveApplication(appBtn);
                 appBtn = null;
             }
         }
@@ -69,7 +68,6 @@ namespace KSP_GPWS.UI
             GameEvents.onGUIApplicationLauncherDestroyed.Remove(onGUIAppLauncherDestroyed);
             if (appBtn != null)
             {
-                ApplicationLauncher.Instance.RemoveApplication(appBtn);
                 ApplicationLauncher.Instance.RemoveModApplication(appBtn);
                 appBtn = null;
             }

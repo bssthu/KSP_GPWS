@@ -89,8 +89,10 @@ namespace KSP_GPWS
 
         private static void loadFromCFG()
         {
-            foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("GPWS_SETTINGS"))
+            ConfigNode node = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/GPWS/settings.cfg");
+            if (node.HasNode("GPWS_SETTINGS"))
             {
+                node = node.GetNode("GPWS_SETTINGS");
                 if (Util.ConvertValue(node, "name", "") == "gpwsSettings")
                 {
                     if (node.HasNode("Plane"))
