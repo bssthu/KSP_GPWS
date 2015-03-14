@@ -5,7 +5,7 @@
     "GITHUB":
     {
         "USERNAME":"bssthu",
-        "REPOSITORY":"GPWS",
+        "REPOSITORY":"KSP_GPWS",
         "ALLOW_PRE_RELEASE":true,
     },
     "VERSION":
