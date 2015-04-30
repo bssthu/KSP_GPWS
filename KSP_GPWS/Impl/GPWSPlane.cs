@@ -347,10 +347,10 @@ namespace KSP_GPWS.Impl
         {
             if (EnableClosureToTerrain)
             {
-                if (isGearDown || (CommonData.time - takeOffTime > 30))        // Mode B
+                if (isGearDown || (CommonData.time - takeOffTime > 30) || (CommonData.HorSpeed < LandingSpeed * 1.2f))        // Mode B
                 {
                     // is descending (radar altitude)
-                    if ((CommonData.Altitude < 800.0f) && (CommonData.Altitude - CommonData.LastAltitude < 0))
+                    if ((CommonData.RadarAltitude < 800.0f) && (CommonData.RadarAltitude - CommonData.LastRadarAltitude < 0))
                     {
                         // check if should warn
                         // ft/min, radar altitude
@@ -377,7 +377,7 @@ namespace KSP_GPWS.Impl
                 else        // Mode A
                 {
                     // is descending (radar altitude)
-                    if ((CommonData.Altitude < 2200.0f) && (CommonData.Altitude - CommonData.LastAltitude < 0))
+                    if ((CommonData.RadarAltitude < 2200.0f) && (CommonData.RadarAltitude - CommonData.LastRadarAltitude < 0))
                     {
                         // check if should warn
                         // ft/min, radar altitude
