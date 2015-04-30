@@ -227,8 +227,7 @@ namespace KSP_GPWS.Impl
             }
 
             // check atmosphere
-            if (!FlightGlobals.getMainBody().atmosphere ||
-                    FlightGlobals.ship_altitude > FlightGlobals.getMainBody().maxAtmosphereAltitude)
+            if (!FlightGlobals.getMainBody().atmosphere || CommonData.ActiveVessel.atmDensity <= 0)
             {
                 Util.audio.SetUnavailable();
                 return false;

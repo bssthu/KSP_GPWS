@@ -20,8 +20,7 @@ namespace KSP_GPWS.UI
         {
             if (!Settings.UseBlizzy78Toolbar || !ToolbarManager.ToolbarAvailable)
             {
-                GameEvents.onGUIApplicationLauncherReady.Add(onGUIAppLauncherReady);
-                GameEvents.onGUIApplicationLauncherDestroyed.Add(onGUIAppLauncherDestroyed);
+                onGUIAppLauncherReady();
             }
         }
 
@@ -65,13 +64,7 @@ namespace KSP_GPWS.UI
 
         public void OnDestroy()
         {
-            GameEvents.onGUIApplicationLauncherReady.Remove(onGUIAppLauncherReady);
-            GameEvents.onGUIApplicationLauncherDestroyed.Remove(onGUIAppLauncherDestroyed);
-            if (appBtn != null)
-            {
-                ApplicationLauncher.Instance.RemoveModApplication(appBtn);
-                appBtn = null;
-            }
+            onGUIAppLauncherDestroyed();
         }
     }
 }
