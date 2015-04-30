@@ -113,8 +113,9 @@ namespace KSP_GPWS.Impl
                     }
                     break;
                 case KindOfSound.TOO_LOW_TERRAIN:
-                    if (!IsPlaying(KindOfSound.TOO_LOW_GEAR)
-                            && !IsPlaying(KindOfSound.TOO_LOW_TERRAIN)
+                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP)
+                            && !IsPlaying(KindOfSound.TERRAIN) && !IsPlaying(KindOfSound.TERRAIN_PULL_UP)
+                            && !IsPlaying(KindOfSound.TOO_LOW_GEAR) && !IsPlaying(KindOfSound.TOO_LOW_TERRAIN)
                             && !IsPlaying(KindOfSound.TOO_LOW_FLAPS))
                     {
                         PlayOneShot(kind, "too_low_terrain");
@@ -145,16 +146,16 @@ namespace KSP_GPWS.Impl
                     break;
                 case KindOfSound.RETARD:
                     if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP)
-                        && !IsPlaying(KindOfSound.TERRAIN) && !IsPlaying(KindOfSound.TERRAIN_PULL_UP)
-                        && !IsPlaying(KindOfSound.DONT_SINK) && !IsPlaying(KindOfSound.RETARD))
+                            && !IsPlaying(KindOfSound.TERRAIN) && !IsPlaying(KindOfSound.TERRAIN_PULL_UP)
+                            && !IsPlaying(KindOfSound.DONT_SINK) && !IsPlaying(KindOfSound.RETARD))
                     {
                         PlayOneShot(kind, "retard");
                     }
                     break;
                 case KindOfSound.ROTATE:
                     if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP)
-                        && !IsPlaying(KindOfSound.TERRAIN) && !IsPlaying(KindOfSound.TERRAIN_PULL_UP)
-                        && !IsPlaying(KindOfSound.DONT_SINK) && !IsPlaying(KindOfSound.ROTATE))
+                            && !IsPlaying(KindOfSound.TERRAIN) && !IsPlaying(KindOfSound.TERRAIN_PULL_UP)
+                            && !IsPlaying(KindOfSound.DONT_SINK) && !IsPlaying(KindOfSound.ROTATE))
                     {
                         PlayOneShot(kind, "rotate");
                     }

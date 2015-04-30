@@ -40,6 +40,7 @@ namespace KSP_GPWS.Impl
         private FloatCurve terrainBCurve = new FloatCurve();            // (radar alt, vSpeed)
         private FloatCurve terrainPullUpBCurve = new FloatCurve();      // (radar alt, vSpeed)
         private FloatCurve dontSinkCurve = new FloatCurve();            // (radar alt, RA loss)
+        private FloatCurve tooLowTerrainCurve = new FloatCurve();       // (radar alt, vSpeed)
         private FloatCurve bankAngleCurve = new FloatCurve();           // (radar alt, bankAngle)
 
         private bool exitClosureToTerrainWarning = false;
@@ -215,6 +216,10 @@ namespace KSP_GPWS.Impl
 
             dontSinkCurve.Add(0, -0.1f);
             dontSinkCurve.Add(1500, -150);
+
+            tooLowTerrainCurve.Add(0, 1.0f);
+            tooLowTerrainCurve.Add(1.2f, 1.0f);
+            tooLowTerrainCurve.Add(1.5f, 2.0f);
 
             bankAngleCurve.Add(5, 10);
             bankAngleCurve.Add(30, 10);
@@ -464,17 +469,28 @@ namespace KSP_GPWS.Impl
         {
             if (EnableTerrainClearance)
             {
-                if (!isGearDown && CommonData.RadarAltitude < TooLowGearAltitude && CommonData.time - takeOffTime > 15)
+                if (!isGearDown && (CommonData.RadarAltitude < TooLowGearAltitude)
+                        && (CommonData.time - takeOffTime > 15) && (CommonData.HorSpeed < LandingSpeed * 1.2f))
                 {
                     // play sound
                     Util.audio.PlaySound(KindOfSound.TOO_LOW_GEAR);
                     return true;
                 }
-                if ((CommonData.time - takeOffTime) < 5 && (CommonData.RadarAltitude < heightJustTakeoff))
+                if ((CommonData.time - takeOffTime < 5) && (CommonData.RadarAltitude < heightJustTakeoff))
                 {
                     // play sound
                     Util.audio.PlaySound(KindOfSound.TOO_LOW_TERRAIN);
                     return true;
+                }
+                if (!isGearDown && (CommonData.time - takeOffTime > 5))
+                {
+                    float tooLowTerrainAltitude = tooLowTerrainCurve.Evaluate(CommonData.HorSpeed / LandingSpeed) * TooLowGearAltitude;
+                    if (CommonData.RadarAltitude < tooLowTerrainAltitude)
+                    {
+                        // play sound
+                        Util.audio.PlaySound(KindOfSound.TOO_LOW_TERRAIN);
+                        return true;
+                    }
                 }
             }
             return false;
