@@ -9,10 +9,11 @@ using System.Text;
 
 namespace KSP_GPWS.SimpleTypes
 {
+    [FlagsAttribute]
     public enum UnitOfAltitude
     {
-        NONE,
-        FOOT = 0,
-        METER = 1
+        NONE = 0,
+        FOOT = 1,
+        METER = 2
     };
 }
