@@ -33,6 +33,11 @@ namespace KSP_GPWS
         public static float Volume = 0.5f;
         public static bool UseBlizzy78Toolbar = false;
 
+        /// <summary>
+        /// if true, treat lander as plane, treat plane as lander
+        /// </summary>
+        public static bool ChangeVesselType = false;
+
         public static IPlaneConfig PlaneConfig
         {
             get

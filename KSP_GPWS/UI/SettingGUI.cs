@@ -177,6 +177,8 @@ namespace KSP_GPWS.UI
 
         private void drawSetting()
         {
+            Settings.ChangeVesselType = GUILayout.Toggle(Settings.ChangeVesselType, "change vessel type",
+                    buttonStyle, GUILayout.Width(200), GUILayout.Height(20));
             // volume
             GUILayout.Label(String.Format("Volume: {0}%", Math.Round(Settings.Volume * 100.0f)));
             Settings.Volume = (float)Math.Round(GUILayout.HorizontalSlider(Settings.Volume, 0.0f, 1.0f), 2);
@@ -261,6 +263,18 @@ namespace KSP_GPWS.UI
             // traffic
             PlaneConfig.EnableBankAngle =
                     GUILayout.Toggle(PlaneConfig.EnableBankAngle, "Bank Angle", toggleStyle);
+
+            // rotate
+            PlaneConfig.EnableRotate =
+                    GUILayout.Toggle(PlaneConfig.EnableRotate, "Rotate", toggleStyle);
+
+            // take off speed
+            GUILayout.Label(String.Format("Take Off Speed: {0} m/s", PlaneConfig.TakeOffSpeed));
+            PlaneConfig.TakeOffSpeed = (float)Math.Round(GUILayout.HorizontalSlider(PlaneConfig.TakeOffSpeed, 10.0f, 200.0f), 0);
+
+            // landing speed
+            GUILayout.Label(String.Format("Landing Speed: {0} m/s", PlaneConfig.LandingSpeed));
+            PlaneConfig.LandingSpeed = (float)Math.Round(GUILayout.HorizontalSlider(PlaneConfig.LandingSpeed, 10.0f, 200.0f), 0);
         }
 
         private void drawLanderSetting()

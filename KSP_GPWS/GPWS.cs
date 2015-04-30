@@ -56,15 +56,27 @@ namespace KSP_GPWS
         {
             get
             {
+                bool isPlane = false;
+                bool isLander = false;
+
                 if (_activeVessel == null || _activeVessel.isEVA)
                 {
                     return SimpleTypes.VesselType.NONE;
                 }
                 if (Plane != null && Plane.GearCount > 0)
                 {
-                    return SimpleTypes.VesselType.PLANE;
+                    isPlane = true;
                 }
                 else if (Lander != null)
+                {
+                    isLander = true;
+                }
+
+                if ((isPlane && !Settings.ChangeVesselType) || (isLander && Settings.ChangeVesselType))
+                {
+                    return SimpleTypes.VesselType.PLANE;
+                }
+                else if ((isLander && !Settings.ChangeVesselType) || (isPlane && Settings.ChangeVesselType))
                 {
                     return SimpleTypes.VesselType.LANDER;
                 }

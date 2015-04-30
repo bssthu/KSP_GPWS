@@ -63,9 +63,12 @@ namespace KSP_GPWS.Impl
         public bool EnableRetard { get; set; }
         public bool EnableBankAngle { get; set; }
         public bool EnableTraffic { get; set; }
+        public bool EnableRotate { get; set; }
 
         public float DescentRateFactor { get; set; }
         public float TooLowGearAltitude { get; set; }
+        public float TakeOffSpeed { get; set; }
+        public float LandingSpeed { get; set; }
         public int[] AltitudeArray { get; set; }
 
         /// <summary>
@@ -88,9 +91,12 @@ namespace KSP_GPWS.Impl
             EnableRetard = Util.ConvertValue<bool>(node, "EnableRetard", EnableRetard);
             EnableBankAngle = Util.ConvertValue<bool>(node, "EnableBankAngle", EnableBankAngle);
             EnableTraffic = Util.ConvertValue<bool>(node, "EnableTraffic", EnableTraffic);
+            EnableRotate = Util.ConvertValue<bool>(node, "EnableRotate", EnableRotate);
 
             DescentRateFactor = Util.ConvertValue<float>(node, "DescentRateFactor", DescentRateFactor);
             TooLowGearAltitude = Util.ConvertValue<float>(node, "TooLowGearAltitude", TooLowGearAltitude);
+            TakeOffSpeed = Util.ConvertValue<float>(node, "TakeOffSpeed", TakeOffSpeed);
+            LandingSpeed = Util.ConvertValue<float>(node, "LandingSpeed", LandingSpeed);
             if (node.HasValue("AltitudeArray"))
             {
                 String[] intstrings = node.GetValue("AltitudeArray").Split(',');
@@ -129,11 +135,14 @@ namespace KSP_GPWS.Impl
             node.AddValue("EnableRetard", EnableRetard);
             node.AddValue("EnableBankAngle", EnableBankAngle);
             node.AddValue("EnableTraffic", EnableTraffic);
+            node.AddValue("EnableRotate", EnableRotate);
 
             node.AddValue("DescentRateFactor", DescentRateFactor);
             node.AddValue("TooLowGearAltitude", TooLowGearAltitude);
+            node.AddValue("TakeOffSpeed", TakeOffSpeed);
+            node.AddValue("LandingSpeed", LandingSpeed);
             node.AddValue("AltitudeArray", String.Join(",", Array.ConvertAll(AltitudeArray, x => x.ToString())));
-            node.AddValue("UnitOfAltitude", UnitOfAltitude);
+            node.AddValue("UnitOfAltitude", UnitOfAltitude.ToString());
         }
 
         #endregion
@@ -160,9 +169,12 @@ namespace KSP_GPWS.Impl
             EnableRetard = true;
             EnableBankAngle = false;
             EnableTraffic = true;
+            EnableRotate = false;
 
             DescentRateFactor = 1.0f;
             TooLowGearAltitude = 500.0f;
+            TakeOffSpeed = 60.0f;
+            LandingSpeed = 60.0f;
             AltitudeArray = new int[] { 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
             UnitOfAltitude = UnitOfAltitude.FOOT;
         }
@@ -213,7 +225,7 @@ namespace KSP_GPWS.Impl
         public bool PreUpdate()
         {
             // just takeoff
-            if (CommonData.time - takeOffTime < 1.0f)
+            if (CommonData.time - takeOffTime < 1.5f)
             {
                 Util.audio.MarkNotPlaying();
                 return false;
