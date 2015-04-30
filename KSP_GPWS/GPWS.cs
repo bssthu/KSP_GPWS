@@ -33,11 +33,19 @@ namespace KSP_GPWS
 
         public float Altitude { get; set; }
 
+        public float HorSpeed { get;  private set; }
+
+        public float VerSpeed { get; private set; }
+
         private Vessel LastActiveVessel = null;
 
         public float LastRadarAltitude { get; private set; }
 
         public float LastAltitude { get; private set; }
+
+        public float LastHorSpeed { get; private set; }
+
+        public float LastVerSpeed { get; private set; }
 
         // time scene loaded
         private float t0 = 0.0f;
@@ -111,8 +119,12 @@ namespace KSP_GPWS
 
             RadarAltitude = 0.0f;
             Altitude = 0.0f;
+            HorSpeed = 0.0f;
+            VerSpeed = 0.0f;
             LastRadarAltitude = float.PositiveInfinity;
             LastAltitude = float.PositiveInfinity;
+            LastHorSpeed = 0.0f;
+            LastVerSpeed = 0.0f;
 
             t0 = Time.time;
             time = t0;
@@ -179,6 +191,10 @@ namespace KSP_GPWS
                 Altitude = (float)FlightGlobals.ship_altitude;
             }
 
+            // speed
+            HorSpeed = (float)ActiveVessel.horizontalSrfSpeed;
+            VerSpeed = (float)ActiveVessel.verticalSpeed;
+
             // check volume
             if (Util.audio.Volume != GameSettings.VOICE_VOLUME * Settings.Volume)
             {
@@ -226,6 +242,8 @@ namespace KSP_GPWS
         {
             LastRadarAltitude = RadarAltitude;    // save last gear height
             LastAltitude = Altitude;
+            LastHorSpeed = HorSpeed;    // save last speed
+            LastVerSpeed = VerSpeed;
             lastTime = time;        // save time of last frame
             LastActiveVessel = ActiveVessel;
         }

@@ -27,6 +27,7 @@ namespace KSP_GPWS.SimpleTypes
         WINDSHEAR,
         TRAFFIC,
         HORIZONTAL_SPEED,
-        RETARD
+        RETARD,
+        ROTATE
     };
 }

@@ -257,8 +257,8 @@ namespace KSP_GPWS.Impl
             {
                 if (CommonData.RadarAltitude < HorizontalSpeedCheckAltitude)
                 {
-                    float hSpeed = (float)CommonData.ActiveVessel.horizontalSrfSpeed;
-                    float vSpeed = (float)CommonData.ActiveVessel.verticalSpeed;
+                    float hSpeed = CommonData.HorSpeed;
+                    float vSpeed = CommonData.VerSpeed;
                     // speed in meters/feet per s
                     if (UnitOfAltitude.FOOT == UnitOfAltitude)
                     {

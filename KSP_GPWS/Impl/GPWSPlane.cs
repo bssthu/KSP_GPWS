@@ -224,13 +224,6 @@ namespace KSP_GPWS.Impl
 
         public bool PreUpdate()
         {
-            // just takeoff
-            if (CommonData.time - takeOffTime < 1.5f)
-            {
-                Util.audio.MarkNotPlaying();
-                return false;
-            }
-
             // check gear
             if (gears.Count <= 0)
             {
@@ -250,8 +243,6 @@ namespace KSP_GPWS.Impl
             {
                 takeOffTime = CommonData.time;
                 heightJustTakeoff = 0.0f;
-                Util.audio.MarkNotPlaying();
-                return false;
             }
 
             return true;
@@ -273,7 +264,24 @@ namespace KSP_GPWS.Impl
 
             isGearDown = Util.GearDeployed(Util.GetLowestGear(gears));
 
-            if (CommonData.RadarAltitude > 0 && CommonData.RadarAltitude < float.PositiveInfinity)
+
+            if (CommonData.time - takeOffTime <= 0.1f)  // taxi
+            {
+                if (checkMode_TakeoffSpeedCheck())
+                { }
+                else if (!Util.audio.IsPlaying())
+                {
+                    Util.audio.MarkNotPlaying();
+                }
+            }
+            else if (CommonData.time - takeOffTime < 1.5f)  // just takeoff
+            {
+                if (!Util.audio.IsPlaying())
+                {
+                    Util.audio.MarkNotPlaying();
+                }
+            }
+            else if (CommonData.RadarAltitude > 0 && CommonData.RadarAltitude < float.PositiveInfinity) // flying
             {
                 if (checkMode_1())  // Excessive Decent Rate
                 { }
@@ -306,7 +314,9 @@ namespace KSP_GPWS.Impl
                 // is descending (altitude)
                 if ((CommonData.Altitude < 2500.0f) && (CommonData.Altitude - CommonData.LastAltitude < 0))
                 {
-                    float vSpeed = Math.Abs((CommonData.Altitude - CommonData.LastAltitude) / (CommonData.time - CommonData.lastTime) * 60.0f);   // ft/min, altitude
+                    // ft/min, altitude
+                    float vSpeed = Math.Abs((CommonData.Altitude - CommonData.LastAltitude)
+                            / (CommonData.time - CommonData.lastTime) * 60.0f);
                     // pull up
                     float maxVSpeedPullUp = Math.Abs(sinkRatePullUpCurve.Evaluate(CommonData.RadarAltitude)) * DescentRateFactor;
                     if (vSpeed > maxVSpeedPullUp)
@@ -343,7 +353,9 @@ namespace KSP_GPWS.Impl
                     if ((CommonData.Altitude < 800.0f) && (CommonData.Altitude - CommonData.LastAltitude < 0))
                     {
                         // check if should warn
-                        float vSpeed = Math.Abs((CommonData.RadarAltitude - CommonData.LastRadarAltitude) / (CommonData.time - CommonData.lastTime) * 60.0f);   // ft/min, radar altitude
+                        // ft/min, radar altitude
+                        float vSpeed = Math.Abs((CommonData.RadarAltitude - CommonData.LastRadarAltitude)
+                                / (CommonData.time - CommonData.lastTime) * 60.0f);
                         // terrain pull up
                         float maxVSpeedPullUp = Math.Abs(terrainPullUpBCurve.Evaluate(CommonData.RadarAltitude)) * DescentRateFactor;
                         if (vSpeed > maxVSpeedPullUp)
@@ -368,7 +380,9 @@ namespace KSP_GPWS.Impl
                     if ((CommonData.Altitude < 2200.0f) && (CommonData.Altitude - CommonData.LastAltitude < 0))
                     {
                         // check if should warn
-                        float vSpeed = Math.Abs((CommonData.RadarAltitude - CommonData.LastRadarAltitude) / (CommonData.time - CommonData.lastTime) * 60.0f);   // ft/min, radar altitude
+                        // ft/min, radar altitude
+                        float vSpeed = Math.Abs((CommonData.RadarAltitude - CommonData.LastRadarAltitude)
+                                / (CommonData.time - CommonData.lastTime) * 60.0f);
                         // terrain pull up
                         float maxVSpeedPullUp = Math.Abs(terrainPullUpCurve.Evaluate(CommonData.RadarAltitude)) * DescentRateFactor;
                         if (vSpeed > maxVSpeedPullUp)
@@ -495,7 +509,7 @@ namespace KSP_GPWS.Impl
             if (EnableAltitudeCallouts)
             {
                 // is descending
-                if (CommonData.RadarAltitude - CommonData.LastRadarAltitude < 0)
+                if (CommonData.RadarAltitude - CommonData.LastRadarAltitude < 0 && CommonData.RadarAltitude > 0)
                 {
                     // lower than an altitude
                     foreach (float threshold in AltitudeArray)
@@ -539,7 +553,8 @@ namespace KSP_GPWS.Impl
                 for (int i = 0; i < FlightGlobals.Vessels.Count; i++)
                 {
                     Vessel vessel = FlightGlobals.Vessels[i];
-                    if (!vessel.isActiveVessel && vessel.situation == Vessel.Situations.FLYING && (vessel.mainBody == CommonData.ActiveVessel.mainBody)
+                    if (!vessel.isActiveVessel && vessel.situation == Vessel.Situations.FLYING
+                            && (vessel.mainBody == CommonData.ActiveVessel.mainBody)
                             && (vessel.vesselType != VesselType.Debris))
                     {
                         float distance = (float)(vessel.GetWorldPos3D() - CommonData.ActiveVessel.GetWorldPos3D()).magnitude;
@@ -560,6 +575,19 @@ namespace KSP_GPWS.Impl
                             }
                         }
                     }
+                }
+            }
+            return false;
+        }
+
+        private bool checkMode_TakeoffSpeedCheck()
+        {
+            if (EnableRotate)
+            {
+                if (CommonData.HorSpeed >= TakeOffSpeed && CommonData.LastHorSpeed < TakeOffSpeed)
+                {
+                    Util.audio.PlaySound(KindOfSound.ROTATE);
+                    return true;
                 }
             }
             return false;

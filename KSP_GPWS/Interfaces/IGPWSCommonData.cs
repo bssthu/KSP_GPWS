@@ -15,6 +15,14 @@ namespace KSP_GPWS.Interfaces
 
         float LastAltitude { get; }
 
+        float HorSpeed { get; }
+
+        float LastHorSpeed { get; }
+
+        float VerSpeed { get; }
+
+        float LastVerSpeed { get; }
+
         float time { get; }
 
         float lastTime { get; }
