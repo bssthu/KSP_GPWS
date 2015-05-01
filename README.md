@@ -26,7 +26,7 @@ Development thread: http://forum.kerbalspaceprogram.com/threads/112420-WIP-0-90-
 #### How to Use
 
 Fly an aircraft with landing gear(s).
-(It should have a ModuleLandingGear, FSwheel or ModuleWheel module.)
+(It should have a ModuleLandingGear, ModuleLandingGearFixed, FSwheel or ModuleWheel module.)
 If you enabled system in GPWS Settings,
 You should hear sounds when you are landing/crashing.
 
@@ -38,22 +38,31 @@ You are free to turn off warnings you don't want to hear.
 
 You can edit settings.cfg for more accurate adjustment.
 
-P.S.1. This mod uses feet for altitude.
+P.S.1. This mod uses feet for plane altitude.
 
 P.S.2. Change "Descent Rate Factor" to allow faster/slower sink rate. (Set to 2 means you are allowed to sink 2 times faster than default.)
 
 #### Supported Warning List
 
+###### Plane
 - sink rate
 - sink rate, whoop whoop pull up
-- terrain, terrain
-- terrain, terrain, whoop whoop pull up
+- terrain terrain
+- terrain terrain, whoop whoop pull up
 - don't sink
 - too low gear
 - too low terrain
 - bank angle
 - altitude callout (1000, 500, approaching minimus, minimus, 100, 50, 40, 30, 20, 10)
+- retard
 - traffic
+- rotate
+
+###### Lander
+- sink rate
+- horizontal speed
+- altitude callout (1000, 500, 100, 50, 40, 30, 20, 10)
+- retard
 
 #### Download
 
