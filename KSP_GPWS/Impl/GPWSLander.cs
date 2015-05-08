@@ -169,6 +169,12 @@ namespace KSP_GPWS.Impl
                 landingTime = CommonData.time;
             }
 
+            // just take off
+            if (takeOffTime - landingTime < 5)
+            {
+                return false;
+            }
+
             return true;
         }
 
