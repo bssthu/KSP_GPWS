@@ -157,8 +157,8 @@ namespace KSP_GPWS.Impl
             if (CommonData.ActiveVessel.LandedOrSplashed)
             {
                 takeOffTime = CommonData.time;
-                // landed for more than 5 sec
-                if (CommonData.time - landingTime > 5)
+                // landed for more than 3 sec
+                if (CommonData.time - landingTime > 3)
                 {
                     Util.audio.MarkNotPlaying();
                     return false;
@@ -170,7 +170,7 @@ namespace KSP_GPWS.Impl
             }
 
             // just take off
-            if (takeOffTime - landingTime < 5)
+            if (CommonData.time - takeOffTime < 3)
             {
                 return false;
             }
