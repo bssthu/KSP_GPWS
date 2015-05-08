@@ -126,6 +126,8 @@ namespace KSP_GPWS
             LastHorSpeed = 0.0f;
             LastVerSpeed = 0.0f;
 
+            Settings.ChangeVesselType = false;
+
             t0 = Time.time;
             time = t0;
             lastTime = t0;
