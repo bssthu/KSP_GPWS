@@ -242,17 +242,23 @@ namespace KSP_GPWS
                 if (v.Parts[i].Modules.Contains("ModuleEngines"))
                 {
                     ModuleEngines me = v.Parts[i].Modules["ModuleEngines"] as ModuleEngines;
-                    if (!me.engineShutdown && me.EngineIgnited)
+                    if (!me.engineShutdown && me.EngineIgnited && !me.flameout)
                     {
-                        maxThrust += me.maxThrust;
+                        float me_isp = me.atmosphereCurve.Evaluate((float)(v.staticPressurekPa * PhysicsGlobals.KpaToAtmospheres));
+                        float g0 = 9.82f;
+                        float me_maxThrust = me.maxFuelFlow * g0 * me_isp;
+                        maxThrust += me_maxThrust;
                     }
                 }
                 if (v.Parts[i].Modules.Contains("ModuleEnginesFX"))
                 {
                     ModuleEnginesFX me = v.Parts[i].Modules["ModuleEnginesFX"] as ModuleEnginesFX;
-                    if (!me.engineShutdown && me.EngineIgnited)
+                    if (!me.engineShutdown && me.EngineIgnited && !me.flameout)
                     {
-                        maxThrust += me.maxThrust;
+                        float me_isp = me.atmosphereCurve.Evaluate((float)(v.staticPressurekPa * PhysicsGlobals.KpaToAtmospheres));
+                        float g0 = 9.82f;
+                        float me_maxThrust = me.maxFuelFlow * g0 * me_isp;
+                        maxThrust += me_maxThrust;
                     }
                 }
             }
