@@ -29,6 +29,8 @@ namespace KSP_GPWS.Interfaces
 
         float LastVerSpeed { get; }
 
+        float Speed { get; }
+
         float time { get; }
 
         float lastTime { get; }

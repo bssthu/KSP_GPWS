@@ -37,6 +37,8 @@ namespace KSP_GPWS
 
         public float VerSpeed { get; private set; }
 
+        public float Speed { get; private set; }
+
         private Vessel LastActiveVessel = null;
 
         public float LastRadarAltitude { get; private set; }
@@ -196,6 +198,7 @@ namespace KSP_GPWS
             // speed
             HorSpeed = (float)ActiveVessel.horizontalSrfSpeed;
             VerSpeed = (float)ActiveVessel.verticalSpeed;
+            Speed = (float)Math.Sqrt(HorSpeed * HorSpeed + VerSpeed * VerSpeed);
 
             // check volume
             if (Util.audio.Volume != GameSettings.VOICE_VOLUME * Settings.Volume)

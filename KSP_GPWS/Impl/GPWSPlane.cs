@@ -396,7 +396,7 @@ namespace KSP_GPWS.Impl
         {
             if (EnableClosureToTerrain)
             {
-                if (isGearDown || (CommonData.time - takeOffTime > 30) || (CommonData.HorSpeed < LandingSpeed * 1.2f))        // Mode B
+                if (isGearDown || (CommonData.time - takeOffTime > 30) || (CommonData.Speed < LandingSpeed * 1.2f))        // Mode B
                 {
                     // is descending (radar altitude)
                     if ((CommonData.RadarAltitude < 800.0f) && (CommonData.RadarAltitude - CommonData.LastRadarAltitude < 0))
@@ -512,7 +512,7 @@ namespace KSP_GPWS.Impl
             if (EnableTerrainClearance)
             {
                 if (!isGearDown && (CommonData.RadarAltitude < TooLowGearAltitude)
-                        && (CommonData.time - takeOffTime > 15) && (CommonData.HorSpeed < LandingSpeed * 1.2f))
+                        && (CommonData.time - takeOffTime > 15) && (CommonData.Speed < LandingSpeed * 1.2f))
                 {
                     // play sound
                     Util.audio.PlaySound(KindOfSound.TOO_LOW_GEAR);
@@ -526,7 +526,7 @@ namespace KSP_GPWS.Impl
                 }
                 if (!isGearDown && (CommonData.time - takeOffTime > 5))
                 {
-                    float tooLowTerrainAltitude = tooLowTerrainCurve.Evaluate(CommonData.HorSpeed / LandingSpeed) * TooLowGearAltitude;
+                    float tooLowTerrainAltitude = tooLowTerrainCurve.Evaluate(CommonData.Speed / LandingSpeed) * TooLowGearAltitude;
                     if (CommonData.RadarAltitude < tooLowTerrainAltitude)
                     {
                         // play sound
