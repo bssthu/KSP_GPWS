@@ -32,6 +32,36 @@ namespace KSP_GPWS.Impl
         /// </summary>
         private float heightJustTakeoff = 0.0f;
 
+        private Queue<float> lastRadarAlt = new Queue<float>();
+        private Queue<float> lastRadarAlt_time = new Queue<float>();
+        private const int lastRadarAlt_Count = 3;
+
+        /// <summary>
+        /// in m/s or ft/s
+        /// </summary>
+        private float VerSpeedRA
+        {
+            get
+            {
+                if (lastRadarAlt.Count < lastRadarAlt_Count * 2 || lastRadarAlt_time.Count < lastRadarAlt_Count * 2)
+                {
+                    return 0.0f;
+                }
+                else
+                {
+                    float t0 = 0, tf = 0, h0 = 0, hf = 0;
+                    for (int i = 0; i < lastRadarAlt_Count; i++)
+                    {
+                        h0 += lastRadarAlt.ElementAt(i);
+                        hf += lastRadarAlt.ElementAt(lastRadarAlt_Count + i);
+                        t0 += lastRadarAlt_time.ElementAt(i);
+                        tf += lastRadarAlt_time.ElementAt(lastRadarAlt_Count + i);
+                    }
+                    return (hf - h0) / (tf - t0);
+                }
+            }
+        }
+
         // curves
         private FloatCurve sinkRateCurve = new FloatCurve();            // (alt, vSpeed)
         private FloatCurve sinkRatePullUpCurve = new FloatCurve();      // (alt, vSpeed)
@@ -189,6 +219,9 @@ namespace KSP_GPWS.Impl
             heightJustTakeoff = 0.0f;
             exitClosureToTerrainWarning = false;
 
+            lastRadarAlt.Clear();
+            lastRadarAlt_time.Clear();
+
             initializeCurves();
         }
 
@@ -248,6 +281,17 @@ namespace KSP_GPWS.Impl
             {
                 takeOffTime = CommonData.time;
                 heightJustTakeoff = 0.0f;
+            }
+
+            if (lastRadarAlt_time.Count == 0 || CommonData.time - lastRadarAlt_time.ElementAt(0) > 0.2f)
+            {
+                lastRadarAlt.Enqueue(CommonData.RadarAltitude);
+                lastRadarAlt_time.Enqueue(CommonData.time);
+            }
+            if (lastRadarAlt_time.Count > lastRadarAlt_Count * 2)
+            {
+                lastRadarAlt.Dequeue();
+                lastRadarAlt_time.Dequeue();
             }
 
             return true;
@@ -359,8 +403,7 @@ namespace KSP_GPWS.Impl
                     {
                         // check if should warn
                         // ft/min, radar altitude
-                        float vSpeed = Math.Abs((CommonData.RadarAltitude - CommonData.LastRadarAltitude)
-                                / (CommonData.time - CommonData.lastTime) * 60.0f);
+                        float vSpeed = Math.Abs(VerSpeedRA) * 60.0f;
                         // terrain pull up
                         float maxVSpeedPullUp = Math.Abs(terrainPullUpBCurve.Evaluate(CommonData.RadarAltitude)) * DescentRateFactor;
                         if (vSpeed > maxVSpeedPullUp)
@@ -386,8 +429,7 @@ namespace KSP_GPWS.Impl
                     {
                         // check if should warn
                         // ft/min, radar altitude
-                        float vSpeed = Math.Abs((CommonData.RadarAltitude - CommonData.LastRadarAltitude)
-                                / (CommonData.time - CommonData.lastTime) * 60.0f);
+                        float vSpeed = Math.Abs(VerSpeedRA) * 60.0f;
                         // terrain pull up
                         float maxVSpeedPullUp = Math.Abs(terrainPullUpCurve.Evaluate(CommonData.RadarAltitude)) * DescentRateFactor;
                         if (vSpeed > maxVSpeedPullUp)
