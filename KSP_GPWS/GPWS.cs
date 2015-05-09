@@ -57,6 +57,16 @@ namespace KSP_GPWS
 
         public float lastTime { get; private set; }
 
+        /// <summary>
+        /// time of takeoff
+        /// </summary>
+        public float takeOffTime { get; private set; }
+
+        /// <summary>
+        /// time of landing/splashing
+        /// </summary>
+        public float landingTime { get; private set; }
+
         private static GPWSPlane Plane = null;
         private static GPWSLander Lander = null;
 
@@ -128,6 +138,9 @@ namespace KSP_GPWS
             LastHorSpeed = 0.0f;
             LastVerSpeed = 0.0f;
 
+            takeOffTime = float.NegativeInfinity;
+            landingTime = float.NegativeInfinity;
+
             Settings.ChangeVesselType = false;
 
             t0 = Time.time;
@@ -154,6 +167,16 @@ namespace KSP_GPWS
         {
             time = Time.time - t0;
             ActiveVessel = FlightGlobals.ActiveVessel;
+
+            // on surface
+            if (ActiveVessel.LandedOrSplashed)
+            {
+                takeOffTime = time;
+            }
+            else
+            {
+                landingTime = time;
+            }
 
             // check time, prevent problem
             if (time < 2.0f)

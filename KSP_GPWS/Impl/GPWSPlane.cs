@@ -23,11 +23,6 @@ namespace KSP_GPWS.Impl
         private bool isGearDown = false;
 
         /// <summary>
-        /// time of takeoff
-        /// </summary>
-        private float takeOffTime = float.NegativeInfinity;
-
-        /// <summary>
         /// max RA when just takeoff
         /// </summary>
         private float heightJustTakeoff = 0.0f;
@@ -215,7 +210,6 @@ namespace KSP_GPWS.Impl
             CommonData = data;
 
             isGearDown = false;
-            takeOffTime = float.NegativeInfinity;
             heightJustTakeoff = 0.0f;
             exitClosureToTerrainWarning = false;
 
@@ -279,7 +273,6 @@ namespace KSP_GPWS.Impl
             // on surface
             if (CommonData.ActiveVessel.LandedOrSplashed)
             {
-                takeOffTime = CommonData.time;
                 heightJustTakeoff = 0.0f;
             }
 
@@ -314,7 +307,7 @@ namespace KSP_GPWS.Impl
             isGearDown = Util.GearDeployed(Util.GetLowestGear(gears));
 
 
-            if (CommonData.time - takeOffTime <= 0.1f)  // taxi
+            if (CommonData.time - CommonData.takeOffTime <= 0.1f && CommonData.time - CommonData.landingTime > 5.0f)  // taxi
             {
                 if (checkMode_TakeoffSpeedCheck())
                 { }
@@ -323,7 +316,7 @@ namespace KSP_GPWS.Impl
                     Util.audio.MarkNotPlaying();
                 }
             }
-            else if (CommonData.time - takeOffTime < 1.5f)  // just takeoff
+            else if (CommonData.time - CommonData.takeOffTime < 1.5f)  // just takeoff
             {
                 if (!Util.audio.IsPlaying())
                 {
@@ -396,7 +389,7 @@ namespace KSP_GPWS.Impl
         {
             if (EnableClosureToTerrain)
             {
-                if (isGearDown || (CommonData.time - takeOffTime > 30) || (CommonData.Speed < LandingSpeed * 1.2f))        // Mode B
+                if (isGearDown || (CommonData.time - CommonData.takeOffTime > 30) || (CommonData.Speed < LandingSpeed * 1.2f))        // Mode B
                 {
                     // is descending (radar altitude)
                     if ((CommonData.RadarAltitude < 800.0f) && (CommonData.RadarAltitude - CommonData.LastRadarAltitude < 0))
@@ -479,7 +472,7 @@ namespace KSP_GPWS.Impl
         {
             if (EnableAltitudeLoss)
             {
-                if ((CommonData.time - takeOffTime) < 15 && heightJustTakeoff < 1500)
+                if ((CommonData.time - CommonData.takeOffTime) < 15 && heightJustTakeoff < 1500)
                 {
                     if (CommonData.RadarAltitude >= heightJustTakeoff)
                     {
@@ -512,19 +505,19 @@ namespace KSP_GPWS.Impl
             if (EnableTerrainClearance)
             {
                 if (!isGearDown && (CommonData.RadarAltitude < TooLowGearAltitude)
-                        && (CommonData.time - takeOffTime > 15) && (CommonData.Speed < LandingSpeed * 1.2f))
+                        && (CommonData.time - CommonData.takeOffTime > 15) && (CommonData.Speed < LandingSpeed * 1.2f))
                 {
                     // play sound
                     Util.audio.PlaySound(KindOfSound.TOO_LOW_GEAR);
                     return true;
                 }
-                if ((CommonData.time - takeOffTime < 5) && (CommonData.RadarAltitude < heightJustTakeoff))
+                if ((CommonData.time - CommonData.takeOffTime < 5) && (CommonData.RadarAltitude < heightJustTakeoff))
                 {
                     // play sound
                     Util.audio.PlaySound(KindOfSound.TOO_LOW_TERRAIN);
                     return true;
                 }
-                if (!isGearDown && (CommonData.time - takeOffTime > 5))
+                if (!isGearDown && (CommonData.time - CommonData.takeOffTime > 5))
                 {
                     float tooLowTerrainAltitude = tooLowTerrainCurve.Evaluate(CommonData.Speed / LandingSpeed) * TooLowGearAltitude;
                     if (CommonData.RadarAltitude < tooLowTerrainAltitude)
@@ -554,7 +547,7 @@ namespace KSP_GPWS.Impl
                     // lower than an altitude
                     if (CommonData.RadarAltitude < 15)
                     {
-                        if ((CommonData.ActiveVessel.ctrlState.mainThrottle > 0) && (CommonData.time - takeOffTime > 5))
+                        if ((CommonData.ActiveVessel.ctrlState.mainThrottle > 0) && (CommonData.time - CommonData.takeOffTime > 5))
                         {
                             // play sound
                             Util.audio.PlaySound(KindOfSound.RETARD);

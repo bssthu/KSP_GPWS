@@ -15,16 +15,6 @@ namespace KSP_GPWS.Impl
     {
         private IGPWSCommonData CommonData = null;
 
-        /// <summary>
-        /// time of takeoff
-        /// </summary>
-        private float takeOffTime = float.NegativeInfinity;
-
-        /// <summary>
-        /// time of landing/splashing
-        /// </summary>
-        private float landingTime = float.NegativeInfinity;
-
         #region ILanderConfig
         public bool EnableSystem { get; set; }
         public bool EnableDescentRate { get; set; }
@@ -141,9 +131,6 @@ namespace KSP_GPWS.Impl
         {
             CommonData = data;
 
-            takeOffTime = float.NegativeInfinity;
-            landingTime = float.NegativeInfinity;
-
             initializeCurves();
         }
 
@@ -156,21 +143,16 @@ namespace KSP_GPWS.Impl
             // on surface
             if (CommonData.ActiveVessel.LandedOrSplashed)
             {
-                takeOffTime = CommonData.time;
                 // landed for more than 3 sec
-                if (CommonData.time - landingTime > 3)
+                if (CommonData.time - CommonData.landingTime > 3)
                 {
                     Util.audio.MarkNotPlaying();
                     return false;
                 }
             }
-            else
-            {
-                landingTime = CommonData.time;
-            }
 
             // just take off
-            if (CommonData.time - takeOffTime < 3)
+            if (CommonData.time - CommonData.takeOffTime < 3)
             {
                 return false;
             }

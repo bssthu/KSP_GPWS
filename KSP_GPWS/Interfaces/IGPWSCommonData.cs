@@ -35,6 +35,18 @@ namespace KSP_GPWS.Interfaces
 
         float lastTime { get; }
 
+        /// <summary>
+        /// time of takeoff.
+        /// when on ground, takeOffTime = time
+        /// </summary>
+        float takeOffTime { get; }
+
+        /// <summary>
+        /// time of landing/splashing.
+        /// when flying, landingTime = time
+        /// </summary>
+        float landingTime { get; }
+
         Vessel ActiveVessel { get; }
     }
 }
