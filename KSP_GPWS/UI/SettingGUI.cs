@@ -268,6 +268,12 @@ namespace KSP_GPWS.UI
             PlaneConfig.EnableRotate =
                     GUILayout.Toggle(PlaneConfig.EnableRotate, "Rotate", toggleStyle);
 
+            // stall
+            PlaneConfig.EnableStall =
+                    GUILayout.Toggle(PlaneConfig.EnableStall, "Stall", toggleStyle);
+            GUILayout.Label(String.Format("Max AOA: {0} deg", PlaneConfig.StallAoa));
+            PlaneConfig.StallAoa = (float)Math.Round(GUILayout.HorizontalSlider(PlaneConfig.StallAoa, 0.0f, 180.0f), 0);
+
             // take off speed
             GUILayout.Label(String.Format("Take Off Speed: {0} m/s", PlaneConfig.TakeOffSpeed));
             PlaneConfig.TakeOffSpeed = (float)Math.Round(GUILayout.HorizontalSlider(PlaneConfig.TakeOffSpeed, 10.0f, 200.0f), 0);

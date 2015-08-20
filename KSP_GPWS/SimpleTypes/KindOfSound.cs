@@ -28,6 +28,7 @@ namespace KSP_GPWS.SimpleTypes
         TRAFFIC,
         HORIZONTAL_SPEED,
         RETARD,
-        ROTATE
+        ROTATE,
+        STALL
     };
 }

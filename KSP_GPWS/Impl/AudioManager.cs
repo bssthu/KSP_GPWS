@@ -127,6 +127,15 @@ namespace KSP_GPWS.Impl
                         PlayOneShot(kind, "traffic");
                     }
                     break;
+                case KindOfSound.STALL:
+                    if (!IsPlaying(KindOfSound.STALL) && !IsPlaying(KindOfSound.TOO_LOW_FLAPS)
+                            && !IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP)
+                            && !IsPlaying(KindOfSound.TERRAIN) && !IsPlaying(KindOfSound.TERRAIN_PULL_UP)
+                            && !IsPlaying(KindOfSound.TOO_LOW_GEAR) && !IsPlaying(KindOfSound.TOO_LOW_TERRAIN))
+                    {
+                        PlayOneShot(kind, "stall");
+                    }
+                    break;
                 case KindOfSound.ALTITUDE_CALLOUTS:
                     this.detail = detail;
                     PlayOneShot(kind, "gpws" + detail);

@@ -22,11 +22,13 @@ namespace KSP_GPWS.Interfaces
         bool EnableBankAngle { get; set; }
         bool EnableTraffic { get; set; }
         bool EnableRotate { get; set; }
+        bool EnableStall { get; set; }
 
         float DescentRateFactor { get; set; }
         float TooLowGearAltitude { get; set; }
         float TakeOffSpeed { get; set; }
         float LandingSpeed { get; set; }
+        float StallAoa { get; set; }
         int[] AltitudeArray { get; set; }
 
         /// <summary>

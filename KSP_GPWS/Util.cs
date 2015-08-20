@@ -219,6 +219,33 @@ namespace KSP_GPWS
         }
 
         /// <summary>
+        /// AOA from SteamGauges.AirGauge
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static float Aoa(Vessel v)
+        {
+            Transform self = v.ReferenceTransform;
+            return AngleAroundNormal(v.GetSrfVelocity(), self.up, self.right) * -1f;
+        }
+
+        // return signed angle in relation to normal's 2d plane
+        // From NavyFish's docking alignment
+        private static float AngleAroundNormal(Vector3 a, Vector3 b, Vector3 up)
+        {
+            return AngleSigned(Vector3.Cross(up, a), Vector3.Cross(up, b), up);
+        }
+
+        // -180 to 180 angle
+        // From NavyFish's docking alignment
+        private static float AngleSigned(Vector3 v1, Vector3 v2, Vector3 up)
+        {
+            if (Vector3.Dot(Vector3.Cross(v1, v2), up) < 0) //greater than 90 i.e v1 left of v2
+                return -Vector3.Angle(v1, v2);
+            return Vector3.Angle(v1, v2);
+        }
+
+        /// <summary>
         /// max acc, in m/s
         /// </summary>
         /// <param name="v"></param>

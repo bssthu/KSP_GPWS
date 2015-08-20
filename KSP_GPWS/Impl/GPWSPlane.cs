@@ -90,11 +90,13 @@ namespace KSP_GPWS.Impl
         public bool EnableBankAngle { get; set; }
         public bool EnableTraffic { get; set; }
         public bool EnableRotate { get; set; }
+        public bool EnableStall { get; set; }
 
         public float DescentRateFactor { get; set; }
         public float TooLowGearAltitude { get; set; }
         public float TakeOffSpeed { get; set; }
         public float LandingSpeed { get; set; }
+        public float StallAoa { get; set; }
         public int[] AltitudeArray { get; set; }
 
         /// <summary>
@@ -118,11 +120,13 @@ namespace KSP_GPWS.Impl
             EnableBankAngle = Util.ConvertValue<bool>(node, "EnableBankAngle", EnableBankAngle);
             EnableTraffic = Util.ConvertValue<bool>(node, "EnableTraffic", EnableTraffic);
             EnableRotate = Util.ConvertValue<bool>(node, "EnableRotate", EnableRotate);
+            EnableStall = Util.ConvertValue<bool>(node, "EnableStall", EnableStall);
 
             DescentRateFactor = Util.ConvertValue<float>(node, "DescentRateFactor", DescentRateFactor);
             TooLowGearAltitude = Util.ConvertValue<float>(node, "TooLowGearAltitude", TooLowGearAltitude);
             TakeOffSpeed = Util.ConvertValue<float>(node, "TakeOffSpeed", TakeOffSpeed);
             LandingSpeed = Util.ConvertValue<float>(node, "LandingSpeed", LandingSpeed);
+            StallAoa = Util.ConvertValue<float>(node, "StallAoa", StallAoa);
             if (node.HasValue("AltitudeArray"))
             {
                 String[] intstrings = node.GetValue("AltitudeArray").Split(',');
@@ -162,11 +166,13 @@ namespace KSP_GPWS.Impl
             node.AddValue("EnableBankAngle", EnableBankAngle);
             node.AddValue("EnableTraffic", EnableTraffic);
             node.AddValue("EnableRotate", EnableRotate);
+            node.AddValue("EnableStall", EnableStall);
 
             node.AddValue("DescentRateFactor", DescentRateFactor);
             node.AddValue("TooLowGearAltitude", TooLowGearAltitude);
             node.AddValue("TakeOffSpeed", TakeOffSpeed);
             node.AddValue("LandingSpeed", LandingSpeed);
+            node.AddValue("StallAoa", StallAoa);
             node.AddValue("AltitudeArray", String.Join(",", Array.ConvertAll(AltitudeArray, x => x.ToString())));
             node.AddValue("UnitOfAltitude", UnitOfAltitude.ToString());
         }
@@ -196,11 +202,13 @@ namespace KSP_GPWS.Impl
             EnableBankAngle = false;
             EnableTraffic = true;
             EnableRotate = false;
+            EnableStall = true;
 
             DescentRateFactor = 1.0f;
             TooLowGearAltitude = 500.0f;
             TakeOffSpeed = 60.0f;
             LandingSpeed = 60.0f;
+            StallAoa = 25.0f;
             AltitudeArray = new int[] { 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
             UnitOfAltitude = UnitOfAltitude.FOOT;
         }
@@ -334,6 +342,8 @@ namespace KSP_GPWS.Impl
                 else if (checkMode_4())  // Unsafe Terrain Clearance
                 { }
                 else if (checkMode_Traffic())  // Traffic
+                { }
+                else if (checkMode_Stall())     // Stall
                 { }
                 else if (checkMode_6())  // Advisory Callout
                 { }
@@ -626,6 +636,20 @@ namespace KSP_GPWS.Impl
                             }
                         }
                     }
+                }
+            }
+            return false;
+        }
+
+        private bool checkMode_Stall()
+        {
+            if (EnableStall)
+            {
+                float aoa = Util.Aoa(CommonData.ActiveVessel);
+                if (Math.Abs(aoa) > StallAoa)
+                {
+                    Util.audio.PlaySound(KindOfSound.STALL);
+                    return true;
                 }
             }
             return false;
