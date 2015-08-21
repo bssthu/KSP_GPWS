@@ -151,7 +151,7 @@ namespace KSP_GPWS
         public void Start()
         {
             Util.Log("Start");
-            Util.audio.AudioInitialize();
+            Util.audio.Initialize();
 
             ActiveVessel = FlightGlobals.ActiveVessel;
             OnVesselChange(ActiveVessel);

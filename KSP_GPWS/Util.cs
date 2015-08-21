@@ -28,7 +28,26 @@ namespace KSP_GPWS
         /// <summary>
         /// Audio
         /// </summary>
-        public static AudioManager audio = new AudioManager();
+        public static AudioManager audio
+        {
+            get
+            {
+                return _audio;
+            }
+        }
+        private static AudioManager _audio = new AudioManager();
+
+        /// <summary>
+        /// XInput
+        /// </summary>
+        public static ControlerManager controller
+        {
+            get
+            {
+                return _controller;
+            }
+        }
+        private static ControlerManager _controller = new ControlerManager();
 
         private static ScreenMessage screenMsg = new ScreenMessage("", 1, ScreenMessageStyle.UPPER_CENTER);
 
@@ -37,6 +56,16 @@ namespace KSP_GPWS
             screenMsg.message = msg;
             ScreenMessages.RemoveMessage(screenMsg);
             ScreenMessages.PostScreenMessage(screenMsg);
+        }
+
+        public static bool IsWin32()
+        {
+            return (IntPtr.Size == 4) && (Environment.OSVersion.Platform == PlatformID.Win32NT);
+        }
+
+        public static bool IsWin64()
+        {
+            return (IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT);
         }
 
         public static T ConvertValue<T>(ConfigNode node, String key, T def = default(T))

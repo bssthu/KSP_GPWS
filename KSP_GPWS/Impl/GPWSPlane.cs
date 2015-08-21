@@ -343,11 +343,12 @@ namespace KSP_GPWS.Impl
                 { }
                 else if (checkMode_Traffic())  // Traffic
                 { }
-                else if (checkMode_Stall())     // Stall
-                { }
                 else if (checkMode_6())  // Advisory Callout
                 { }
-                else if (!Util.audio.IsPlaying())
+                // other
+                if (checkMode_Stall())     // Stall
+                { }
+                if (!Util.audio.IsPlaying())
                 {
                     Util.audio.MarkNotPlaying();
                 }
@@ -649,6 +650,7 @@ namespace KSP_GPWS.Impl
                 if (Math.Abs(aoa) > StallAoa)
                 {
                     Util.audio.PlaySound(KindOfSound.STALL);
+                    Util.controller.SetShake(0.5f, 300);
                     return true;
                 }
             }

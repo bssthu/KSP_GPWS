@@ -35,7 +35,7 @@ namespace KSP_GPWS.Impl
 
         private String detail = "";
 
-        public void AudioInitialize()
+        public void Initialize()
         {
             Volume = GameSettings.VOICE_VOLUME;
 

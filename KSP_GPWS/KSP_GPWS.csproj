@@ -47,8 +47,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controller\XInputState.cs" />
+    <Compile Include="Controller\XInputWrapper.cs" />
     <Compile Include="Impl\AudioManager.cs" />
     <Compile Include="GPWS.cs" />
+    <Compile Include="Impl\ControlerManager.cs" />
     <Compile Include="Impl\GPWSLander.cs" />
     <Compile Include="Impl\GPWSPlane.cs" />
     <Compile Include="Interfaces\IBasicGPWSFunction.cs" />
@@ -66,6 +69,7 @@
     <Compile Include="Config\Settings.cs" />
     <Compile Include="Interfaces\ToolbarWrapper.cs" />
     <Compile Include="Util.cs" />
+    <Compile Include="Controller\XInputController.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
