@@ -13,7 +13,7 @@ using KSP_GPWS.Interfaces;
 namespace KSP_GPWS.UI
 {
     [KSPAddon(KSPAddon.Startup.Flight, false)]
-    class SettingGUI : MonoBehaviour
+    class SettingGui : MonoBehaviour
     {
         private bool isHideUI = false;
 
@@ -58,12 +58,12 @@ namespace KSP_GPWS.UI
             Settings.guiIsActive = active;
             if (!active)
             {
-                if (!(Settings.UseBlizzy78Toolbar && ToolbarManager.ToolbarAvailable) && GUIAppLaunchBtn.appBtn != null)
+                if (!(Settings.UseBlizzy78Toolbar && ToolbarManager.ToolbarAvailable) && GuiAppLaunchBtn.appBtn != null)
                 {
-                    GUIAppLaunchBtn.appBtn.SetFalse(false);
+                    GuiAppLaunchBtn.appBtn.SetFalse(false);
                 }
             }
-            Settings.saveToXML();
+            Settings.SaveToXML();
         }
 
         public static void toggleSettingGUI()
@@ -91,10 +91,10 @@ namespace KSP_GPWS.UI
                 {
                     Settings.guiwindowPosition.height = 50;
                     Settings.showConfigs = showConfigs;
-                    Settings.saveToXML();
+                    Settings.SaveToXML();
                 }
                 // on vessel type changed: resize window
-                if (vesselType != GPWS.ActiveVesselType)
+                if (vesselType != Gpws.ActiveVesselType)
                 {
                     Settings.guiwindowPosition.height = 50;
                 }
@@ -159,7 +159,7 @@ namespace KSP_GPWS.UI
         {
             GUILayout.BeginVertical();
             {
-                vesselType = GPWS.ActiveVesselType;
+                vesselType = Gpws.ActiveVesselType;
                 if (vesselType != SimpleTypes.VesselType.NONE)
                 {
                     showConfigs = GUILayout.Toggle(
@@ -183,7 +183,7 @@ namespace KSP_GPWS.UI
             GUILayout.Label(String.Format("Volume: {0}%", Math.Round(Settings.Volume * 100.0f)));
             Settings.Volume = (float)Math.Round(GUILayout.HorizontalSlider(Settings.Volume, 0.0f, 1.0f), 2);
 
-            switch (GPWS.ActiveVesselType)
+            switch (Gpws.ActiveVesselType)
             {
                 case SimpleTypes.VesselType.PLANE:
                     drawPlaneSetting();
@@ -334,7 +334,7 @@ namespace KSP_GPWS.UI
         {
             GameEvents.onShowUI.Remove(ShowUI);
             GameEvents.onHideUI.Remove(HideUI);
-            Settings.saveToXML();
+            Settings.SaveToXML();
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace KSP_GPWS.Interfaces
 {
-    public interface IGPWSCommonData
+    public interface IGpwsCommonData
     {
         float RadarAltitude { get; set; }
 
@@ -31,21 +31,21 @@ namespace KSP_GPWS.Interfaces
 
         float Speed { get; }
 
-        float time { get; }
+        float CurrentTime { get; }
 
-        float lastTime { get; }
+        float LastTime { get; }
 
         /// <summary>
         /// time of takeoff.
         /// when on ground, takeOffTime = time
         /// </summary>
-        float takeOffTime { get; }
+        float TakeOffTime { get; }
 
         /// <summary>
         /// time of landing/splashing.
         /// when flying, landingTime = time
         /// </summary>
-        float landingTime { get; }
+        float LandingTime { get; }
 
         Vessel ActiveVessel { get; }
     }

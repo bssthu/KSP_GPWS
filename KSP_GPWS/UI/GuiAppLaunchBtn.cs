@@ -12,7 +12,7 @@ using KSP_GPWS.Interfaces;
 namespace KSP_GPWS.UI
 {
     [KSPAddon(KSPAddon.Startup.Flight, false)]
-    class GUIAppLaunchBtn : MonoBehaviour
+    class GuiAppLaunchBtn : MonoBehaviour
     {
         public static ApplicationLauncherButton appBtn = null;
 
@@ -42,14 +42,14 @@ namespace KSP_GPWS.UI
                 }
                 if (Settings.guiIsActive)
                 {
-                    SettingGUI.toggleSettingGUI(true);
+                    SettingGui.toggleSettingGUI(true);
                 }
             }
         }
 
         private void onAppLaunchToggleOnOff()
         {
-            SettingGUI.toggleSettingGUI();
+            SettingGui.toggleSettingGUI();
             appBtn.SetFalse(false);
         }
 

@@ -12,7 +12,7 @@ using KSP_GPWS.Interfaces;
 namespace KSP_GPWS.UI
 {
     [KSPAddon(KSPAddon.Startup.Flight, false)]
-    class GUIToolbarBtn : MonoBehaviour
+    class GuiToolbarBtn : MonoBehaviour
     {
         private IButton btn = null;
 
@@ -24,7 +24,7 @@ namespace KSP_GPWS.UI
                 btn.TexturePath = "GPWS/gpws";
                 btn.ToolTip = "GPWS settings";
                 btn.Visibility = new GameScenesVisibility(GameScenes.FLIGHT);
-                btn.OnClick += (e) => SettingGUI.toggleSettingGUI();
+                btn.OnClick += (e) => SettingGui.toggleSettingGUI();
             }
         }
 

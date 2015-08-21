@@ -20,7 +20,7 @@ namespace KSP_GPWS.Interfaces
         /// </summary>
         void InitializeConfig();
 
-        void Initialize(IGPWSCommonData data);
+        void Initialize(IGpwsCommonData data);
 
         bool PreUpdate();
 

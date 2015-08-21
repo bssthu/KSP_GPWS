@@ -102,7 +102,7 @@ namespace KSP_GPWS
             }
         }
 
-        public static void UpdateGearList(Vessel v, ref List<GPWSGear> gears)
+        public static void UpdateGearList(Vessel v, ref List<PartModule> gears)
         {
             gears.Clear();
 
@@ -116,7 +116,7 @@ namespace KSP_GPWS
                 Part p = v.parts[i];
                 if (p.Modules.Contains("GPWSGear"))
                 {
-                    gears.Add(p.Modules["GPWSGear"] as GPWSGear);
+                    gears.Add(p.Modules["GPWSGear"] as GpwsGear);
                     Log(String.Format("find {0} in {1}", p.name, p.vessel.name));
                 }
             }
@@ -157,7 +157,7 @@ namespace KSP_GPWS
             return true;
         }
 
-        public static Part GetLowestGear(List<GPWSGear> gears)
+        public static Part GetLowestGear(List<PartModule> gears)
         {
             if (gears.Count <= 0)    // no gear
             {
@@ -185,7 +185,7 @@ namespace KSP_GPWS
         /// return height from surface to the lowest landing gear, in meters
         /// </summary>
         /// <returns></returns>
-        public static float GetLowestGearRadarAltitude(List<GPWSGear> gears)
+        public static float GetLowestGearRadarAltitude(List<PartModule> gears)
         {
             return RadarAltitude(GetLowestGear(gears));
         }

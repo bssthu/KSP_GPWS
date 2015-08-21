@@ -236,11 +236,11 @@ namespace KSP_GPWS.Impl
             else if (KindOfSound == KindOfSound.ALTITUDE_CALLOUTS)
             {
                 UnitOfAltitude unit = UnitOfAltitude.NONE;
-                if (GPWS.ActiveVesselType == SimpleTypes.VesselType.PLANE)
+                if (Gpws.ActiveVesselType == SimpleTypes.VesselType.PLANE)
                 {
                     unit = Settings.PlaneConfig.UnitOfAltitude;
                 }
-                else if (GPWS.ActiveVesselType == SimpleTypes.VesselType.LANDER)
+                else if (Gpws.ActiveVesselType == SimpleTypes.VesselType.LANDER)
                 {
                     unit = Settings.LanderConfig.UnitOfAltitude;
                 }

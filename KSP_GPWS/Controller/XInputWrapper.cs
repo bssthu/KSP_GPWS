@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace KSP_GPWS.Controller
@@ -37,18 +38,18 @@ namespace KSP_GPWS.Controller
         {
             if (Util.IsWin32())
             {
-                XInputGamePadGetState = XInputController.XInputGamePadGetState_x86;
-                XInputGamePadSetState = XInputController.XInputGamePadSetState_x86;
+                XInputGamePadGetState = NativeMethods.XInputGamePadGetState_x86;
+                XInputGamePadSetState = NativeMethods.XInputGamePadSetState_x86;
             }
             else if (Util.IsWin64())
             {
-                XInputGamePadGetState = XInputController.XInputGamePadGetState_x64;
-                XInputGamePadSetState = XInputController.XInputGamePadSetState_x64;
+                XInputGamePadGetState = NativeMethods.XInputGamePadGetState_x64;
+                XInputGamePadSetState = NativeMethods.XInputGamePadSetState_x64;
             }
             else
             {
-                XInputGamePadGetState = XInputController.XInputGamePadGetState;
-                XInputGamePadSetState = XInputController.XInputGamePadSetState;
+                XInputGamePadGetState = NativeMethods.XInputGamePadGetState;
+                XInputGamePadSetState = NativeMethods.XInputGamePadSetState;
             }
         }
 
@@ -70,9 +71,9 @@ namespace KSP_GPWS.Controller
             catch (DllNotFoundException)
             {
                 Util.Log("33");
-                if (XInputGamePadGetState != XInputController.XInputGamePadGetState)    // if _x86 or _x64 dll not exists
+                if (XInputGamePadGetState != NativeMethods.XInputGamePadGetState)    // if _x86 or _x64 dll not exists
                 {
-                    XInputGamePadGetState = XInputController.XInputGamePadGetState;
+                    XInputGamePadGetState = NativeMethods.XInputGamePadGetState;
                     return IsConnected(playerIndex);
                 }
                 else    // no dll at all
@@ -102,9 +103,9 @@ namespace KSP_GPWS.Controller
             }
             catch (DllNotFoundException)
             {
-                if (XInputGamePadSetState != XInputController.XInputGamePadSetState)    // if _x86 or _x64 dll not exists
+                if (XInputGamePadSetState != NativeMethods.XInputGamePadSetState)    // if _x86 or _x64 dll not exists
                 {
-                    XInputGamePadSetState = XInputController.XInputGamePadSetState;
+                    XInputGamePadSetState = NativeMethods.XInputGamePadSetState;
                     SetVibration(playerIndex, leftMotor, rightMotor);
                 }
                 else    // no dll at all
@@ -118,6 +119,23 @@ namespace KSP_GPWS.Controller
                 DllAvailable = false;
                 return;
             }
+        }
+
+        class NativeMethods
+        {
+            [DllImport("XInputInterface")]
+            public static extern uint XInputGamePadGetState(uint playerIndex, out XInputState state);
+            [DllImport("XInputInterface_x86")]
+            public static extern uint XInputGamePadGetState_x86(uint playerIndex, out XInputState state);
+            [DllImport("XInputInterface_x64")]
+            public static extern uint XInputGamePadGetState_x64(uint playerIndex, out XInputState state);
+
+            [DllImport("XInputInterface", CallingConvention = CallingConvention.Cdecl)]
+            public static extern void XInputGamePadSetState(uint playerIndex, float leftMotor, float rightMotor);
+            [DllImport("XInputInterface_x86", CallingConvention = CallingConvention.Cdecl)]
+            public static extern void XInputGamePadSetState_x86(uint playerIndex, float leftMotor, float rightMotor);
+            [DllImport("XInputInterface_x64", CallingConvention = CallingConvention.Cdecl)]
+            public static extern void XInputGamePadSetState_x64(uint playerIndex, float leftMotor, float rightMotor);
         }
     }
 }

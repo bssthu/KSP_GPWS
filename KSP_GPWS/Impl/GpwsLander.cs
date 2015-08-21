@@ -11,9 +11,9 @@ using KSP_GPWS.SimpleTypes;
 
 namespace KSP_GPWS.Impl
 {
-    public class GPWSLander : ILanderConfig, IBasicGPWSFunction
+    public class GpwsLander : ILanderConfig, IBasicGPWSFunction
     {
-        private IGPWSCommonData CommonData = null;
+        private IGpwsCommonData commonData = null;
 
         #region ILanderConfig
         public bool EnableSystem { get; set; }
@@ -105,7 +105,7 @@ namespace KSP_GPWS.Impl
             HorizontalSpeedFactor = Math.Min(HorizontalSpeedFactor, 1.0f);
         }
 
-        public GPWSLander()
+        public GpwsLander()
         {
             InitializeConfig();
         }
@@ -127,9 +127,9 @@ namespace KSP_GPWS.Impl
             UnitOfAltitude = UnitOfAltitude.METER;
         }
 
-        public void Initialize(IGPWSCommonData data)
+        public void Initialize(IGpwsCommonData data)
         {
-            CommonData = data;
+            commonData = data;
 
             initializeCurves();
         }
@@ -141,10 +141,10 @@ namespace KSP_GPWS.Impl
         public bool PreUpdate()
         {
             // on surface
-            if (CommonData.ActiveVessel.LandedOrSplashed)
+            if (commonData.ActiveVessel.LandedOrSplashed)
             {
                 // landed for more than 3 sec
-                if (CommonData.time - CommonData.landingTime > 3)
+                if (commonData.CurrentTime - commonData.LandingTime > 3)
                 {
                     Util.audio.MarkNotPlaying();
                     return false;
@@ -152,7 +152,7 @@ namespace KSP_GPWS.Impl
             }
 
             // just take off
-            if (CommonData.time - CommonData.takeOffTime < 3)
+            if (commonData.CurrentTime - commonData.TakeOffTime < 3)
             {
                 return false;
             }
@@ -162,7 +162,7 @@ namespace KSP_GPWS.Impl
 
         public void UpdateGPWS()
         {
-            if (CommonData.RadarAltitude > 0 && CommonData.RadarAltitude < float.PositiveInfinity)
+            if (commonData.RadarAltitude > 0 && commonData.RadarAltitude < float.PositiveInfinity)
             {
                 if (checkMode_sinkRate())   // Decent Rate
                 { }
@@ -188,8 +188,8 @@ namespace KSP_GPWS.Impl
         {
             if (EnableDescentRate)
             {
-                Vessel vessel = CommonData.ActiveVessel;
-                if (CommonData.RadarAltitude < DescentRateCheckAltitude && vessel.orbit.PeA < 0 && vessel.verticalSpeed < 0)  // landing
+                Vessel vessel = commonData.ActiveVessel;
+                if (commonData.RadarAltitude < DescentRateCheckAltitude && vessel.orbit.PeA < 0 && vessel.verticalSpeed < 0)  // landing
                 {
                     // only simple physics
                     double acc = Util.GetMaxAcceleration(vessel);
@@ -243,10 +243,10 @@ namespace KSP_GPWS.Impl
         {
             if (EnableHorizontalSpeed)
             {
-                if (CommonData.RadarAltitude < HorizontalSpeedCheckAltitude)
+                if (commonData.RadarAltitude < HorizontalSpeedCheckAltitude)
                 {
-                    float hSpeed = CommonData.HorSpeed;
-                    float vSpeed = CommonData.VerSpeed;
+                    float hSpeed = commonData.HorSpeed;
+                    float vSpeed = commonData.VerSpeed;
                     // speed in meters/feet per s
                     if (UnitOfAltitude.FOOT == UnitOfAltitude)
                     {
@@ -255,7 +255,7 @@ namespace KSP_GPWS.Impl
                     }
                     if (vSpeed < 0)
                     {
-                        if (hSpeed > (CommonData.RadarAltitude + TouchDownSpeed * 1.0f) * HorizontalSpeedFactor)
+                        if (hSpeed > (commonData.RadarAltitude + TouchDownSpeed * 1.0f) * HorizontalSpeedFactor)
                         {
                             // play sound
                             Util.audio.PlaySound(KindOfSound.HORIZONTAL_SPEED);
@@ -276,7 +276,7 @@ namespace KSP_GPWS.Impl
         {
             if (EnableRetard)
             {
-                Vessel vessel = CommonData.ActiveVessel;
+                Vessel vessel = commonData.ActiveVessel;
                 if (vessel.ctrlState.mainThrottle > 0)
                 {
                     // landed
@@ -323,12 +323,12 @@ namespace KSP_GPWS.Impl
             if (EnableAltitudeCallouts)
             {
                 // is descending
-                if (CommonData.RadarAltitude - CommonData.LastRadarAltitude < 0)
+                if (commonData.RadarAltitude - commonData.LastRadarAltitude < 0)
                 {
                     // lower than an altitude
                     foreach (float threshold in AltitudeArray)
                     {
-                        if (CommonData.LastRadarAltitude > threshold && CommonData.RadarAltitude < threshold)
+                        if (commonData.LastRadarAltitude > threshold && commonData.RadarAltitude < threshold)
                         {
                             // play sound
                             Util.audio.PlaySound(KindOfSound.ALTITUDE_CALLOUTS, threshold.ToString());

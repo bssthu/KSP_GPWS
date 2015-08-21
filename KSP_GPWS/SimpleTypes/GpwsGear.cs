@@ -9,7 +9,7 @@ using System.Text;
 
 namespace KSP_GPWS.SimpleTypes
 {
-    public class GPWSGear : PartModule
+    class GpwsGear : PartModule
     {
     }
 }

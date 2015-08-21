@@ -11,14 +11,14 @@ using KSP_GPWS.SimpleTypes;
 
 namespace KSP_GPWS.Impl
 {
-    public class GPWSPlane : IPlaneConfig, IBasicGPWSFunction
+    public class GpwsPlane : IPlaneConfig, IBasicGPWSFunction
     {
-        private IGPWSCommonData CommonData = null;
+        private IGpwsCommonData CommonData = null;
 
         /// <summary>
         /// parts with module "GPWSGear"
         /// </summary>
-        private List<GPWSGear> gears = new List<GPWSGear>();
+        private List<PartModule> gears = new List<PartModule>();
 
         private bool isGearDown = false;
 
@@ -185,7 +185,7 @@ namespace KSP_GPWS.Impl
             DescentRateFactor = Math.Min(DescentRateFactor, 10.0f);
         }
 
-        public GPWSPlane()
+        public GpwsPlane()
         {
             InitializeConfig();
         }
@@ -213,7 +213,7 @@ namespace KSP_GPWS.Impl
             UnitOfAltitude = UnitOfAltitude.FOOT;
         }
 
-        public void Initialize(IGPWSCommonData data)
+        public void Initialize(IGpwsCommonData data)
         {
             CommonData = data;
 
@@ -284,10 +284,10 @@ namespace KSP_GPWS.Impl
                 heightJustTakeoff = 0.0f;
             }
 
-            if (lastRadarAlt_time.Count == 0 || CommonData.time - lastRadarAlt_time.ElementAt(0) > 0.2f)
+            if (lastRadarAlt_time.Count == 0 || CommonData.CurrentTime - lastRadarAlt_time.ElementAt(0) > 0.2f)
             {
                 lastRadarAlt.Enqueue(CommonData.RadarAltitude);
-                lastRadarAlt_time.Enqueue(CommonData.time);
+                lastRadarAlt_time.Enqueue(CommonData.CurrentTime);
             }
             if (lastRadarAlt_time.Count > lastRadarAlt_Count * 2)
             {
@@ -315,7 +315,7 @@ namespace KSP_GPWS.Impl
             isGearDown = Util.GearDeployed(Util.GetLowestGear(gears));
 
 
-            if (CommonData.time - CommonData.takeOffTime <= 0.1f && CommonData.time - CommonData.landingTime > 5.0f)  // taxi
+            if (CommonData.CurrentTime - CommonData.TakeOffTime <= 0.1f && CommonData.CurrentTime - CommonData.LandingTime > 5.0f)  // taxi
             {
                 if (checkMode_TakeoffSpeedCheck())
                 { }
@@ -324,7 +324,7 @@ namespace KSP_GPWS.Impl
                     Util.audio.MarkNotPlaying();
                 }
             }
-            else if (CommonData.time - CommonData.takeOffTime < 1.5f)  // just takeoff
+            else if (CommonData.CurrentTime - CommonData.TakeOffTime < 1.5f)  // just takeoff
             {
                 if (!Util.audio.IsPlaying())
                 {
@@ -369,7 +369,7 @@ namespace KSP_GPWS.Impl
                 {
                     // ft/min, altitude
                     float vSpeed = Math.Abs((CommonData.Altitude - CommonData.LastAltitude)
-                            / (CommonData.time - CommonData.lastTime) * 60.0f);
+                            / (CommonData.CurrentTime - CommonData.LastTime) * 60.0f);
                     // pull up
                     float maxVSpeedPullUp = Math.Abs(sinkRatePullUpCurve.Evaluate(CommonData.RadarAltitude)) * DescentRateFactor;
                     if (vSpeed > maxVSpeedPullUp)
@@ -400,7 +400,7 @@ namespace KSP_GPWS.Impl
         {
             if (EnableClosureToTerrain)
             {
-                if (isGearDown || (CommonData.time - CommonData.takeOffTime > 30) || (CommonData.Speed < LandingSpeed * 1.2f))        // Mode B
+                if (isGearDown || (CommonData.CurrentTime - CommonData.TakeOffTime > 30) || (CommonData.Speed < LandingSpeed * 1.2f))        // Mode B
                 {
                     // is descending (radar altitude)
                     if ((CommonData.RadarAltitude < 800.0f) && (CommonData.RadarAltitude - CommonData.LastRadarAltitude < 0))
@@ -483,7 +483,7 @@ namespace KSP_GPWS.Impl
         {
             if (EnableAltitudeLoss)
             {
-                if ((CommonData.time - CommonData.takeOffTime) < 15 && heightJustTakeoff < 1500)
+                if ((CommonData.CurrentTime - CommonData.TakeOffTime) < 15 && heightJustTakeoff < 1500)
                 {
                     if (CommonData.RadarAltitude >= heightJustTakeoff)
                     {
@@ -516,19 +516,19 @@ namespace KSP_GPWS.Impl
             if (EnableTerrainClearance)
             {
                 if (!isGearDown && (CommonData.RadarAltitude < TooLowGearAltitude)
-                        && (CommonData.time - CommonData.takeOffTime > 15) && (CommonData.Speed < LandingSpeed * 1.2f))
+                        && (CommonData.CurrentTime - CommonData.TakeOffTime > 15) && (CommonData.Speed < LandingSpeed * 1.2f))
                 {
                     // play sound
                     Util.audio.PlaySound(KindOfSound.TOO_LOW_GEAR);
                     return true;
                 }
-                if ((CommonData.time - CommonData.takeOffTime < 5) && (CommonData.RadarAltitude < heightJustTakeoff))
+                if ((CommonData.CurrentTime - CommonData.TakeOffTime < 5) && (CommonData.RadarAltitude < heightJustTakeoff))
                 {
                     // play sound
                     Util.audio.PlaySound(KindOfSound.TOO_LOW_TERRAIN);
                     return true;
                 }
-                if (!isGearDown && (CommonData.time - CommonData.takeOffTime > 5))
+                if (!isGearDown && (CommonData.CurrentTime - CommonData.TakeOffTime > 5))
                 {
                     float tooLowTerrainAltitude = tooLowTerrainCurve.Evaluate(CommonData.Speed / LandingSpeed) * TooLowGearAltitude;
                     if (CommonData.RadarAltitude < tooLowTerrainAltitude)
@@ -558,7 +558,7 @@ namespace KSP_GPWS.Impl
                     // lower than an altitude
                     if (CommonData.RadarAltitude < 15)
                     {
-                        if ((CommonData.ActiveVessel.ctrlState.mainThrottle > 0) && (CommonData.time - CommonData.takeOffTime > 5))
+                        if ((CommonData.ActiveVessel.ctrlState.mainThrottle > 0) && (CommonData.CurrentTime - CommonData.TakeOffTime > 5))
                         {
                             // play sound
                             Util.audio.PlaySound(KindOfSound.RETARD);

@@ -14,7 +14,7 @@ using KSP_GPWS.Impl;
 namespace KSP_GPWS
 {
     [KSPAddon(KSPAddon.Startup.Flight, false)]
-    public partial class GPWS : MonoBehaviour, IGPWSCommonData
+    public partial class Gpws : MonoBehaviour, IGpwsCommonData
     {
         public Vessel ActiveVessel
         {
@@ -53,24 +53,24 @@ namespace KSP_GPWS
         private float t0 = 0.0f;
 
         /// time in seconds since scene loaded
-        public float time { get; private set; }
+        public float CurrentTime { get; private set; }
 
-        public float lastTime { get; private set; }
+        public float LastTime { get; private set; }
 
         /// <summary>
         /// time of takeoff
         /// </summary>
-        public float takeOffTime { get; private set; }
+        public float TakeOffTime { get; private set; }
 
         /// <summary>
         /// time of landing/splashing
         /// </summary>
-        public float landingTime { get; private set; }
+        public float LandingTime { get; private set; }
 
-        private static GPWSPlane Plane = null;
-        private static GPWSLander Lander = null;
+        private static GpwsPlane plane = null;
+        private static GpwsLander lander = null;
 
-        private IBasicGPWSFunction GPWSFunc;
+        private IBasicGPWSFunction gpwsFunc;
 
         public static SimpleTypes.VesselType ActiveVesselType
         {
@@ -83,11 +83,11 @@ namespace KSP_GPWS
                 {
                     return SimpleTypes.VesselType.NONE;
                 }
-                if (Plane != null && Plane.GearCount > 0)
+                if (plane != null && plane.GearCount > 0)
                 {
                     isPlane = true;
                 }
-                else if (Lander != null)
+                else if (lander != null)
                 {
                     isLander = true;
                 }
@@ -109,19 +109,19 @@ namespace KSP_GPWS
 
         public static void InitializeGPWSFunctions()
         {
-            if (Plane == null && Lander == null)    // call once
+            if (plane == null && lander == null)    // call once
             {
-                Plane = new GPWSPlane();
-                Settings.PlaneConfig = Plane as IPlaneConfig;
-                Lander = new GPWSLander();
-                Settings.LanderConfig = Lander as ILanderConfig;
+                plane = new GpwsPlane();
+                Settings.PlaneConfig = plane as IPlaneConfig;
+                lander = new GpwsLander();
+                Settings.LanderConfig = lander as ILanderConfig;
             }
         }
 
         public void Awake()
         {
-            Plane.Initialize(this as IGPWSCommonData);
-            Lander.Initialize(this as IGPWSCommonData);
+            plane.Initialize(this as IGpwsCommonData);
+            lander.Initialize(this as IGpwsCommonData);
             initializeVariables();
         }
 
@@ -138,14 +138,14 @@ namespace KSP_GPWS
             LastHorSpeed = 0.0f;
             LastVerSpeed = 0.0f;
 
-            takeOffTime = float.NegativeInfinity;
-            landingTime = float.NegativeInfinity;
+            TakeOffTime = float.NegativeInfinity;
+            LandingTime = float.NegativeInfinity;
 
             Settings.ChangeVesselType = false;
 
             t0 = Time.time;
-            time = t0;
-            lastTime = t0;
+            CurrentTime = t0;
+            LastTime = t0;
         }
 
         public void Start()
@@ -159,27 +159,27 @@ namespace KSP_GPWS
 
         private void OnVesselChange(Vessel v)
         {
-            Plane.ChangeVessel(ActiveVessel);
-            Lander.ChangeVessel(ActiveVessel);
+            plane.ChangeVessel(ActiveVessel);
+            lander.ChangeVessel(ActiveVessel);
         }
 
-        private bool preUpdate()
+        private bool PreUpdate()
         {
-            time = Time.time - t0;
+            CurrentTime = Time.time - t0;
             ActiveVessel = FlightGlobals.ActiveVessel;
 
             // on surface
             if (ActiveVessel.LandedOrSplashed)
             {
-                takeOffTime = time;
+                TakeOffTime = CurrentTime;
             }
             else
             {
-                landingTime = time;
+                LandingTime = CurrentTime;
             }
 
             // check time, prevent problem
-            if (time < 2.0f)
+            if (CurrentTime < 2.0f)
             {
                 Util.audio.SetUnavailable();
                 return false;
@@ -194,11 +194,11 @@ namespace KSP_GPWS
             // check vessel type
             if (ActiveVesselType == SimpleTypes.VesselType.PLANE)
             {
-                GPWSFunc = Plane as IBasicGPWSFunction;
+                gpwsFunc = plane as IBasicGPWSFunction;
             }
             else if (ActiveVesselType == SimpleTypes.VesselType.LANDER)
             {
-                GPWSFunc = Lander as IBasicGPWSFunction;
+                gpwsFunc = lander as IBasicGPWSFunction;
             }
             else
             {
@@ -207,7 +207,7 @@ namespace KSP_GPWS
             }
 
             // height in meters/feet
-            if (UnitOfAltitude.FOOT == GPWSFunc.UnitOfAltitude)
+            if (UnitOfAltitude.FOOT == gpwsFunc.UnitOfAltitude)
             {
                 RadarAltitude = Util.RadarAltitude(ActiveVessel) * Util.M_TO_FT;
                 Altitude = (float)(FlightGlobals.ship_altitude * Util.M_TO_FT);
@@ -236,13 +236,13 @@ namespace KSP_GPWS
                 return false;
             }
 
-            if (!GPWSFunc.PreUpdate())
+            if (!gpwsFunc.PreUpdate())
             {
                 return false;
             }
 
             // enable
-            if (!GPWSFunc.EnableSystem)
+            if (!gpwsFunc.EnableSystem)
             {
                 Util.audio.SetUnavailable();
                 return false;
@@ -253,12 +253,12 @@ namespace KSP_GPWS
 
         void UpdateGPWS()
         {
-            GPWSFunc.UpdateGPWS();
+            gpwsFunc.UpdateGPWS();
         }
 
         public void Update()
         {
-            if (preUpdate())
+            if (PreUpdate())
             {
                 UpdateGPWS();
             }
@@ -272,14 +272,14 @@ namespace KSP_GPWS
             LastAltitude = Altitude;
             LastHorSpeed = HorSpeed;    // save last speed
             LastVerSpeed = VerSpeed;
-            lastTime = time;        // save time of last frame
+            LastTime = CurrentTime;        // save time of last frame
             LastActiveVessel = ActiveVessel;
         }
 
         public void OnDestroy()
         {
-            Plane.CleanUp();
-            Lander.CleanUp();
+            plane.CleanUp();
+            lander.CleanUp();
         }
     }
 }

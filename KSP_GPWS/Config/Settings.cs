@@ -24,7 +24,7 @@ namespace KSP_GPWS
             {
                 Util.Log("Blizzy78 Toolbar not available");
             }
-            GPWS.InitializeGPWSFunctions();
+            Gpws.InitializeGPWSFunctions();
         }
     }
 
@@ -87,11 +87,11 @@ namespace KSP_GPWS
 
         public static void LoadSettings()
         {
-            loadFromCFG();
-            loadFromXML();
+            LoadFromCFG();
+            LoadFromXML();
         }
 
-        private static void loadFromCFG()
+        private static void LoadFromCFG()
         {
             ConfigNode node = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/GPWS/settings.cfg");
             if (node.HasNode("GPWS_SETTINGS"))
@@ -117,7 +117,7 @@ namespace KSP_GPWS
             Volume = Math.Min(Volume, 1.0f);
         }
 
-        private static void loadFromXML()
+        private static void LoadFromXML()
         {
             KSP.IO.PluginConfiguration config = KSP.IO.PluginConfiguration.CreateForType<SettingsLoader>(); // why use template T?
             config.load();
@@ -128,11 +128,11 @@ namespace KSP_GPWS
 
         public static void SaveSettings()
         {
-            saveToCFG();
-            saveToXML();
+            SaveToCFG();
+            SaveToXML();
         }
 
-        private static void saveToCFG()
+        private static void SaveToCFG()
         {
             ConfigNode config = new ConfigNode();
             ConfigNode gpwsNode = new ConfigNode();
@@ -155,7 +155,7 @@ namespace KSP_GPWS
             config.Save(KSPUtil.ApplicationRootPath + "GameData/GPWS/settings.cfg", "GPWS");
         }
 
-        public static void saveToXML()
+        public static void SaveToXML()
         {
             KSP.IO.PluginConfiguration config = KSP.IO.PluginConfiguration.CreateForType<SettingsLoader>();
             config.SetValue("guiwindowPosition", guiwindowPosition);
