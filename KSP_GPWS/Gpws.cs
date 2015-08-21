@@ -70,7 +70,7 @@ namespace KSP_GPWS
         private static GpwsPlane plane = null;
         private static GpwsLander lander = null;
 
-        private IBasicGPWSFunction gpwsFunc;
+        private IBasicGpwsFunction gpwsFunc;
 
         public static SimpleTypes.VesselType ActiveVesselType
         {
@@ -159,8 +159,8 @@ namespace KSP_GPWS
 
         private void OnVesselChange(Vessel v)
         {
-            plane.ChangeVessel(ActiveVessel);
-            lander.ChangeVessel(ActiveVessel);
+            plane.ChangeVessel(v);
+            lander.ChangeVessel(v);
         }
 
         private bool PreUpdate()
@@ -194,11 +194,11 @@ namespace KSP_GPWS
             // check vessel type
             if (ActiveVesselType == SimpleTypes.VesselType.PLANE)
             {
-                gpwsFunc = plane as IBasicGPWSFunction;
+                gpwsFunc = plane as IBasicGpwsFunction;
             }
             else if (ActiveVesselType == SimpleTypes.VesselType.LANDER)
             {
-                gpwsFunc = lander as IBasicGPWSFunction;
+                gpwsFunc = lander as IBasicGpwsFunction;
             }
             else
             {

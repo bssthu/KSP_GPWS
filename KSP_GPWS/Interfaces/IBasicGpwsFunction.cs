@@ -10,7 +10,7 @@ using KSP_GPWS.SimpleTypes;
 
 namespace KSP_GPWS.Interfaces
 {
-    interface IBasicGPWSFunction
+    interface IBasicGpwsFunction
     {
         bool EnableSystem { get; set; }
         UnitOfAltitude UnitOfAltitude { get; set; }

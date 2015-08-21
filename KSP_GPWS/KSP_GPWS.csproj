@@ -54,10 +54,10 @@
     <Compile Include="Impl\ControlerManager.cs" />
     <Compile Include="Impl\GpwsLander.cs" />
     <Compile Include="Impl\GpwsPlane.cs" />
-    <Compile Include="Interfaces\IBasicGPWSFunction.cs" />
-    <Compile Include="Interfaces\IGPWSCommonData.cs" />
+    <Compile Include="Interfaces\IBasicGpwsFunction.cs" />
+    <Compile Include="Interfaces\IGpwsCommonData.cs" />
     <Compile Include="Interfaces\ILanderConfig.cs" />
-    <Compile Include="SimpleTypes\GpwsGear.cs" />
+    <Compile Include="SimpleTypes\GPWSGear.cs" />
     <Compile Include="SimpleTypes\KindOfSound.cs" />
     <Compile Include="SimpleTypes\UnitOfAltitude.cs" />
     <Compile Include="SimpleTypes\VesselType.cs" />

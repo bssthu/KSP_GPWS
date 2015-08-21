@@ -11,7 +11,7 @@ using KSP_GPWS.SimpleTypes;
 
 namespace KSP_GPWS.Impl
 {
-    public class GpwsLander : ILanderConfig, IBasicGPWSFunction
+    public class GpwsLander : ILanderConfig, IBasicGpwsFunction
     {
         private IGpwsCommonData commonData = null;
 

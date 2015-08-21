@@ -11,7 +11,7 @@ using KSP_GPWS.SimpleTypes;
 
 namespace KSP_GPWS.Impl
 {
-    public class GpwsPlane : IPlaneConfig, IBasicGPWSFunction
+    public class GpwsPlane : IPlaneConfig, IBasicGpwsFunction
     {
         private IGpwsCommonData CommonData = null;
 
@@ -650,7 +650,7 @@ namespace KSP_GPWS.Impl
                 if (Math.Abs(aoa) > StallAoa)
                 {
                     Util.audio.PlaySound(KindOfSound.STALL);
-                    Util.controller.SetShake(0.5f, 300);
+                    Util.controller.SetShake(0.5f);
                     return true;
                 }
             }

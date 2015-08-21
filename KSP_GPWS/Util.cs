@@ -116,7 +116,8 @@ namespace KSP_GPWS
                 Part p = v.parts[i];
                 if (p.Modules.Contains("GPWSGear"))
                 {
-                    gears.Add(p.Modules["GPWSGear"] as GpwsGear);
+                    Util.Log("fffound one!!!");
+                    gears.Add(p.Modules["GPWSGear"] as PartModule);
                     Log(String.Format("find {0} in {1}", p.name, p.vessel.name));
                 }
             }

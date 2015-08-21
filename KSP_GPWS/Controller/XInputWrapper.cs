@@ -55,13 +55,11 @@ namespace KSP_GPWS.Controller
 
         public bool IsConnected(uint playerIndex)
         {
-            Util.Log("11");
             if (!DllAvailable)
             {
                 return false;
             }
 
-            Util.Log("22");
             try
             {
                 XInputState state;
@@ -70,7 +68,6 @@ namespace KSP_GPWS.Controller
             }
             catch (DllNotFoundException)
             {
-                Util.Log("33");
                 if (XInputGamePadGetState != NativeMethods.XInputGamePadGetState)    // if _x86 or _x64 dll not exists
                 {
                     XInputGamePadGetState = NativeMethods.XInputGamePadGetState;
@@ -84,7 +81,6 @@ namespace KSP_GPWS.Controller
             }
             catch (BadImageFormatException) // use _x86 dll on x64 system, or _x64 dll on x86 system
             {
-                Util.Log("44");
                 DllAvailable = false;
                 return false;
             }
@@ -125,16 +121,16 @@ namespace KSP_GPWS.Controller
         {
             [DllImport("XInputInterface")]
             public static extern uint XInputGamePadGetState(uint playerIndex, out XInputState state);
-            [DllImport("XInputInterface_x86")]
+            [DllImport("XInputInterface_x86", EntryPoint = "XInputGamePadGetState")]
             public static extern uint XInputGamePadGetState_x86(uint playerIndex, out XInputState state);
-            [DllImport("XInputInterface_x64")]
+            [DllImport("XInputInterface_x64", EntryPoint = "XInputGamePadGetState")]
             public static extern uint XInputGamePadGetState_x64(uint playerIndex, out XInputState state);
 
             [DllImport("XInputInterface", CallingConvention = CallingConvention.Cdecl)]
             public static extern void XInputGamePadSetState(uint playerIndex, float leftMotor, float rightMotor);
-            [DllImport("XInputInterface_x86", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("XInputInterface_x86", CallingConvention = CallingConvention.Cdecl, EntryPoint = "XInputGamePadSetState")]
             public static extern void XInputGamePadSetState_x86(uint playerIndex, float leftMotor, float rightMotor);
-            [DllImport("XInputInterface_x64", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport("XInputInterface_x64", CallingConvention = CallingConvention.Cdecl, EntryPoint = "XInputGamePadSetState")]
             public static extern void XInputGamePadSetState_x64(uint playerIndex, float leftMotor, float rightMotor);
         }
     }
