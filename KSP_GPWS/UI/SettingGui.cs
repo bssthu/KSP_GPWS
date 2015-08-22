@@ -53,7 +53,7 @@ namespace KSP_GPWS.UI
             vesselType = SimpleTypes.VesselType.NONE;
         }
 
-        public static void toggleSettingGUI(bool active)
+        public static void toggleSettingGui(bool active)
         {
             Settings.guiIsActive = active;
             if (!active)
@@ -63,12 +63,12 @@ namespace KSP_GPWS.UI
                     GuiAppLaunchBtn.appBtn.SetFalse(false);
                 }
             }
-            Settings.SaveToXML();
+            Settings.SaveToXml();
         }
 
-        public static void toggleSettingGUI()
+        public static void toggleSettingGui()
         {
-            toggleSettingGUI(!Settings.guiIsActive);
+            toggleSettingGui(!Settings.guiIsActive);
         }
 
         public void HideUI()
@@ -91,7 +91,7 @@ namespace KSP_GPWS.UI
                 {
                     Settings.guiwindowPosition.height = 50;
                     Settings.showConfigs = showConfigs;
-                    Settings.SaveToXML();
+                    Settings.SaveToXml();
                 }
                 // on vessel type changed: resize window
                 if (vesselType != Gpws.ActiveVesselType)
@@ -334,7 +334,7 @@ namespace KSP_GPWS.UI
         {
             GameEvents.onShowUI.Remove(ShowUI);
             GameEvents.onHideUI.Remove(HideUI);
-            Settings.SaveToXML();
+            Settings.SaveToXml();
         }
     }
 }

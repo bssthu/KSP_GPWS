@@ -5,5 +5,4 @@
 bin/
 obj/
 /GameData/
-/Assembly-CSharp.dll
-/UnityEngine.dll
+*.dll

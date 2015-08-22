@@ -20,11 +20,11 @@ namespace KSP_GPWS.UI
         {
             if (!Settings.UseBlizzy78Toolbar || !ToolbarManager.ToolbarAvailable)
             {
-                onGUIAppLauncherReady();
+                onGuiAppLauncherReady();
             }
         }
 
-        public void onGUIAppLauncherReady()
+        public void onGuiAppLauncherReady()
         {
             if (ApplicationLauncher.Ready)
             {
@@ -42,18 +42,18 @@ namespace KSP_GPWS.UI
                 }
                 if (Settings.guiIsActive)
                 {
-                    SettingGui.toggleSettingGUI(true);
+                    SettingGui.toggleSettingGui(true);
                 }
             }
         }
 
         private void onAppLaunchToggleOnOff()
         {
-            SettingGui.toggleSettingGUI();
+            SettingGui.toggleSettingGui();
             appBtn.SetFalse(false);
         }
 
-        public void onGUIAppLauncherDestroyed()
+        public void onGuiAppLauncherDestroyed()
         {
             if (appBtn != null)
             {
@@ -64,7 +64,7 @@ namespace KSP_GPWS.UI
 
         public void OnDestroy()
         {
-            onGUIAppLauncherDestroyed();
+            onGuiAppLauncherDestroyed();
         }
     }
 }

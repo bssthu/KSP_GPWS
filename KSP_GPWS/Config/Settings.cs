@@ -87,11 +87,11 @@ namespace KSP_GPWS
 
         public static void LoadSettings()
         {
-            LoadFromCFG();
-            LoadFromXML();
+            LoadFromCfg();
+            LoadFromXml();
         }
 
-        private static void LoadFromCFG()
+        private static void LoadFromCfg()
         {
             ConfigNode node = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/GPWS/settings.cfg");
             if (node.HasNode("GPWS_SETTINGS"))
@@ -117,7 +117,7 @@ namespace KSP_GPWS
             Volume = Math.Min(Volume, 1.0f);
         }
 
-        private static void LoadFromXML()
+        private static void LoadFromXml()
         {
             KSP.IO.PluginConfiguration config = KSP.IO.PluginConfiguration.CreateForType<SettingsLoader>(); // why use template T?
             config.load();
@@ -128,11 +128,11 @@ namespace KSP_GPWS
 
         public static void SaveSettings()
         {
-            SaveToCFG();
-            SaveToXML();
+            SaveToCfg();
+            SaveToXml();
         }
 
-        private static void SaveToCFG()
+        private static void SaveToCfg()
         {
             ConfigNode config = new ConfigNode();
             ConfigNode gpwsNode = new ConfigNode();
@@ -155,7 +155,7 @@ namespace KSP_GPWS
             config.Save(KSPUtil.ApplicationRootPath + "GameData/GPWS/settings.cfg", "GPWS");
         }
 
-        public static void SaveToXML()
+        public static void SaveToXml()
         {
             KSP.IO.PluginConfiguration config = KSP.IO.PluginConfiguration.CreateForType<SettingsLoader>();
             config.SetValue("guiwindowPosition", guiwindowPosition);

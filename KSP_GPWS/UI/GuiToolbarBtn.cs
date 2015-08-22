@@ -24,7 +24,7 @@ namespace KSP_GPWS.UI
                 btn.TexturePath = "GPWS/gpws";
                 btn.ToolTip = "GPWS settings";
                 btn.Visibility = new GameScenesVisibility(GameScenes.FLIGHT);
-                btn.OnClick += (e) => SettingGui.toggleSettingGUI();
+                btn.OnClick += (e) => SettingGui.toggleSettingGui();
             }
         }
 
