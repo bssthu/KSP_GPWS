@@ -91,6 +91,7 @@ namespace KSP_GPWS.Impl
         public bool EnableTraffic { get; set; }
         public bool EnableRotate { get; set; }
         public bool EnableStall { get; set; }
+        public bool EnableStallShake { get; set; }
 
         public float DescentRateFactor { get; set; }
         public float TooLowGearAltitude { get; set; }
@@ -121,6 +122,7 @@ namespace KSP_GPWS.Impl
             EnableTraffic = Util.ConvertValue<bool>(node, "EnableTraffic", EnableTraffic);
             EnableRotate = Util.ConvertValue<bool>(node, "EnableRotate", EnableRotate);
             EnableStall = Util.ConvertValue<bool>(node, "EnableStall", EnableStall);
+            EnableStallShake = Util.ConvertValue<bool>(node, "EnableStallShake", EnableStallShake);
 
             DescentRateFactor = Util.ConvertValue<float>(node, "DescentRateFactor", DescentRateFactor);
             TooLowGearAltitude = Util.ConvertValue<float>(node, "TooLowGearAltitude", TooLowGearAltitude);
@@ -167,6 +169,7 @@ namespace KSP_GPWS.Impl
             node.AddValue("EnableTraffic", EnableTraffic);
             node.AddValue("EnableRotate", EnableRotate);
             node.AddValue("EnableStall", EnableStall);
+            node.AddValue("EnableStallShake", EnableStallShake);
 
             node.AddValue("DescentRateFactor", DescentRateFactor);
             node.AddValue("TooLowGearAltitude", TooLowGearAltitude);
@@ -203,12 +206,13 @@ namespace KSP_GPWS.Impl
             EnableTraffic = true;
             EnableRotate = false;
             EnableStall = true;
+            EnableStallShake = true;
 
             DescentRateFactor = 1.0f;
             TooLowGearAltitude = 500.0f;
             TakeOffSpeed = 60.0f;
             LandingSpeed = 60.0f;
-            StallAoa = 25.0f;
+            StallAoa = 20.0f;
             AltitudeArray = new int[] { 1000, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10 };
             UnitOfAltitude = UnitOfAltitude.FOOT;
         }
@@ -650,7 +654,10 @@ namespace KSP_GPWS.Impl
                 if (Math.Abs(aoa) > StallAoa)
                 {
                     Util.audio.PlaySound(KindOfSound.STALL);
-                    Util.controller.SetShake(0.5f);
+                    if (EnableStallShake)
+                    {
+                        Util.controller.SetShake(0.5f);
+                    }
                     return true;
                 }
             }

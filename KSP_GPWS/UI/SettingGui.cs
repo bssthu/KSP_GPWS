@@ -25,8 +25,8 @@ namespace KSP_GPWS.UI
 
         private bool showConfigs;
 
-        private IPlaneConfig PlaneConfig;
-        private ILanderConfig LanderConfig;
+        private IPlaneConfig planeConfig;
+        private ILanderConfig landerConfig;
 
         GUIStyle toggleStyle;
         GUIStyle buttonStyle;
@@ -39,14 +39,14 @@ namespace KSP_GPWS.UI
             GameEvents.onShowUI.Add(ShowUI);
             GameEvents.onHideUI.Add(HideUI);
 
-            PlaneConfig = Settings.PlaneConfig;
-            LanderConfig = Settings.LanderConfig;
+            planeConfig = Settings.PlaneConfig;
+            landerConfig = Settings.LanderConfig;
 
-            descentRateFactorExp = (float)Math.Log10(PlaneConfig.DescentRateFactor);
-            tooLowGearAltitudeString = PlaneConfig.TooLowGearAltitude.ToString();
+            descentRateFactorExp = (float)Math.Log10(planeConfig.DescentRateFactor);
+            tooLowGearAltitudeString = planeConfig.TooLowGearAltitude.ToString();
 
-            touchDownSpeedString = LanderConfig.TouchDownSpeed.ToString();
-            horizontalSpeedCheckAltitudeString = LanderConfig.HorizontalSpeedCheckAltitude.ToString();
+            touchDownSpeedString = landerConfig.TouchDownSpeed.ToString();
+            horizontalSpeedCheckAltitudeString = landerConfig.HorizontalSpeedCheckAltitude.ToString();
 
             showConfigs = Settings.showConfigs;
 
@@ -137,8 +137,8 @@ namespace KSP_GPWS.UI
 
         private void WindowFunc(int windowID)
         {
-            PlaneConfig = Settings.PlaneConfig;
-            LanderConfig = Settings.LanderConfig;
+            planeConfig = Settings.PlaneConfig;
+            landerConfig = Settings.LanderConfig;
             ConfigureStyles();
 
             // begin drawing
@@ -201,15 +201,15 @@ namespace KSP_GPWS.UI
                 float newFloat;
                 if (float.TryParse(tooLowGearAltitudeString, out newFloat))
                 {
-                    PlaneConfig.TooLowGearAltitude = newFloat;
+                    planeConfig.TooLowGearAltitude = newFloat;
                 }
                 if (float.TryParse(touchDownSpeedString, out newFloat))
                 {
-                    LanderConfig.TouchDownSpeed = newFloat;
+                    landerConfig.TouchDownSpeed = newFloat;
                 }
                 if (float.TryParse(horizontalSpeedCheckAltitudeString, out newFloat))
                 {
-                    LanderConfig.HorizontalSpeedCheckAltitude = newFloat;
+                    landerConfig.HorizontalSpeedCheckAltitude = newFloat;
                 }
                 // save
                 Settings.SaveSettings();
@@ -218,82 +218,89 @@ namespace KSP_GPWS.UI
 
         private void drawPlaneSetting()
         {
-            PlaneConfig.EnableSystem =
-                    GUILayout.Toggle(PlaneConfig.EnableSystem, "System Enable", toggleStyle);
+            planeConfig.EnableSystem =
+                    GUILayout.Toggle(planeConfig.EnableSystem, "System Enable", toggleStyle);
 
             // descent rate config
-            PlaneConfig.EnableDescentRate =
-                    GUILayout.Toggle(PlaneConfig.EnableDescentRate, "Descent Rate", toggleStyle);
-            PlaneConfig.EnableClosureToTerrain =
-                    GUILayout.Toggle(PlaneConfig.EnableClosureToTerrain, "Closure to Terrain", toggleStyle);
+            planeConfig.EnableDescentRate =
+                    GUILayout.Toggle(planeConfig.EnableDescentRate, "Descent Rate", toggleStyle);
+            planeConfig.EnableClosureToTerrain =
+                    GUILayout.Toggle(planeConfig.EnableClosureToTerrain, "Closure to Terrain", toggleStyle);
 
-            GUILayout.Label(String.Format("Descent Rate Factor: {0}", PlaneConfig.DescentRateFactor));
+            GUILayout.Label(String.Format("Descent Rate Factor: {0}", planeConfig.DescentRateFactor));
             descentRateFactorExp = GUILayout.HorizontalSlider(descentRateFactorExp, -1.0f, 1.0f);
-            PlaneConfig.DescentRateFactor = (float)Math.Round(Math.Pow(10, descentRateFactorExp), 1);
+            planeConfig.DescentRateFactor = (float)Math.Round(Math.Pow(10, descentRateFactorExp), 1);
 
             // altitude loss
-            PlaneConfig.EnableAltitudeLoss =
-                    GUILayout.Toggle(PlaneConfig.EnableAltitudeLoss, "Altitude Loss After Takeoff", toggleStyle);
+            planeConfig.EnableAltitudeLoss =
+                    GUILayout.Toggle(planeConfig.EnableAltitudeLoss, "Altitude Loss After Takeoff", toggleStyle);
 
             // terrain clearance
-            PlaneConfig.EnableTerrainClearance =
-                    GUILayout.Toggle(PlaneConfig.EnableTerrainClearance, "Terrain Clearance", toggleStyle);
+            planeConfig.EnableTerrainClearance =
+                    GUILayout.Toggle(planeConfig.EnableTerrainClearance, "Terrain Clearance", toggleStyle);
             GUILayout.BeginHorizontal();
             {
                 GUILayout.Label("Gear Alt");
                 GUILayout.FlexibleSpace();
                 tooLowGearAltitudeString =
                         GUILayout.TextField(tooLowGearAltitudeString, GUILayout.Height(30), GUILayout.Width(80));
-                GUILayout.Label(Util.GetShortString(PlaneConfig.UnitOfAltitude));
+                GUILayout.Label(Util.GetShortString(planeConfig.UnitOfAltitude));
             }
             GUILayout.EndHorizontal();
 
             // altitude
-            PlaneConfig.EnableAltitudeCallouts =
-                    GUILayout.Toggle(PlaneConfig.EnableAltitudeCallouts, "Altitude Callouts", toggleStyle);
+            planeConfig.EnableAltitudeCallouts =
+                    GUILayout.Toggle(planeConfig.EnableAltitudeCallouts, "Altitude Callouts", toggleStyle);
 
             // retard
-            PlaneConfig.EnableRetard =
-                    GUILayout.Toggle(PlaneConfig.EnableRetard, "Retard", toggleStyle);
+            planeConfig.EnableRetard =
+                    GUILayout.Toggle(planeConfig.EnableRetard, "Retard", toggleStyle);
 
             // bank angle
-            PlaneConfig.EnableTraffic =
-                    GUILayout.Toggle(PlaneConfig.EnableTraffic, "Traffic", toggleStyle);
+            planeConfig.EnableTraffic =
+                    GUILayout.Toggle(planeConfig.EnableTraffic, "Traffic", toggleStyle);
 
             // traffic
-            PlaneConfig.EnableBankAngle =
-                    GUILayout.Toggle(PlaneConfig.EnableBankAngle, "Bank Angle", toggleStyle);
+            planeConfig.EnableBankAngle =
+                    GUILayout.Toggle(planeConfig.EnableBankAngle, "Bank Angle", toggleStyle);
 
             // rotate
-            PlaneConfig.EnableRotate =
-                    GUILayout.Toggle(PlaneConfig.EnableRotate, "Rotate", toggleStyle);
+            planeConfig.EnableRotate =
+                    GUILayout.Toggle(planeConfig.EnableRotate, "Rotate", toggleStyle);
 
             // stall
-            PlaneConfig.EnableStall =
-                    GUILayout.Toggle(PlaneConfig.EnableStall, "Stall", toggleStyle);
-            GUILayout.Label(String.Format("Max AOA: {0} deg", PlaneConfig.StallAoa));
-            PlaneConfig.StallAoa = (float)Math.Round(GUILayout.HorizontalSlider(PlaneConfig.StallAoa, 0.0f, 180.0f), 0);
+            GUILayout.BeginHorizontal();
+            {
+                planeConfig.EnableStall =
+                        GUILayout.Toggle(planeConfig.EnableStall, "Stall", toggleStyle);
+                GUILayout.Space(50);
+                planeConfig.EnableStallShake =
+                        GUILayout.Toggle(planeConfig.EnableStallShake, "Shake", toggleStyle);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Label(String.Format("Max AOA: {0} deg", planeConfig.StallAoa));
+            planeConfig.StallAoa = (float)Math.Round(GUILayout.HorizontalSlider(planeConfig.StallAoa, 0.0f, 180.0f), 0);
 
             // take off speed
-            GUILayout.Label(String.Format("Take Off Speed: {0} m/s", PlaneConfig.TakeOffSpeed));
-            PlaneConfig.TakeOffSpeed = (float)Math.Round(GUILayout.HorizontalSlider(PlaneConfig.TakeOffSpeed, 10.0f, 200.0f), 0);
+            GUILayout.Label(String.Format("Take Off Speed: {0} m/s", planeConfig.TakeOffSpeed));
+            planeConfig.TakeOffSpeed = (float)Math.Round(GUILayout.HorizontalSlider(planeConfig.TakeOffSpeed, 10.0f, 200.0f), 0);
 
             // landing speed
-            GUILayout.Label(String.Format("Landing Speed: {0} m/s", PlaneConfig.LandingSpeed));
-            PlaneConfig.LandingSpeed = (float)Math.Round(GUILayout.HorizontalSlider(PlaneConfig.LandingSpeed, 10.0f, 200.0f), 0);
+            GUILayout.Label(String.Format("Landing Speed: {0} m/s", planeConfig.LandingSpeed));
+            planeConfig.LandingSpeed = (float)Math.Round(GUILayout.HorizontalSlider(planeConfig.LandingSpeed, 10.0f, 200.0f), 0);
         }
 
         private void drawLanderSetting()
         {
-            LanderConfig.EnableSystem =
-                    GUILayout.Toggle(LanderConfig.EnableSystem, "System Enable", toggleStyle);
+            landerConfig.EnableSystem =
+                    GUILayout.Toggle(landerConfig.EnableSystem, "System Enable", toggleStyle);
 
             // descent rate
-            LanderConfig.EnableDescentRate =
-                    GUILayout.Toggle(LanderConfig.EnableDescentRate, "Descent Rate", toggleStyle);
+            landerConfig.EnableDescentRate =
+                    GUILayout.Toggle(landerConfig.EnableDescentRate, "Descent Rate", toggleStyle);
 
-            GUILayout.Label(String.Format("Safety Factor: {0}", LanderConfig.DescentRateSafetyFactor));
-            LanderConfig.DescentRateSafetyFactor = (float)Math.Round(GUILayout.HorizontalSlider(LanderConfig.DescentRateSafetyFactor, 1.0f, 4.0f), 1);
+            GUILayout.Label(String.Format("Safety Factor: {0}", landerConfig.DescentRateSafetyFactor));
+            landerConfig.DescentRateSafetyFactor = (float)Math.Round(GUILayout.HorizontalSlider(landerConfig.DescentRateSafetyFactor, 1.0f, 4.0f), 1);
 
             GUILayout.BeginHorizontal();
             {
@@ -301,33 +308,33 @@ namespace KSP_GPWS.UI
                 GUILayout.FlexibleSpace();
                 touchDownSpeedString =
                         GUILayout.TextField(touchDownSpeedString, GUILayout.Height(30), GUILayout.Width(80));
-                GUILayout.Label(Util.GetShortString(LanderConfig.UnitOfAltitude) + "/s");
+                GUILayout.Label(Util.GetShortString(landerConfig.UnitOfAltitude) + "/s");
             }
             GUILayout.EndHorizontal();
 
             // horizontal speed
-            LanderConfig.EnableHorizontalSpeed =
-                    GUILayout.Toggle(LanderConfig.EnableHorizontalSpeed, "Horizontal Speed", toggleStyle);
+            landerConfig.EnableHorizontalSpeed =
+                    GUILayout.Toggle(landerConfig.EnableHorizontalSpeed, "Horizontal Speed", toggleStyle);
             GUILayout.BeginHorizontal();
             {
                 GUILayout.Label("vh Check Alt");
                 GUILayout.FlexibleSpace();
                 horizontalSpeedCheckAltitudeString =
                         GUILayout.TextField(horizontalSpeedCheckAltitudeString, GUILayout.Height(30), GUILayout.Width(80));
-                GUILayout.Label(Util.GetShortString(LanderConfig.UnitOfAltitude));
+                GUILayout.Label(Util.GetShortString(landerConfig.UnitOfAltitude));
             }
             GUILayout.EndHorizontal();
 
-            GUILayout.Label(String.Format("Horizontal Speed Factor: {0}", LanderConfig.HorizontalSpeedFactor));
-            LanderConfig.HorizontalSpeedFactor = (float)Math.Round(GUILayout.HorizontalSlider(LanderConfig.HorizontalSpeedFactor, 0.01f, 1.0f), 2);
+            GUILayout.Label(String.Format("Horizontal Speed Factor: {0}", landerConfig.HorizontalSpeedFactor));
+            landerConfig.HorizontalSpeedFactor = (float)Math.Round(GUILayout.HorizontalSlider(landerConfig.HorizontalSpeedFactor, 0.01f, 1.0f), 2);
 
             // altitude
-            LanderConfig.EnableAltitudeCallouts =
-                    GUILayout.Toggle(LanderConfig.EnableAltitudeCallouts, "Altitude Callouts", toggleStyle);
+            landerConfig.EnableAltitudeCallouts =
+                    GUILayout.Toggle(landerConfig.EnableAltitudeCallouts, "Altitude Callouts", toggleStyle);
 
             // retard
-            LanderConfig.EnableRetard =
-                    GUILayout.Toggle(LanderConfig.EnableRetard, "Retard", toggleStyle);
+            landerConfig.EnableRetard =
+                    GUILayout.Toggle(landerConfig.EnableRetard, "Retard", toggleStyle);
         }
 
         public void OnDestory()

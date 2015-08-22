@@ -23,6 +23,7 @@ namespace KSP_GPWS.Interfaces
         bool EnableTraffic { get; set; }
         bool EnableRotate { get; set; }
         bool EnableStall { get; set; }
+        bool EnableStallShake { get; set; }
 
         float DescentRateFactor { get; set; }
         float TooLowGearAltitude { get; set; }
