@@ -57,6 +57,7 @@ P.S.2. Change "Descent Rate Factor" to allow faster/slower sink rate. (Set to 2 
 - retard
 - traffic
 - rotate
+- (stall) (joystick vibration tested on x1 controller)
 
 ###### Lander
 - sink rate
@@ -71,6 +72,9 @@ https://github.com/bssthu/KSP_GPWS/releases
 #### Installation
 
 Just copy the contents of the archive to KSP's root folder.
+
+On Windows, you may rename XInputInterface_x86.dll (or XInputInterface_x64.dll on 64bit KSP) 
+to XInputInterface.dll
 
 You need ModuleManager to make it work.
 If you don't have one, you can get it from
