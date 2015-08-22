@@ -84,6 +84,11 @@ namespace KSP_GPWS.Controller
                 DllAvailable = false;
                 return false;
             }
+            catch (Exception)
+            {
+                DllAvailable = false;
+                return false;
+            }
         }
 
         public void SetVibration(uint playerIndex, float leftMotor, float rightMotor)
@@ -114,6 +119,11 @@ namespace KSP_GPWS.Controller
             {
                 DllAvailable = false;
                 return;
+            }
+            catch (Exception)
+            {
+                DllAvailable = false;
+                return ;
             }
         }
 
