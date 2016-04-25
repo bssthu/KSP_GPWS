@@ -116,7 +116,7 @@ namespace KSP_GPWS
                 Part p = v.parts[i];
                 if (p.Modules.Contains("GPWSGear"))
                 {
-                    Util.Log("fffound one!!!");
+                    Util.Log("found one!!!");
                     gears.Add(p.Modules["GPWSGear"] as PartModule);
                     Log(String.Format("find {0} in {1}", p.name, p.vessel.name));
                 }
@@ -130,10 +130,10 @@ namespace KSP_GPWS
                 // ModuleLandingGear
                 try
                 {
-                    if (gear.Modules.Contains("ModuleLandingGear"))
+                    if (gear.Modules.Contains("ModuleWheelDeployment"))
                     {
-                        ModuleLandingGear landingGear = gear.Modules["ModuleLandingGear"] as ModuleLandingGear;
-                        if (landingGear.gearState != ModuleLandingGear.GearStates.DEPLOYED)
+                        PartModule m = gear.Modules["ModuleWheelDeployment"];
+                        if (m.GetType().GetField("stateString").GetValue(m).ToString() != "Deployed")
                         {
                             return false;  // not down
                         }
