@@ -49,7 +49,7 @@ namespace KSP_GPWS.Impl
             }
             asGPWS = audioPlayer.AddComponent<AudioSource>();
             asGPWS.volume = Volume;
-            asGPWS.panLevel = 0;
+            asGPWS.spatialBlend = 0;
 
             KindOfSound = KindOfSound.NONE;
             lastPlayTime = Time.time;

@@ -45,6 +45,10 @@
       <HintPath>..\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="KSPUtil">
+      <HintPath>..\KSPUtil.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller\XInputState.cs" />

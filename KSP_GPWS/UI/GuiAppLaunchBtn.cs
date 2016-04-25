@@ -14,7 +14,7 @@ namespace KSP_GPWS.UI
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     class GuiAppLaunchBtn : MonoBehaviour
     {
-        public static ApplicationLauncherButton appBtn = null;
+        public static KSP.UI.Screens.ApplicationLauncherButton appBtn = null;
 
         public void Awake()
         {
@@ -26,18 +26,18 @@ namespace KSP_GPWS.UI
 
         public void onGuiAppLauncherReady()
         {
-            if (ApplicationLauncher.Ready)
+            if (KSP.UI.Screens.ApplicationLauncher.Ready)
             {
                 if (appBtn == null)
                 {
-                    appBtn = ApplicationLauncher.Instance.AddModApplication(
+                    appBtn = KSP.UI.Screens.ApplicationLauncher.Instance.AddModApplication(
                             onAppLaunchToggleOnOff,
                             onAppLaunchToggleOnOff,
                             () => { },
                             () => { },
                             () => { },
                             () => { },
-                            ApplicationLauncher.AppScenes.FLIGHT,
+                            KSP.UI.Screens.ApplicationLauncher.AppScenes.FLIGHT,
                             (Texture)GameDatabase.Instance.GetTexture("GPWS/gpws", false));
                 }
                 if (Settings.guiIsActive)
@@ -57,7 +57,7 @@ namespace KSP_GPWS.UI
         {
             if (appBtn != null)
             {
-                ApplicationLauncher.Instance.RemoveModApplication(appBtn);
+                KSP.UI.Screens.ApplicationLauncher.Instance.RemoveModApplication(appBtn);
                 appBtn = null;
             }
         }
