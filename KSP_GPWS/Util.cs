@@ -128,10 +128,10 @@ namespace KSP_GPWS
         {
             if (gear != null)
             {
-                // ModuleLandingGear
+                // landing gear contains ModuleWheelDeployment too, so check ModuleWheelBrakes
                 try
                 {
-                    if (gear.Modules.Contains<ModuleWheelDeployment>())
+                    if (gear.Modules.Contains<ModuleWheelDeployment>() && gear.Modules.Contains<ModuleWheelBrakes>())
                     {
                         ModuleWheelDeployment m = gear.Modules.GetModule<ModuleWheelDeployment>();
                         if (m.stateString != "Deployed")
