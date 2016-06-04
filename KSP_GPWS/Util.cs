@@ -10,6 +10,7 @@ using System.Text;
 using UnityEngine;
 using KSP_GPWS.SimpleTypes;
 using KSP_GPWS.Impl;
+using ModuleWheels;
 
 namespace KSP_GPWS
 {
@@ -114,10 +115,10 @@ namespace KSP_GPWS
             for (int i = 0; i < v.parts.Count; i++)    // it is said that foreach costs more memory due to Unity Mono issues
             {
                 Part p = v.parts[i];
-                if (p.Modules.Contains("GPWSGear"))
+                if (p.Modules.Contains<GPWSGear>())
                 {
                     Util.Log("found one!!!");
-                    gears.Add(p.Modules["GPWSGear"] as PartModule);
+                    gears.Add(p.Modules.GetModule<GPWSGear>());
                     Log(String.Format("find {0} in {1}", p.name, p.vessel.name));
                 }
             }
@@ -130,10 +131,10 @@ namespace KSP_GPWS
                 // ModuleLandingGear
                 try
                 {
-                    if (gear.Modules.Contains("ModuleWheelDeployment"))
+                    if (gear.Modules.Contains<ModuleWheelDeployment>())
                     {
-                        PartModule m = gear.Modules["ModuleWheelDeployment"];
-                        if (m.GetType().GetField("stateString").GetValue(m).ToString() != "Deployed")
+                        ModuleWheelDeployment m = gear.Modules.GetModule<ModuleWheelDeployment>();
+                        if (m.stateString != "Deployed")
                         {
                             return false;  // not down
                         }
@@ -296,9 +297,9 @@ namespace KSP_GPWS
 
             for (int i = 0; i < v.Parts.Count; i++)
             {
-                if (v.Parts[i].Modules.Contains("ModuleEngines"))
+                if (v.Parts[i].Modules.Contains<ModuleEngines>())
                 {
-                    ModuleEngines me = v.Parts[i].Modules["ModuleEngines"] as ModuleEngines;
+                    ModuleEngines me = v.Parts[i].Modules.GetModule<ModuleEngines>();
                     if (!me.engineShutdown && me.EngineIgnited && !me.flameout)
                     {
                         float me_isp = me.atmosphereCurve.Evaluate((float)(v.staticPressurekPa * PhysicsGlobals.KpaToAtmospheres));
@@ -307,9 +308,9 @@ namespace KSP_GPWS
                         maxThrust += me_maxThrust;
                     }
                 }
-                if (v.Parts[i].Modules.Contains("ModuleEnginesFX"))
+                if (v.Parts[i].Modules.Contains<ModuleEnginesFX>())
                 {
-                    ModuleEnginesFX me = v.Parts[i].Modules["ModuleEnginesFX"] as ModuleEnginesFX;
+                    ModuleEnginesFX me = v.Parts[i].Modules.GetModule<ModuleEnginesFX>();
                     if (!me.engineShutdown && me.EngineIgnited && !me.flameout)
                     {
                         float me_isp = me.atmosphereCurve.Evaluate((float)(v.staticPressurekPa * PhysicsGlobals.KpaToAtmospheres));
