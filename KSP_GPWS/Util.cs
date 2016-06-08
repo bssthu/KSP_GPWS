@@ -134,7 +134,7 @@ namespace KSP_GPWS
                     if (gear.Modules.Contains<ModuleWheelDeployment>() && gear.Modules.Contains<ModuleWheelBrakes>())
                     {
                         ModuleWheelDeployment m = gear.Modules.GetModule<ModuleWheelDeployment>();
-                        if (m.stateString != "Deployed")
+                        if (m.stateString != null && m.stateString != "" && m.stateString != "Deployed")    // sometimes it's an empty string
                         {
                             return false;  // not down
                         }
