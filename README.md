@@ -26,7 +26,7 @@ Development thread: http://forum.kerbalspaceprogram.com/threads/112420-WIP-0-90-
 #### How to Use
 
 Fly an aircraft with landing gear(s).
-(It should have a ModuleLandingGear, ModuleLandingGearFixed, FSwheel or ModuleWheel module.)
+(It should have a ModuleWheelDeployment && ModuleWheelBrakes, or FSwheel module.)
 If you enabled system in GPWS Settings,
 You should hear sounds when you are landing/crashing.
 
@@ -78,7 +78,7 @@ to XInputInterface.dll
 
 You need ModuleManager to make it work.
 If you don't have one, you can get it from
-http://forum.kerbalspaceprogram.com/threads/55219-0-90-Module-Manager-2-5-10-%28Feb-13%29-Including-faster-cats
+http://forum.kerbalspaceprogram.com/threads/55219
 
 #### Credits
 
