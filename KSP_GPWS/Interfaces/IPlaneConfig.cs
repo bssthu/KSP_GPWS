@@ -21,12 +21,15 @@ namespace KSP_GPWS.Interfaces
         bool EnableRetard { get; set; }
         bool EnableBankAngle { get; set; }
         bool EnableTraffic { get; set; }
+        bool EnableV1 { get; set; }
         bool EnableRotate { get; set; }
+        bool EnableGearUp { get; set; }
         bool EnableStall { get; set; }
         bool EnableStallShake { get; set; }
 
         float DescentRateFactor { get; set; }
         float TooLowGearAltitude { get; set; }
+        float V1Speed { get; set; }
         float TakeOffSpeed { get; set; }
         float LandingSpeed { get; set; }
         float StallAoa { get; set; }

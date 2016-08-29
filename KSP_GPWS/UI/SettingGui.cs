@@ -264,9 +264,17 @@ namespace KSP_GPWS.UI
             planeConfig.EnableBankAngle =
                     GUILayout.Toggle(planeConfig.EnableBankAngle, "Bank Angle", toggleStyle);
 
+            // v1
+            planeConfig.EnableV1 =
+                    GUILayout.Toggle(planeConfig.EnableV1, "V1", toggleStyle);
+
             // rotate
             planeConfig.EnableRotate =
                     GUILayout.Toggle(planeConfig.EnableRotate, "Rotate", toggleStyle);
+
+            // gear up
+            planeConfig.EnableGearUp =
+                    GUILayout.Toggle(planeConfig.EnableGearUp, "Gear Up", toggleStyle);
 
             // stall
             GUILayout.BeginHorizontal();
@@ -282,6 +290,8 @@ namespace KSP_GPWS.UI
             planeConfig.StallAoa = (float)Math.Round(GUILayout.HorizontalSlider(planeConfig.StallAoa, 0.0f, 180.0f), 0);
 
             // take off speed
+            GUILayout.Label(String.Format("V1 Speed: {0} m/s", planeConfig.V1Speed));
+            planeConfig.V1Speed = (float)Math.Round(GUILayout.HorizontalSlider(planeConfig.V1Speed, 10.0f, 200.0f), 0);
             GUILayout.Label(String.Format("Take Off Speed: {0} m/s", planeConfig.TakeOffSpeed));
             planeConfig.TakeOffSpeed = (float)Math.Round(GUILayout.HorizontalSlider(planeConfig.TakeOffSpeed, 10.0f, 200.0f), 0);
 

@@ -28,7 +28,9 @@ namespace KSP_GPWS.SimpleTypes
         TRAFFIC,
         HORIZONTAL_SPEED,
         RETARD,
+        V1,
         ROTATE,
+        GEAR_UP,
         STALL
     };
 }

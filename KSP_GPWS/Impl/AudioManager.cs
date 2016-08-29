@@ -161,12 +161,28 @@ namespace KSP_GPWS.Impl
                         PlayOneShot(kind, "retard");
                     }
                     break;
+                case KindOfSound.V1:
+                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP)
+                            && !IsPlaying(KindOfSound.TERRAIN) && !IsPlaying(KindOfSound.TERRAIN_PULL_UP)
+                            && !IsPlaying(KindOfSound.DONT_SINK) && !IsPlaying(KindOfSound.V1) && !IsPlaying(KindOfSound.ROTATE))
+                    {
+                        PlayOneShot(kind, "v1");
+                    }
+                    break;
                 case KindOfSound.ROTATE:
                     if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP)
                             && !IsPlaying(KindOfSound.TERRAIN) && !IsPlaying(KindOfSound.TERRAIN_PULL_UP)
                             && !IsPlaying(KindOfSound.DONT_SINK) && !IsPlaying(KindOfSound.ROTATE))
                     {
                         PlayOneShot(kind, "rotate");
+                    }
+                    break;
+                case KindOfSound.GEAR_UP:
+                    if (!IsPlaying(KindOfSound.SINK_RATE) && !IsPlaying(KindOfSound.SINK_RATE_PULL_UP)
+                            && !IsPlaying(KindOfSound.TERRAIN) && !IsPlaying(KindOfSound.TERRAIN_PULL_UP)
+                            && !IsPlaying(KindOfSound.DONT_SINK) && !IsPlaying(KindOfSound.GEAR_UP))
+                    {
+                        PlayOneShot(kind, "gear_up");
                     }
                     break;
                 default:

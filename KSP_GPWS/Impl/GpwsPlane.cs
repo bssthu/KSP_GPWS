@@ -89,12 +89,15 @@ namespace KSP_GPWS.Impl
         public bool EnableRetard { get; set; }
         public bool EnableBankAngle { get; set; }
         public bool EnableTraffic { get; set; }
+        public bool EnableV1 { get; set; }
         public bool EnableRotate { get; set; }
+        public bool EnableGearUp { get; set; }
         public bool EnableStall { get; set; }
         public bool EnableStallShake { get; set; }
 
         public float DescentRateFactor { get; set; }
         public float TooLowGearAltitude { get; set; }
+        public float V1Speed { get; set; }
         public float TakeOffSpeed { get; set; }
         public float LandingSpeed { get; set; }
         public float StallAoa { get; set; }
@@ -120,12 +123,15 @@ namespace KSP_GPWS.Impl
             EnableRetard = Util.ConvertValue<bool>(node, "EnableRetard", EnableRetard);
             EnableBankAngle = Util.ConvertValue<bool>(node, "EnableBankAngle", EnableBankAngle);
             EnableTraffic = Util.ConvertValue<bool>(node, "EnableTraffic", EnableTraffic);
+            EnableV1 = Util.ConvertValue<bool>(node, "EnableV1", EnableV1);
             EnableRotate = Util.ConvertValue<bool>(node, "EnableRotate", EnableRotate);
+            EnableGearUp = Util.ConvertValue<bool>(node, "EnableGearUp", EnableGearUp);
             EnableStall = Util.ConvertValue<bool>(node, "EnableStall", EnableStall);
             EnableStallShake = Util.ConvertValue<bool>(node, "EnableStallShake", EnableStallShake);
 
             DescentRateFactor = Util.ConvertValue<float>(node, "DescentRateFactor", DescentRateFactor);
             TooLowGearAltitude = Util.ConvertValue<float>(node, "TooLowGearAltitude", TooLowGearAltitude);
+            V1Speed = Util.ConvertValue<float>(node, "V1Speed", V1Speed);
             TakeOffSpeed = Util.ConvertValue<float>(node, "TakeOffSpeed", TakeOffSpeed);
             LandingSpeed = Util.ConvertValue<float>(node, "LandingSpeed", LandingSpeed);
             StallAoa = Util.ConvertValue<float>(node, "StallAoa", StallAoa);
@@ -167,12 +173,15 @@ namespace KSP_GPWS.Impl
             node.AddValue("EnableRetard", EnableRetard);
             node.AddValue("EnableBankAngle", EnableBankAngle);
             node.AddValue("EnableTraffic", EnableTraffic);
+            node.AddValue("EnableV1", EnableV1);
             node.AddValue("EnableRotate", EnableRotate);
+            node.AddValue("EnableGearUp", EnableGearUp);
             node.AddValue("EnableStall", EnableStall);
             node.AddValue("EnableStallShake", EnableStallShake);
 
             node.AddValue("DescentRateFactor", DescentRateFactor);
             node.AddValue("TooLowGearAltitude", TooLowGearAltitude);
+            node.AddValue("V1Speed", V1Speed);
             node.AddValue("TakeOffSpeed", TakeOffSpeed);
             node.AddValue("LandingSpeed", LandingSpeed);
             node.AddValue("StallAoa", StallAoa);
@@ -204,12 +213,15 @@ namespace KSP_GPWS.Impl
             EnableRetard = true;
             EnableBankAngle = false;
             EnableTraffic = true;
+            EnableV1 = false;
             EnableRotate = false;
+            EnableGearUp = true;
             EnableStall = true;
             EnableStallShake = true;
 
             DescentRateFactor = 1.0f;
             TooLowGearAltitude = 500.0f;
+            V1Speed = 45.0f;
             TakeOffSpeed = 60.0f;
             LandingSpeed = 60.0f;
             StallAoa = 20.0f;
@@ -351,6 +363,8 @@ namespace KSP_GPWS.Impl
                 { }
                 // other
                 if (checkMode_Stall())     // Stall
+                { }
+                if (checkMode_GearUp())
                 { }
                 if (!Util.audio.IsPlaying())
                 {
@@ -666,12 +680,40 @@ namespace KSP_GPWS.Impl
 
         private bool checkMode_TakeoffSpeedCheck()
         {
+            if (EnableV1)
+            {
+                if (CommonData.HorSpeed >= V1Speed && CommonData.LastHorSpeed < V1Speed)
+                {
+                    Util.audio.PlaySound(KindOfSound.V1);
+                    return true;
+                }
+            }
             if (EnableRotate)
             {
                 if (CommonData.HorSpeed >= TakeOffSpeed && CommonData.LastHorSpeed < TakeOffSpeed)
                 {
                     Util.audio.PlaySound(KindOfSound.ROTATE);
                     return true;
+                }
+            }
+            return false;
+        }
+
+        private bool checkMode_GearUp()
+        {
+            if (EnableGearUp)
+            {
+                float checkGearUpTime = 5;  // check at 5s
+                if ((CommonData.CurrentTime - CommonData.TakeOffTime) > checkGearUpTime
+                    && (CommonData.LastTime - CommonData.TakeOffTime) < checkGearUpTime
+                    && isGearDown)
+                {
+                    if (CommonData.VerSpeed >= 0)   // vspeed > 0
+                    {
+                        // play sound
+                        Util.audio.PlaySound(KindOfSound.GEAR_UP);
+                        return true;
+                    }
                 }
             }
             return false;
