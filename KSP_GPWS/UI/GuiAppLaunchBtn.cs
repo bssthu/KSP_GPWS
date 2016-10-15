@@ -18,32 +18,30 @@ namespace KSP_GPWS.UI
 
         public void Awake()
         {
-            if (!Settings.UseBlizzy78Toolbar || !ToolbarManager.ToolbarAvailable)
-            {
-                onGuiAppLauncherReady();
-            }
+            GameEvents.onGUIApplicationLauncherReady.Add(onGuiAppLauncherReady);
         }
 
         public void onGuiAppLauncherReady()
         {
-            if (KSP.UI.Screens.ApplicationLauncher.Ready)
+            if ((Settings.UseBlizzy78Toolbar && ToolbarManager.ToolbarAvailable) || !KSP.UI.Screens.ApplicationLauncher.Ready)
             {
-                if (appBtn == null)
-                {
-                    appBtn = KSP.UI.Screens.ApplicationLauncher.Instance.AddModApplication(
-                            onAppLaunchToggleOnOff,
-                            onAppLaunchToggleOnOff,
-                            () => { },
-                            () => { },
-                            () => { },
-                            () => { },
-                            KSP.UI.Screens.ApplicationLauncher.AppScenes.FLIGHT,
-                            (Texture)GameDatabase.Instance.GetTexture("GPWS/gpws", false));
-                }
-                if (Settings.guiIsActive)
-                {
-                    SettingGui.toggleSettingGui(true);
-                }
+                return;
+            }
+            if (appBtn == null)
+            {
+                appBtn = KSP.UI.Screens.ApplicationLauncher.Instance.AddModApplication(
+                        onAppLaunchToggleOnOff,
+                        onAppLaunchToggleOnOff,
+                        () => { },
+                        () => { },
+                        () => { },
+                        () => { },
+                        KSP.UI.Screens.ApplicationLauncher.AppScenes.FLIGHT,
+                        (Texture)GameDatabase.Instance.GetTexture("GPWS/gpws", false));
+            }
+            if (Settings.guiIsActive)
+            {
+                SettingGui.toggleSettingGui(true);
             }
         }
 

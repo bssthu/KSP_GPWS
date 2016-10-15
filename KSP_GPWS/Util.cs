@@ -237,7 +237,7 @@ namespace KSP_GPWS
         public static float BankAngle(Vessel v)
         {
             // surface vectors
-            Vector3d planetUp = (v.GetWorldPos3D() - v.mainBody.position).normalized;
+            Vector3d planetUp = (v.CoMD - v.mainBody.position).normalized;
             // Vessel forward and right vetors, parallel to the surface
             Vector3d surfVesRight = Vector3d.Cross(planetUp, v.ReferenceTransform.up).normalized;
             // roll
