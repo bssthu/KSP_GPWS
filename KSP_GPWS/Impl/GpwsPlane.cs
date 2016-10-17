@@ -280,6 +280,12 @@ namespace KSP_GPWS.Impl
 
         public bool PreUpdate()
         {
+            // check vessel state
+            if (CommonData.ActiveVessel.state != Vessel.State.ACTIVE)
+            {
+                Util.audio.SetUnavailable();
+                return false;
+            }
             // check gear
             if (gears.Count <= 0)
             {
