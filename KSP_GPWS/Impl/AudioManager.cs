@@ -205,6 +205,14 @@ namespace KSP_GPWS.Impl
             Util.Log(String.Format("play " + filename));
         }
 
+        public void Stop()
+        {
+            if (asGPWS.isPlaying)
+            {
+                asGPWS.Stop();
+            }
+        }
+
         public bool IsPlaying()
         {
             return asGPWS.isPlaying;
@@ -231,6 +239,7 @@ namespace KSP_GPWS.Impl
         public void SetUnavailable()
         {
             KindOfSound = KindOfSound.UNAVAILABLE;
+            Stop();
         }
 
         public void MarkNotPlaying()

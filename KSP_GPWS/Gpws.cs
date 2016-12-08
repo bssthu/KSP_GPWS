@@ -161,6 +161,7 @@ namespace KSP_GPWS
         {
             plane.ChangeVessel(v);
             lander.ChangeVessel(v);
+            Util.audio.Stop();
         }
 
         private bool PreUpdate()
