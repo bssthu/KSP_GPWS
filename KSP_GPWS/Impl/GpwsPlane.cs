@@ -18,7 +18,7 @@ namespace KSP_GPWS.Impl
         /// <summary>
         /// parts with module "GPWSGear"
         /// </summary>
-        private List<PartModule> gears = new List<PartModule>();
+        private List<Part> gears = new List<Part>();
 
         private bool isGearDown = false;
 

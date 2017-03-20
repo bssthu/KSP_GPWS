@@ -103,7 +103,7 @@ namespace KSP_GPWS
             }
         }
 
-        public static void UpdateGearList(Vessel v, ref List<PartModule> gears)
+        public static void UpdateGearList(Vessel v, ref List<Part> gears)
         {
             gears.Clear();
 
@@ -115,10 +115,10 @@ namespace KSP_GPWS
             for (int i = 0; i < v.parts.Count; i++)    // it is said that foreach costs more memory due to Unity Mono issues
             {
                 Part p = v.parts[i];
-                if (p.Modules.Contains<GPWSGear>())
+                if (p.Modules.Contains<GPWSGear>() || p.Modules.Contains<ModuleWheelBase>())
                 {
                     Util.Log("found one!!!");
-                    gears.Add(p.Modules.GetModule<GPWSGear>());
+                    gears.Add(p);
                     Log(String.Format("find {0} in {1}", p.name, p.vessel.name));
                 }
             }
@@ -159,19 +159,19 @@ namespace KSP_GPWS
             return true;
         }
 
-        public static Part GetLowestGear(List<PartModule> gears)
+        public static Part GetLowestGear(List<Part> gears)
         {
             if (gears.Count <= 0)    // no gear
             {
                 return null;
             }
 
-            Part lowestGearPart = gears[0].part;
+            Part lowestGearPart = gears[0];
             // height from vessel to gear
             float lowestGearFromVessel = float.PositiveInfinity;
             for (int i = 0; i < gears.Count; i++)    // find lowest gear
             {
-                Part p = gears[i].part;
+                Part p = gears[i];
                 float gearFromVessel = AltitudeFromVessel(p);
 
                 if (gearFromVessel < lowestGearFromVessel)
@@ -187,7 +187,7 @@ namespace KSP_GPWS
         /// return height from surface to the lowest landing gear, in meters
         /// </summary>
         /// <returns></returns>
-        public static float GetLowestGearRadarAltitude(List<PartModule> gears)
+        public static float GetLowestGearRadarAltitude(List<Part> gears)
         {
             return RadarAltitude(GetLowestGear(gears));
         }
