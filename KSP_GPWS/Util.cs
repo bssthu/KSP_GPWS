@@ -115,7 +115,14 @@ namespace KSP_GPWS
             for (int i = 0; i < v.parts.Count; i++)    // it is said that foreach costs more memory due to Unity Mono issues
             {
                 Part p = v.parts[i];
-                if (p.Modules.Contains<GPWSGear>() || p.Modules.Contains<ModuleWheelBase>())
+
+                bool isModuleWheelGear = false;     // is ModuleWheelBase and wheelType is FREE
+                if (p.Modules.Contains<ModuleWheelBase>())
+                {
+                    isModuleWheelGear |= p.Modules.GetModule<ModuleWheelBase>().wheelType == WheelType.FREE;
+                }
+
+                if (p.Modules.Contains<GPWSGear>() || isModuleWheelGear)
                 {
                     Util.Log("found one!!!");
                     gears.Add(p);
