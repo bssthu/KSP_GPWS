@@ -676,7 +676,9 @@ namespace KSP_GPWS.Impl
                     Util.audio.PlaySound(KindOfSound.STALL);
                     if (EnableStallShake)
                     {
-                        Util.controller.SetShake(0.5f);
+                        float factor = (Math.Abs(aoa) - StallAoa) / (90.0f - StallAoa);
+                        float motor = 0.1f + Math.Max(Math.Min(factor, 1.0f), 0.0f) * 0.2f;
+                        Util.controller.SetShake(motor, motor * 0.4f);
                     }
                     return true;
                 }

@@ -230,6 +230,9 @@ namespace KSP_GPWS
                 Util.audio.UpdateVolume();
             }
 
+            // check shake
+            Util.controller.CheckResetShake();
+
             // if vessel changed, don't update
             if (ActiveVessel != LastActiveVessel)
             {
@@ -281,6 +284,8 @@ namespace KSP_GPWS
         {
             plane.CleanUp();
             lander.CleanUp();
+
+            Util.controller.ResetShake();
         }
     }
 }
