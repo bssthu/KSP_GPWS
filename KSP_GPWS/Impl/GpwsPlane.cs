@@ -408,7 +408,7 @@ namespace KSP_GPWS.Impl
                     {
                         // play sound
                         Util.audio.PlaySound(KindOfSound.SINK_RATE);
-                        return true;
+                        return false;   // is warning
                     }
                 }
             }
@@ -546,13 +546,7 @@ namespace KSP_GPWS.Impl
                     Util.audio.PlaySound(KindOfSound.TOO_LOW_GEAR);
                     return true;
                 }
-                if ((CommonData.CurrentTime - CommonData.TakeOffTime < 5) && (CommonData.RadarAltitude < heightJustTakeoff))
-                {
-                    // play sound
-                    Util.audio.PlaySound(KindOfSound.TOO_LOW_TERRAIN);
-                    return true;
-                }
-                if (!isGearDown && (CommonData.CurrentTime - CommonData.TakeOffTime > 5))
+                if (!isGearDown && (CommonData.CurrentTime - CommonData.TakeOffTime > 15))
                 {
                     float tooLowTerrainAltitude = tooLowTerrainCurve.Evaluate(CommonData.Speed / LandingSpeed) * TooLowGearAltitude;
                     if (CommonData.RadarAltitude < tooLowTerrainAltitude)
